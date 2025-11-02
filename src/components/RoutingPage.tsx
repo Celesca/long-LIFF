@@ -445,32 +445,70 @@ const RoutingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white">
-      {/* Header */}
-      <div className="flex items-center justify-between p-6 bg-white/80 backdrop-blur-sm border-b border-purple-100 sticky top-0 z-10">
-        <Link 
-          to="/gallery"
-          className="flex items-center space-x-2 text-purple-600 hover:text-purple-700"
-        >
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          <span className="font-medium">Back to Gallery</span>
-        </Link>
-        
-        <div className="text-center">
-          <h1 className="text-xl font-bold text-purple-800">Your Travel Route</h1>
-          <p className="text-sm text-purple-500">{optimizedRoute.length} destinations</p>
-        </div>
-        
-        <div className="flex items-center space-x-4">
-          <CoinCounter showAnimation={true} />
-          <button
-            onClick={triggerEmergencyPlan}
-            className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition"
-          >
-            <span>🚨</span>
-            <span>Emergency Plan</span>
-          </button>
+      {/* Header - Responsive */}
+      <div className="bg-white/80 backdrop-blur-sm border-b border-purple-100 sticky top-0 z-10">
+        <div className="p-4 sm:p-6">
+          {/* Mobile Layout */}
+          <div className="flex flex-col space-y-3 md:hidden">
+            {/* Top row - Back button and title */}
+            <div className="flex items-center justify-between">
+              <Link 
+                to="/gallery"
+                className="flex items-center space-x-2 text-purple-600 hover:text-purple-700"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                <span className="font-medium text-sm">Gallery</span>
+              </Link>
+              
+              <div className="text-center flex-1 mx-2">
+                <h1 className="text-base font-bold text-purple-800">Your Travel Route</h1>
+                <p className="text-xs text-purple-500">{optimizedRoute.length} destinations</p>
+              </div>
+            </div>
+            
+            {/* Bottom row - Coin counter and Emergency button */}
+            <div className="flex items-center justify-between gap-2">
+              <CoinCounter showAnimation={true} />
+              <button
+                onClick={triggerEmergencyPlan}
+                className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg font-medium text-xs shadow-sm transition"
+              >
+                <span>🚨</span>
+                <span>Emergency</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Desktop Layout */}
+          <div className="hidden md:flex items-center justify-between">
+            <Link 
+              to="/gallery"
+              className="flex items-center space-x-2 text-purple-600 hover:text-purple-700"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              <span className="font-medium">Back to Gallery</span>
+            </Link>
+            
+            <div className="text-center">
+              <h1 className="text-xl font-bold text-purple-800">Your Travel Route</h1>
+              <p className="text-sm text-purple-500">{optimizedRoute.length} destinations</p>
+            </div>
+            
+            <div className="flex items-center space-x-4">
+              <CoinCounter showAnimation={true} />
+              <button
+                onClick={triggerEmergencyPlan}
+                className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition"
+              >
+                <span>🚨</span>
+                <span>Emergency Plan</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
