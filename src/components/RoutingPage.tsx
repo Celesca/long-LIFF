@@ -6,6 +6,7 @@ import type { TravelPlace } from '../types/TravelPlace';
 import { CoinSystem } from '../utils/coinSystem';
 import CoinCounter from './CoinCounter';
 import PhotoUpload from './PhotoUpload';
+import { getUserStorageKey } from '../hooks/useLiff';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
@@ -130,7 +131,8 @@ const RoutingPage: React.FC = () => {
 
     // Gather candidate alternatives from likedPlaces (excluding the emergency place & already in optimizedRoute)
     try {
-      const saved = localStorage.getItem('likedPlaces');
+      const storageKey = getUserStorageKey('likedPlaces');
+      const saved = localStorage.getItem(storageKey);
       const liked: TravelPlace[] = saved ? JSON.parse(saved) : [];
       const routeIds = new Set(optimizedRoute.map(p => p.id));
       let candidates = liked.filter(p => p.id !== nextUnvisited.id && !routeIds.has(p.id));
@@ -172,7 +174,8 @@ const RoutingPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const saved = localStorage.getItem('likedPlaces');
+    const storageKey = getUserStorageKey('likedPlaces');
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       const places = JSON.parse(saved);
       

@@ -1,11 +1,13 @@
 import type { UserProfile, UserJourney } from '../types/TravelPlace';
+import { getUserStorageKey } from '../hooks/useLiff';
 
 export class CoinSystem {
   private static readonly PHOTO_UPLOAD_COINS = 10;
   private static readonly JOURNEY_COMPLETION_BONUS = 100;
 
   static getUserProfile(): UserProfile {
-    const saved = localStorage.getItem('userProfile');
+    const storageKey = getUserStorageKey('userProfile');
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       return JSON.parse(saved);
     }
@@ -17,7 +19,8 @@ export class CoinSystem {
   }
 
   static saveUserProfile(profile: UserProfile): void {
-    localStorage.setItem('userProfile', JSON.stringify(profile));
+    const storageKey = getUserStorageKey('userProfile');
+    localStorage.setItem(storageKey, JSON.stringify(profile));
   }
 
   static markPlaceAsVisited(placeId: string, userPhotos: string[] = []): number {

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { TravelPlace } from '../types/TravelPlace';
 import PersonalityModal from './PersonalityModal';
 import CoinCounter from './CoinCounter';
+import { getUserStorageKey } from '../hooks/useLiff';
 
 const GalleryPage: React.FC = () => {
   const [likedPlaces, setLikedPlaces] = useState<TravelPlace[]>([]);
@@ -10,8 +11,9 @@ const GalleryPage: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // In a real app, you'd fetch this from localStorage or a backend
-    const saved = localStorage.getItem('likedPlaces');
+    // Load user-specific liked places from localStorage
+    const storageKey = getUserStorageKey('likedPlaces');
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       setLikedPlaces(JSON.parse(saved));
     }
@@ -19,13 +21,15 @@ const GalleryPage: React.FC = () => {
 
   const clearGallery = () => {
     setLikedPlaces([]);
-    localStorage.removeItem('likedPlaces');
+    const storageKey = getUserStorageKey('likedPlaces');
+    localStorage.removeItem(storageKey);
   };
 
   const removePlace = (placeId: string) => {
     const updated = likedPlaces.filter(place => place.id !== placeId);
     setLikedPlaces(updated);
-    localStorage.setItem('likedPlaces', JSON.stringify(updated));
+    const storageKey = getUserStorageKey('likedPlaces');
+    localStorage.setItem(storageKey, JSON.stringify(updated));
   };
 
   const handleTravelPlan = (personality: string, duration: string) => {

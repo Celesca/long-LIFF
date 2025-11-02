@@ -3,23 +3,26 @@ import { Link } from 'react-router-dom';
 import TinderCard from '../components/TinderCard';
 import { mockTravelPlaces } from '../data/travelPlaces';
 import type { TravelPlace } from '../types/TravelPlace';
+import { getUserStorageKey } from '../hooks/useLiff';
 
 const TinderPage: React.FC = () => {
   const [places] = useState(mockTravelPlaces);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedPlaces, setLikedPlaces] = useState<TravelPlace[]>([]);
 
-  // Load liked places from localStorage on component mount
+  // Load liked places from user-specific localStorage on component mount
   useEffect(() => {
-    const saved = localStorage.getItem('likedPlaces');
+    const storageKey = getUserStorageKey('likedPlaces');
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
       setLikedPlaces(JSON.parse(saved));
     }
   }, []);
 
-  // Save liked places to localStorage whenever likedPlaces changes
+  // Save liked places to user-specific localStorage whenever likedPlaces changes
   useEffect(() => {
-    localStorage.setItem('likedPlaces', JSON.stringify(likedPlaces));
+    const storageKey = getUserStorageKey('likedPlaces');
+    localStorage.setItem(storageKey, JSON.stringify(likedPlaces));
   }, [likedPlaces]);
 
   const handleSwipe = useCallback((direction: 'left' | 'right') => {

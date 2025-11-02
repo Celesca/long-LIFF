@@ -1,10 +1,27 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import CoinCounter from './CoinCounter';
+import { useLiff } from '../hooks/useLiff';
 
 const LaunchPage: React.FC = () => {
+  const { isLoggedIn, displayName, pictureUrl } = useLiff();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white flex flex-col items-center justify-center p-6">
+      {/* User Profile - Top Left */}
+      {isLoggedIn && (
+        <div className="fixed top-6 left-6 z-10 flex items-center space-x-3 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
+          {pictureUrl && (
+            <img
+              src={pictureUrl}
+              alt={displayName || 'User'}
+              className="w-10 h-10 rounded-full border-2 border-purple-300"
+            />
+          )}
+          <span className="text-purple-800 font-medium">{displayName || 'User'}</span>
+        </div>
+      )}
+
       {/* Coin Counter - Top Right */}
       <div className="fixed top-6 right-6 z-10">
         <CoinCounter />
