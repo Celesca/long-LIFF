@@ -1,4 +1,4 @@
-# YEEPING - LINE LIFF Travel App
+# LONG - LINE LIFF Travel App
 
 A travel discovery app built with React, TypeScript, and LINE LIFF that lets users swipe through destinations, save favorites, and plan personalized trips.
 
