@@ -38,7 +38,7 @@ const LaunchPage: React.FC = () => {
         {/* Title */}
         <div>
           <h1 className="text-4xl font-bold text-purple-800 mb-2">
-            LONG
+            YEEPING
           </h1>
           <p className="text-purple-600 text-lg">
             Discover amazing places you'll love

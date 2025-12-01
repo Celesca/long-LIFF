@@ -95,7 +95,7 @@ const TinderPage: React.FC = () => {
         </Link>
         
         <div className="text-center">
-          <div className="text-lg sm:text-xl font-bold text-purple-800">LONG</div>
+          <div className="text-lg sm:text-xl font-bold text-purple-800">YEEPING</div>
         </div>
         
         <Link 
