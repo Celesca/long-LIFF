@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { CoinSystem } from '../utils/coinSystem';
 
 interface CoinCounterProps {
@@ -46,12 +47,12 @@ const CoinCounter: React.FC<CoinCounterProps> = ({ showAnimation = false, onCoin
   }, [showAnimation, onCoinEarned]);
 
   return (
-    <div className="flex items-center space-x-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900 px-4 py-2 rounded-full shadow-lg">
+    <Link 
+      to="/rewards"
+      className="flex items-center space-x-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900 px-4 py-2 rounded-full shadow-lg hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105 animate-pulse-glow cursor-pointer"
+    >
       <div className="relative">
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none"/>
-          <text x="12" y="16" textAnchor="middle" className="text-xs font-bold fill-current">₿</text>
-        </svg>
+        <span className="text-xl animate-bounce-slow">🪙</span>
         
         {animatingCoins > 0 && (
           <div className="absolute -top-8 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full animate-bounce">
@@ -67,7 +68,12 @@ const CoinCounter: React.FC<CoinCounterProps> = ({ showAnimation = false, onCoin
       <span className="text-sm font-medium opacity-80">
         Coins
       </span>
-    </div>
+      
+      {/* Small arrow indicator */}
+      <svg className="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+      </svg>
+    </Link>
   );
 };
 

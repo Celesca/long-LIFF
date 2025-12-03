@@ -7,6 +7,7 @@ import LaunchPage from "./components/LaunchPage.js";
 import TinderPage from "./components/TinderPage.js";
 import GalleryPage from "./components/GalleryPage.js";
 import RoutingPage from "./components/RoutingPage.js";
+import CoinRewardsPage from "./components/CoinRewardsPage.js";
 
 // Create context for LIFF user data
 export const LiffContext = createContext<{
@@ -146,6 +147,7 @@ function App() {
           <Route path="/tinder" element={<TinderPage />} />
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/routing" element={<RoutingPage />} />
+          <Route path="/rewards" element={<CoinRewardsPage />} />
         </Routes>
       </Router>
     </LiffContext.Provider>
