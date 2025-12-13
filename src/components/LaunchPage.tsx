@@ -69,7 +69,7 @@ const LaunchPage: React.FC = () => {
         {/* Title with gradient animation */}
         <div className="animate-fade-in">
           <h1 className="text-4xl font-bold mb-2 animate-gradient-text">
-            YEEPING
+            LONG
           </h1>
           <p className="text-purple-600 text-lg">
             Discover amazing places in Chiang Mai
