@@ -39,9 +39,29 @@ const LaunchPage: React.FC = () => {
         </div>
       </div>
 
-      {/* User Profile - Top Left */}
+      {/* Responsive Header for small screens (stacked above content) */}
+      <div className="w-full z-10 mb-4 sm:hidden">
+        <div className="flex items-center justify-between bg-white/80 backdrop-blur-sm px-4 py-3 rounded-xl shadow-md">
+          <div className="flex items-center space-x-3">
+            {isLoggedIn && pictureUrl && (
+              <img
+                src={pictureUrl}
+                alt={displayName || 'User'}
+                className="w-10 h-10 rounded-full border-2 border-purple-300"
+              />
+            )}
+            <span className="text-purple-800 font-medium">{isLoggedIn ? (displayName || 'User') : 'Welcome'}</span>
+          </div>
+
+          <div>
+            <CoinCounter />
+          </div>
+        </div>
+      </div>
+
+      {/* User Profile - Top Left (desktop) */}
       {isLoggedIn && (
-        <div className="fixed top-6 left-6 z-10 flex items-center space-x-3 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg animate-fade-in">
+        <div className="hidden sm:flex fixed top-6 left-6 z-10 flex items-center space-x-3 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg animate-fade-in">
           {pictureUrl && (
             <img
               src={pictureUrl}
@@ -53,8 +73,8 @@ const LaunchPage: React.FC = () => {
         </div>
       )}
 
-      {/* Coin Counter - Top Right */}
-      <div className="fixed top-6 right-6 z-10 animate-fade-in">
+      {/* Coin Counter - Top Right (desktop) */}
+      <div className="hidden sm:block fixed top-6 right-6 z-10 animate-fade-in">
         <CoinCounter />
       </div>
 
