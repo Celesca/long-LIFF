@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CoinCounter from './CoinCounter';
 import { useLiff } from '../hooks/useLiff';
+import PersonalityModal from './PersonalityModal';
+import { userService } from '../utils/api';
 
 const chiangMaiImages = [
   { url: 'https://cms.dmpcdn.com/travel/2020/11/03/9d45da30-1dbc-11eb-9275-d9e61fe8653e_original.jpg', name: 'Wat Umong' },
@@ -13,8 +15,10 @@ const chiangMaiImages = [
 ];
 
 const LaunchPage: React.FC = () => {
-  const { isLoggedIn, displayName, pictureUrl } = useLiff();
+  const { isLoggedIn, displayName, pictureUrl, userId } = useLiff();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isPersonalityModalOpen, setIsPersonalityModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   // Auto-rotate background images
   useEffect(() => {
@@ -24,15 +28,46 @@ const LaunchPage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const handleStartExploring = () => {
+    setIsPersonalityModalOpen(true);
+  };
+
+  const handlePersonalityConfirm = async (personality: string, duration: string) => {
+    try {
+      if (userId) {
+        await userService.createOrUpdateUser({
+          liff_user_id: userId,
+          display_name: displayName || 'User',
+          picture_url: pictureUrl,
+          preferences: {
+            personality,
+            trip_duration: duration,
+            location_filter: 'Chiang Mai', // Defaulting for now
+          }
+        });
+      }
+      navigate('/tinder');
+    } catch (error) {
+      console.error("Failed to save preferences:", error);
+      // Navigate anyway for demo
+      navigate('/tinder');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      <PersonalityModal
+        isOpen={isPersonalityModalOpen}
+        onClose={() => setIsPersonalityModalOpen(false)}
+        onConfirm={handlePersonalityConfirm}
+      />
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Floating circles */}
         <div className="absolute -top-20 -right-20 w-64 h-64 bg-purple-200/40 rounded-full blur-3xl animate-float"></div>
         <div className="absolute top-1/3 -left-20 w-48 h-48 bg-pink-200/40 rounded-full blur-3xl animate-float-delayed"></div>
         <div className="absolute bottom-20 right-1/4 w-56 h-56 bg-indigo-200/40 rounded-full blur-3xl animate-float"></div>
-        
+
         {/* Flying plane */}
         <div className="absolute top-20 animate-fly-across">
           <span className="text-4xl opacity-30">✈️</span>
@@ -82,7 +117,7 @@ const LaunchPage: React.FC = () => {
         {/* Logo/Icon with animation */}
         <div className="w-24 h-24 mx-auto bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center shadow-lg animate-bounce-slow">
           <svg className="w-12 h-12 text-white" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
           </svg>
         </div>
 
@@ -101,9 +136,8 @@ const LaunchPage: React.FC = () => {
           {chiangMaiImages.map((img, index) => (
             <div
               key={index}
-              className={`absolute inset-0 transition-opacity duration-1000 ${
-                index === currentImageIndex ? 'opacity-100' : 'opacity-0'
-              }`}
+              className={`absolute inset-0 transition-opacity duration-1000 ${index === currentImageIndex ? 'opacity-100' : 'opacity-0'
+                }`}
             >
               <img
                 src={img.url}
@@ -115,18 +149,17 @@ const LaunchPage: React.FC = () => {
               </div>
             </div>
           ))}
-          
+
           {/* Image indicators */}
           <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 flex space-x-2">
             {chiangMaiImages.map((_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentImageIndex(index)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                  index === currentImageIndex 
-                    ? 'bg-white w-4' 
-                    : 'bg-white/50 hover:bg-white/75'
-                }`}
+                className={`w-2 h-2 rounded-full transition-all duration-300 ${index === currentImageIndex
+                  ? 'bg-white w-4'
+                  : 'bg-white/50 hover:bg-white/75'
+                  }`}
               />
             ))}
           </div>
@@ -137,7 +170,7 @@ const LaunchPage: React.FC = () => {
           <p className="text-gray-700 leading-relaxed">
             Swipe through beautiful travel destinations in Chiang Mai, save your favorites, earn coins, and redeem exclusive discounts!
           </p>
-          
+
           <div className="flex items-center justify-center space-x-8 text-sm text-purple-600">
             <div className="flex items-center space-x-2">
               <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
@@ -156,21 +189,21 @@ const LaunchPage: React.FC = () => {
 
         {/* Buttons */}
         <div className="space-y-4 stagger-fade-in">
-          <Link 
-            to="/tinder"
+          <button
+            onClick={handleStartExploring}
             className="block w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-4 px-8 rounded-xl font-semibold text-lg shadow-lg hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 ripple-effect"
           >
             🗺️ Start Exploring
-          </Link>
-          
-          <Link 
+          </button>
+
+          <Link
             to="/gallery"
             className="block w-full bg-white text-purple-600 py-4 px-8 rounded-xl font-semibold text-lg border-2 border-purple-200 hover:border-purple-300 hover:bg-purple-50 transform hover:scale-105 transition-all duration-200"
           >
             📸 View My Gallery
           </Link>
 
-          <Link 
+          <Link
             to="/rewards"
             className="block w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-white py-4 px-8 rounded-xl font-semibold text-lg shadow-lg hover:from-yellow-500 hover:to-orange-600 transform hover:scale-105 transition-all duration-200"
           >

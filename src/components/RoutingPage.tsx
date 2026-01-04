@@ -7,6 +7,7 @@ import { CoinSystem } from '../utils/coinSystem';
 import CoinCounter from './CoinCounter';
 import PhotoUpload from './PhotoUpload';
 import { getUserStorageKey } from '../hooks/useLiff';
+import { tripService } from '../utils/api';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
@@ -147,7 +148,7 @@ const RoutingPage: React.FC = () => {
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
       setAlternativePlaces(shuffled.slice(0, 5));
-  } catch {
+    } catch {
       setAlternativePlaces([]);
     }
 
@@ -174,40 +175,77 @@ const RoutingPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const storageKey = getUserStorageKey('likedPlaces');
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      const places = JSON.parse(saved);
-      
-      // Simple routing algorithm based on personality and duration
-      const route = optimizeRoute(places, personality, duration);
-      setOptimizedRoute(route);
+    // Only generate trip if we don't have one active, or if we want to refresh
+    // For now, let's load logic.
+    const generateTrip = async () => {
+      try {
+        const storageKey = getUserStorageKey('likedPlaces');
+        const saved = localStorage.getItem(storageKey);
+        if (!saved) return;
+        const likedPlaces: TravelPlace[] = JSON.parse(saved);
 
-      // Create or load current journey
-      const existingJourney = CoinSystem.getCurrentJourney() as Journey | null;
-      if (existingJourney && existingJourney.personality === personality && existingJourney.duration === duration) {
-        setCurrentJourney(existingJourney);
-        const visited = new Set(existingJourney.places.filter(p => p.visited).map(p => p.id));
-        setVisitedPlaces(visited);
-      } else {
-        const newJourney = CoinSystem.createNewJourney(personality || 'default', duration || 'custom', route) as Journey;
-        setCurrentJourney(newJourney);
+        // Call API
+        const result = await tripService.generateTrip(
+          {
+            personality: personality || 'default',
+            trip_duration: duration || 'custom',
+            location_filter: 'All'
+          },
+          likedPlaces.map(p => p.id)
+        );
+
+        if (result && result.places) {
+          // Map API places to TravelPlace (ensuring numbers for lat/long)
+          const mappedRoute: TravelPlace[] = result.places.map((p: any) => ({
+            id: p.id,
+            name: p.name,
+            description: p.description,
+            image_url: p.image_url,
+            lat: p.lat || p.location?.lat || 0, // Fallback
+            long: p.long || p.location?.lng || 0,
+            province: p.province,
+            category: p.category,
+            rating: 4.8 // Mock rating if missing
+          })).filter(p => p.lat !== 0 && p.long !== 0); // Filter out invalid coords
+
+          setOptimizedRoute(mappedRoute);
+
+          // Persist Journey
+          const newJourney = CoinSystem.createNewJourney(
+            personality || 'default',
+            duration || 'custom',
+            mappedRoute
+          ) as Journey;
+          setCurrentJourney(newJourney);
+        }
+      } catch (error) {
+        console.error("Failed to generate trip via API, falling back to local:", error);
+        // Fallback to local logic if API fails
+        const storageKey = getUserStorageKey('likedPlaces');
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          const places = JSON.parse(saved);
+          const route = optimizeRoute(places, personality, duration);
+          setOptimizedRoute(route);
+        }
       }
-    }
-  }, [personality, duration, optimizeRoute]);
+    };
+
+    generateTrip();
+  }, [personality, duration, optimizeRoute]); // Removed optimizeRoute from dep array if not needed, but keep for safety
 
   const handlePlaceVisit = (placeId: string, photos: string[] = []) => {
     if (photos.length > 0) {
       const coinsEarned = CoinSystem.markPlaceAsVisited(placeId, photos);
       if (coinsEarned > 0) {
         setVisitedPlaces(prev => new Set([...prev, placeId]));
-        
+
         // Trigger coin animation
         window.dispatchEvent(new CustomEvent('coinUpdate', { detail: { earned: coinsEarned } }));
-        
+
         // Update current journey state
-  const updatedJourney = CoinSystem.getCurrentJourney() as Journey | null;
-  if (updatedJourney) setCurrentJourney(updatedJourney);
+        const updatedJourney = CoinSystem.getCurrentJourney() as Journey | null;
+        if (updatedJourney) setCurrentJourney(updatedJourney);
       }
     }
   };
@@ -217,7 +255,7 @@ const RoutingPage: React.FC = () => {
       photos.forEach(photo => {
         CoinSystem.addPhotoToPlace(placeId, photo);
       });
-      
+
       // Mark place as visited when photos are uploaded and earn coins
       handlePlaceVisit(placeId, photos);
     }
@@ -231,10 +269,10 @@ const RoutingPage: React.FC = () => {
 
   const MapVisualization = () => {
     const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
-    
+
     // Center the map on Thailand (Chiang Mai area)
     const thailandCenter: [number, number] = [18.7883, 98.9930];
-    
+
     // Create path coordinates for the polyline
     const pathCoordinates = optimizedRoute.map(place => [place.lat, place.long] as [number, number]);
 
@@ -265,32 +303,30 @@ const RoutingPage: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-purple-800">Interactive Route Map - Thailand</h3>
-          
+
           {/* Map Type Toggle */}
           <div className="flex bg-purple-100 rounded-lg p-1">
             <button
               onClick={() => setMapType('street')}
-              className={`px-3 py-1 rounded text-sm font-medium transition-all ${
-                mapType === 'street' 
-                  ? 'bg-purple-600 text-white shadow-sm' 
-                  : 'text-purple-600 hover:bg-purple-200'
-              }`}
+              className={`px-3 py-1 rounded text-sm font-medium transition-all ${mapType === 'street'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'text-purple-600 hover:bg-purple-200'
+                }`}
             >
               Street
             </button>
             <button
               onClick={() => setMapType('satellite')}
-              className={`px-3 py-1 rounded text-sm font-medium transition-all ${
-                mapType === 'satellite' 
-                  ? 'bg-purple-600 text-white shadow-sm' 
-                  : 'text-purple-600 hover:bg-purple-200'
-              }`}
+              className={`px-3 py-1 rounded text-sm font-medium transition-all ${mapType === 'satellite'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'text-purple-600 hover:bg-purple-200'
+                }`}
             >
               Satellite
             </button>
           </div>
         </div>
-        
+
         <div className="h-[500px] rounded-xl overflow-hidden border-2 border-purple-100">
           <MapContainer
             center={thailandCenter}
@@ -310,7 +346,7 @@ const RoutingPage: React.FC = () => {
                 url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               />
             )}
-            
+
             {/* Add markers for each place in the route */}
             {optimizedRoute.map((place, index) => (
               <Marker
@@ -346,7 +382,7 @@ const RoutingPage: React.FC = () => {
                 </Popup>
               </Marker>
             ))}
-            
+
             {/* Draw the route path */}
             {pathCoordinates.length > 1 && (
               <Polyline
@@ -363,7 +399,7 @@ const RoutingPage: React.FC = () => {
             )}
           </MapContainer>
         </div>
-        
+
         {/* Enhanced Map Controls and Legend */}
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Map Legend */}
@@ -392,7 +428,7 @@ const RoutingPage: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Map Statistics */}
           <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-100 rounded-xl">
             <h4 className="font-semibold text-indigo-800 mb-3">Route Statistics</h4>
@@ -408,7 +444,7 @@ const RoutingPage: React.FC = () => {
               <div className="flex justify-between">
                 <span className="text-indigo-600">Avg Rating:</span>
                 <span className="font-bold">
-                  {optimizedRoute.length > 0 && 
+                  {optimizedRoute.length > 0 &&
                     (optimizedRoute.reduce((sum, place) => sum + (place.rating || 0), 0) / optimizedRoute.length).toFixed(1)
                   } ⭐
                 </span>
@@ -432,11 +468,11 @@ const RoutingPage: React.FC = () => {
       const places = JSON.parse(saved);
       const newRoute = optimizeRoute(places, personality, duration);
       setOptimizedRoute(newRoute);
-      
+
       // Reset visited places for the new route
       setVisitedPlaces(new Set());
       setSelectedPlace(null);
-      
+
       // Create a new journey with the regenerated route
       const newJourney = CoinSystem.createNewJourney(personality || 'default', duration || 'custom', newRoute);
       setCurrentJourney(newJourney);
@@ -452,7 +488,7 @@ const RoutingPage: React.FC = () => {
           <div className="flex flex-col space-y-3 md:hidden">
             {/* Top row - Back button and title */}
             <div className="flex items-center justify-between">
-              <Link 
+              <Link
                 to="/gallery"
                 className="flex items-center space-x-2 text-purple-600 hover:text-purple-700"
               >
@@ -461,13 +497,13 @@ const RoutingPage: React.FC = () => {
                 </svg>
                 <span className="font-medium text-sm">Gallery</span>
               </Link>
-              
+
               <div className="text-center flex-1 mx-2">
                 <h1 className="text-base font-bold text-purple-800">Your Travel Route</h1>
                 <p className="text-xs text-purple-500">{optimizedRoute.length} destinations</p>
               </div>
             </div>
-            
+
             {/* Bottom row - Coin counter and Emergency button */}
             <div className="flex items-center justify-between gap-2">
               <CoinCounter showAnimation={true} />
@@ -483,7 +519,7 @@ const RoutingPage: React.FC = () => {
 
           {/* Desktop Layout */}
           <div className="hidden md:flex items-center justify-between">
-            <Link 
+            <Link
               to="/gallery"
               className="flex items-center space-x-2 text-purple-600 hover:text-purple-700"
             >
@@ -492,12 +528,12 @@ const RoutingPage: React.FC = () => {
               </svg>
               <span className="font-medium">Back to Gallery</span>
             </Link>
-            
+
             <div className="text-center">
               <h1 className="text-xl font-bold text-purple-800">Your Travel Route</h1>
               <p className="text-sm text-purple-500">{optimizedRoute.length} destinations</p>
             </div>
-            
+
             <div className="flex items-center space-x-4">
               <CoinCounter showAnimation={true} />
               <button
@@ -576,7 +612,7 @@ const RoutingPage: React.FC = () => {
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
                 <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                 </svg>
               </div>
               <div>
@@ -587,7 +623,7 @@ const RoutingPage: React.FC = () => {
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
                 <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
               </div>
               <div>
@@ -598,7 +634,7 @@ const RoutingPage: React.FC = () => {
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
                 <svg className="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                 </svg>
               </div>
               <div>
@@ -609,24 +645,24 @@ const RoutingPage: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Selection Info */}
           <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
                 <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
                 <span className="text-sm text-blue-800">
-                  {duration === '1 วัน ไม่ค้างคืน' 
+                  {duration === '1 วัน ไม่ค้างคืน'
                     ? `Randomly selected 3 places from your gallery for a perfect day trip`
                     : duration === '2 วัน 1 คืน'
-                    ? `Optimally selected up to 6 places for your 2-day adventure`
-                    : `All your favorite places included in this itinerary`
+                      ? `Optimally selected up to 6 places for your 2-day adventure`
+                      : `All your favorite places included in this itinerary`
                   }
                 </span>
               </div>
-              
+
               {/* Regenerate Button - only show for limited duration trips */}
               {(duration === '1 วัน ไม่ค้างคืน' || duration === '2 วัน 1 คืน') && (
                 <button
@@ -634,7 +670,7 @@ const RoutingPage: React.FC = () => {
                   className="flex items-center space-x-1 bg-blue-500 text-white px-3 py-1 rounded-lg text-xs font-medium hover:bg-blue-600 transition-colors duration-200"
                 >
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/>
+                    <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
                   </svg>
                   <span>New Selection</span>
                 </button>
@@ -651,33 +687,32 @@ const RoutingPage: React.FC = () => {
               {optimizedRoute.map((place, index) => (
                 <div key={place.id} className="p-4 bg-purple-50 rounded-xl border-2 border-purple-100">
                   <div className="flex items-start space-x-4">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-                      isPlaceVisited(place.id) 
-                        ? 'bg-green-500 text-white' 
-                        : 'bg-purple-600 text-white'
-                    }`}>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${isPlaceVisited(place.id)
+                      ? 'bg-green-500 text-white'
+                      : 'bg-purple-600 text-white'
+                      }`}>
                       {isPlaceVisited(place.id) ? '✓' : index + 1}
                     </div>
-                    
+
                     <div className="flex-1">
                       <h4 className="font-bold text-purple-800">{place.name}</h4>
                       <p className="text-sm text-gray-600 mb-2">{place.description}</p>
-                      
+
                       <div className="flex items-center justify-between text-xs text-purple-600 mb-3">
                         <span className="flex items-center">
                           <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                           </svg>
                           {place.lat.toFixed(4)}, {place.long.toFixed(4)}
                         </span>
-                        
+
                         {place.rating && (
                           <span className="flex items-center">
                             ⭐ {place.rating}
                           </span>
                         )}
                       </div>
-                      
+
                       {index < optimizedRoute.length - 1 && (
                         <div className="mb-3 text-xs text-gray-500">
                           Distance to next: {calculateDistance(place, optimizedRoute[index + 1]).toFixed(2)} km
@@ -720,7 +755,7 @@ const RoutingPage: React.FC = () => {
                 </div>
               ))}
             </div>
-            
+
             {/* Total Distance Summary */}
             <div className="mt-6 p-4 bg-gradient-to-r from-purple-100 to-purple-50 rounded-xl">
               <h4 className="font-semibold text-purple-800 mb-2">Route Summary</h4>
@@ -732,8 +767,8 @@ const RoutingPage: React.FC = () => {
                 <div className="flex justify-between">
                   <span>Total Distance:</span>
                   <span className="font-bold">
-                    {optimizedRoute.length > 1 && 
-                      optimizedRoute.slice(0, -1).reduce((total, place, index) => 
+                    {optimizedRoute.length > 1 &&
+                      optimizedRoute.slice(0, -1).reduce((total, place, index) =>
                         total + calculateDistance(place, optimizedRoute[index + 1]), 0
                       ).toFixed(2)
                     } km
@@ -751,7 +786,7 @@ const RoutingPage: React.FC = () => {
 
         {/* Action Buttons */}
         <div className="mt-8 flex justify-center space-x-4">
-          <button 
+          <button
             onClick={() => {
               const url = optimizedRoute.map(place => `${place.lat},${place.long}`).join('/');
               window.open(`https://www.google.com/maps/dir/${url}`, '_blank');
@@ -760,8 +795,8 @@ const RoutingPage: React.FC = () => {
           >
             Open in Google Maps
           </button>
-          
-          <Link 
+
+          <Link
             to="/gallery"
             className="bg-gray-200 text-gray-700 py-3 px-8 rounded-xl font-semibold hover:bg-gray-300 transition-colors duration-200"
           >
