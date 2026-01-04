@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { CoinSystem, type ActiveJourney, type JourneyPlace } from '../utils/coinSystem';
 import CoinCounter from './CoinCounter';
 
@@ -234,9 +235,9 @@ const TravelCompanion: React.FC = () => {
       </div>
 
       {/* Content Area */}
-      <div className="flex-1 overflow-hidden">
+      <div className="flex-1 overflow-hidden relative">
         {activeTab === 'places' ? (
-          <div className="h-full flex flex-col">
+          <div className="h-full flex flex-col overflow-y-auto">
             {/* Current Place Card */}
             {currentPlace && (
               <div className="p-4 bg-gradient-to-b from-white to-gray-50">
@@ -351,11 +352,11 @@ const TravelCompanion: React.FC = () => {
           </div>
         ) : (
           /* Map View */
-          <div className="h-full relative">
+          <div className="h-full w-full absolute inset-0">
             <MapContainer
               center={mapCenter}
               zoom={14}
-              style={{ height: '100%', width: '100%' }}
+              style={{ height: '100%', width: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
               zoomControl={false}
             >
               <TileLayer

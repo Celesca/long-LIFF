@@ -41,7 +41,7 @@ const quickActions = [
   { icon: '🗺️', label: 'Explore', path: '/tinder', color: 'from-purple-500 to-indigo-600' },
   { icon: '❤️', label: 'Saved', path: '/gallery', color: 'from-pink-500 to-rose-600' },
   { icon: '🪙', label: 'Rewards', path: '/rewards', color: 'from-amber-400 to-orange-500' },
-  { icon: '📍', label: 'Routes', path: '/routes', color: 'from-teal-400 to-cyan-600' },
+  { icon: '📜', label: 'History', path: '/history', color: 'from-teal-400 to-cyan-600' },
 ];
 
 const LaunchPage: React.FC = () => {

@@ -117,7 +117,45 @@ export class CoinSystem {
   }
 
   static endActiveJourney(): void {
+    const journey = this.getActiveJourney();
+    // Save to history before removing
+    if (journey) {
+      this.saveJourneyToHistory(journey);
+    }
     const storageKey = getUserStorageKey(this.ACTIVE_JOURNEY_KEY);
+    localStorage.removeItem(storageKey);
+  }
+
+  // Journey History Management
+  private static readonly JOURNEY_HISTORY_KEY = 'journeyHistory';
+
+  static getJourneyHistory(): ActiveJourney[] {
+    const storageKey = getUserStorageKey(this.JOURNEY_HISTORY_KEY);
+    const saved = localStorage.getItem(storageKey);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return [];
+  }
+
+  static saveJourneyToHistory(journey: ActiveJourney): void {
+    const history = this.getJourneyHistory();
+    // Add end date
+    const completedJourney = {
+      ...journey,
+      endDate: new Date().toISOString(),
+      isActive: false
+    };
+    // Add to beginning of history (most recent first)
+    history.unshift(completedJourney);
+    // Keep only last 20 journeys
+    const trimmedHistory = history.slice(0, 20);
+    const storageKey = getUserStorageKey(this.JOURNEY_HISTORY_KEY);
+    localStorage.setItem(storageKey, JSON.stringify(trimmedHistory));
+  }
+
+  static clearJourneyHistory(): void {
+    const storageKey = getUserStorageKey(this.JOURNEY_HISTORY_KEY);
     localStorage.removeItem(storageKey);
   }
 

@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import type { TravelPlace } from '../types/TravelPlace';
 import { CoinSystem } from '../utils/coinSystem';
 import CoinCounter from './CoinCounter';
-import PhotoUpload from './PhotoUpload';
 import { getUserStorageKey } from '../hooks/useLiff';
 
 // Fix for default markers in react-leaflet
@@ -22,26 +22,12 @@ interface RoutingPageProps {
   city?: string;
 }
 
-interface JourneyPlace {
-  id: string;
-  visited?: boolean;
-  photos?: string[];
-}
-
-interface Journey {
-  personality: string;
-  duration: string;
-  places: JourneyPlace[];
-}
-
 const RoutingPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { personality, duration, city } = (location.state as RoutingPageProps) || {};
   const [optimizedRoute, setOptimizedRoute] = useState<TravelPlace[]>([]);
-  const [, setCurrentJourney] = useState<Journey | null>(null);
-  const [visitedPlaces, setVisitedPlaces] = useState<Set<string>>(new Set());
-  const [selectedPlace, setSelectedPlace] = useState<string | null>(null);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   // Emergency routing state
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [emergencyPlace, setEmergencyPlace] = useState<TravelPlace | null>(null);
@@ -127,9 +113,9 @@ const RoutingPage: React.FC = () => {
   const triggerEmergencyPlan = () => {
     if (!optimizedRoute || optimizedRoute.length === 0) return;
 
-    // Find next unvisited place (or fallback to first)
-    const nextUnvisited = optimizedRoute.find(p => !visitedPlaces.has(p.id)) || optimizedRoute[0];
-    setEmergencyPlace(nextUnvisited);
+    // Find first place to replace
+    const placeToReplace = optimizedRoute[0];
+    setEmergencyPlace(placeToReplace);
 
     // Gather candidate alternatives from likedPlaces (excluding the emergency place & already in optimizedRoute)
     try {
@@ -137,10 +123,10 @@ const RoutingPage: React.FC = () => {
       const saved = localStorage.getItem(storageKey);
       const liked: TravelPlace[] = saved ? JSON.parse(saved) : [];
       const routeIds = new Set(optimizedRoute.map(p => p.id));
-      let candidates = liked.filter(p => p.id !== nextUnvisited.id && !routeIds.has(p.id));
+      let candidates = liked.filter(p => p.id !== placeToReplace.id && !routeIds.has(p.id));
       // Fallback: allow other places in route (not the emergency place) if no external candidates
       if (candidates.length === 0) {
-        candidates = optimizedRoute.filter(p => p.id !== nextUnvisited.id && !visitedPlaces.has(p.id));
+        candidates = optimizedRoute.filter(p => p.id !== placeToReplace.id);
       }
       // Shuffle and take up to 5
       const shuffled = [...candidates];
@@ -189,49 +175,46 @@ const RoutingPage: React.FC = () => {
       // Simple routing algorithm based on personality and duration
       const route = optimizeRoute(places, personality, duration);
       setOptimizedRoute(route);
-
-      // Create or load current journey
-      const existingJourney = CoinSystem.getCurrentJourney() as Journey | null;
-      if (existingJourney && existingJourney.personality === personality && existingJourney.duration === duration) {
-        setCurrentJourney(existingJourney);
-        const visited = new Set(existingJourney.places.filter(p => p.visited).map(p => p.id));
-        setVisitedPlaces(visited);
-      } else {
-        const newJourney = CoinSystem.createNewJourney(personality || 'default', duration || 'custom', route) as Journey;
-        setCurrentJourney(newJourney);
-      }
     }
   }, [personality, duration, city, optimizeRoute]);
 
-  const handlePlaceVisit = (placeId: string, photos: string[] = []) => {
-    if (photos.length > 0) {
-      const coinsEarned = CoinSystem.markPlaceAsVisited(placeId, photos);
-      if (coinsEarned > 0) {
-        setVisitedPlaces(prev => new Set([...prev, placeId]));
-        
-        // Trigger coin animation
-        window.dispatchEvent(new CustomEvent('coinUpdate', { detail: { earned: coinsEarned } }));
-        
-        // Update current journey state
-  const updatedJourney = CoinSystem.getCurrentJourney() as Journey | null;
-  if (updatedJourney) setCurrentJourney(updatedJourney);
-      }
-    }
+  // Drag and drop handlers for reordering
+  const handleDragStart = (index: number) => {
+    setDraggedIndex(index);
   };
 
-  const handlePhotoUpload = (placeId: string, photos: string[]) => {
-    if (photos.length > 0) {
-      photos.forEach(photo => {
-        CoinSystem.addPhotoToPlace(placeId, photo);
-      });
-      
-      // Mark place as visited when photos are uploaded and earn coins
-      handlePlaceVisit(placeId, photos);
-    }
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    if (draggedIndex === null || draggedIndex === index) return;
+    
+    const newRoute = [...optimizedRoute];
+    const draggedItem = newRoute[draggedIndex];
+    newRoute.splice(draggedIndex, 1);
+    newRoute.splice(index, 0, draggedItem);
+    setOptimizedRoute(newRoute);
+    setDraggedIndex(index);
   };
 
-  const isPlaceVisited = (placeId: string) => {
-    return visitedPlaces.has(placeId);
+  const handleDragEnd = () => {
+    setDraggedIndex(null);
+  };
+
+  // Move place up/down in the route
+  const movePlace = (index: number, direction: 'up' | 'down') => {
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === optimizedRoute.length - 1) return;
+    
+    const newRoute = [...optimizedRoute];
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    [newRoute[index], newRoute[newIndex]] = [newRoute[newIndex], newRoute[index]];
+    setOptimizedRoute(newRoute);
+  };
+
+  // Remove place from route
+  const removeFromRoute = (index: number) => {
+    if (optimizedRoute.length <= 1) return;
+    const newRoute = optimizedRoute.filter((_, i) => i !== index);
+    setOptimizedRoute(newRoute);
   };
 
   // optimizeRoute & helpers now declared earlier
@@ -451,19 +434,18 @@ const RoutingPage: React.FC = () => {
   };
 
   const regenerateRoute = () => {
-    const saved = localStorage.getItem('likedPlaces');
+    const storageKey = getUserStorageKey('likedPlaces');
+    const saved = localStorage.getItem(storageKey);
     if (saved) {
-      const places = JSON.parse(saved);
+      let places: TravelPlace[] = JSON.parse(saved);
+      
+      // Filter by city if selected
+      if (city && city !== 'all') {
+        places = places.filter(p => p.city === city);
+      }
+      
       const newRoute = optimizeRoute(places, personality, duration);
       setOptimizedRoute(newRoute);
-      
-      // Reset visited places for the new route
-      setVisitedPlaces(new Set());
-      setSelectedPlace(null);
-      
-      // Create a new journey with the regenerated route
-      const newJourney = CoinSystem.createNewJourney(personality || 'default', duration || 'custom', newRoute);
-      setCurrentJourney(newJourney);
     }
   };
 
@@ -721,74 +703,81 @@ const RoutingPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
           {/* Route List */}
           <div className="xl:col-span-1 bg-white rounded-2xl shadow-lg p-6">
-            <h3 className="text-xl font-bold text-purple-800 mb-6">Optimized Route Order</h3>
-            <div className="space-y-4">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-purple-800">Route Order</h3>
+              <p className="text-xs text-gray-500">Drag to reorder</p>
+            </div>
+            <div className="space-y-3">
               {optimizedRoute.map((place, index) => (
-                <div key={place.id} className="p-4 bg-purple-50 rounded-xl border-2 border-purple-100">
-                  <div className="flex items-start space-x-4">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${
-                      isPlaceVisited(place.id) 
-                        ? 'bg-green-500 text-white' 
-                        : 'bg-purple-600 text-white'
-                    }`}>
-                      {isPlaceVisited(place.id) ? '✓' : index + 1}
+                <div 
+                  key={place.id} 
+                  draggable
+                  onDragStart={() => handleDragStart(index)}
+                  onDragOver={(e) => handleDragOver(e, index)}
+                  onDragEnd={handleDragEnd}
+                  className={`p-4 bg-purple-50 rounded-xl border-2 transition-all cursor-grab active:cursor-grabbing ${
+                    draggedIndex === index ? 'border-purple-500 opacity-50' : 'border-purple-100'
+                  }`}
+                >
+                  <div className="flex items-start space-x-3">
+                    {/* Drag Handle */}
+                    <div className="flex flex-col items-center space-y-1 pt-1">
+                      <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-bold">
+                        {index + 1}
+                      </div>
+                      <div className="flex flex-col space-y-0.5">
+                        <button 
+                          onClick={() => movePlace(index, 'up')}
+                          disabled={index === 0}
+                          className="text-gray-400 hover:text-purple-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                          </svg>
+                        </button>
+                        <button 
+                          onClick={() => movePlace(index, 'down')}
+                          disabled={index === optimizedRoute.length - 1}
+                          className="text-gray-400 hover:text-purple-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </button>
+                      </div>
                     </div>
                     
-                    <div className="flex-1">
-                      <h4 className="font-bold text-purple-800">{place.name}</h4>
-                      <p className="text-sm text-gray-600 mb-2">{place.description}</p>
-                      
-                      <div className="flex items-center justify-between text-xs text-purple-600 mb-3">
-                        <span className="flex items-center">
-                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-bold text-purple-800 truncate">{place.name}</h4>
+                          <p className="text-sm text-gray-600 line-clamp-2">{place.description}</p>
+                        </div>
+                        {/* Remove button */}
+                        <button
+                          onClick={() => removeFromRoute(index)}
+                          disabled={optimizedRoute.length <= 1}
+                          className="ml-2 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-30"
+                          title="Remove from route"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                           </svg>
-                          {place.lat.toFixed(4)}, {place.long.toFixed(4)}
-                        </span>
-                        
-                        {place.rating && (
-                          <span className="flex items-center">
-                            ⭐ {place.rating}
-                          </span>
-                        )}
+                        </button>
+                      </div>
+                      
+                      <div className="flex items-center space-x-3 mt-2 text-xs text-purple-600">
+                        {place.city && <span className="bg-purple-100 px-2 py-0.5 rounded">📍 {place.city}</span>}
+                        {place.rating && <span>⭐ {place.rating}</span>}
                       </div>
                       
                       {index < optimizedRoute.length - 1 && (
-                        <div className="mb-3 text-xs text-gray-500">
-                          Distance to next: {calculateDistance(place, optimizedRoute[index + 1]).toFixed(2)} km
+                        <div className="mt-2 text-xs text-gray-400 flex items-center">
+                          <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                          </svg>
+                          {calculateDistance(place, optimizedRoute[index + 1]).toFixed(1)} km to next
                         </div>
-                      )}
-
-                      {/* Visit Status */}
-                      {isPlaceVisited(place.id) ? (
-                        <div className="w-full bg-green-100 text-green-800 py-2 px-4 rounded-lg font-medium text-center mb-3">
-                          ✅ Visited! You earned coins from your photos!
-                        </div>
-                      ) : (
-                        <div className="w-full bg-blue-100 text-blue-800 py-2 px-4 rounded-lg font-medium text-center mb-3">
-                          📸 Upload photos to mark as visited and earn coins!
-                        </div>
-                      )}
-
-                      {/* Photo Upload Section */}
-                      {selectedPlace === place.id && (
-                        <div className="mt-4">
-                          <PhotoUpload
-                            placeId={place.id}
-                            placeName={place.name}
-                            onPhotosUploaded={(photos) => handlePhotoUpload(place.id, photos)}
-                          />
-                        </div>
-                      )}
-
-                      {/* Toggle Photo Upload */}
-                      {!isPlaceVisited(place.id) && (
-                        <button
-                          onClick={() => setSelectedPlace(selectedPlace === place.id ? null : place.id)}
-                          className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-2 px-4 rounded-lg font-medium hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 text-sm"
-                        >
-                          {selectedPlace === place.id ? '📸 Hide Photo Upload' : '📸 Upload Photos (+10 🪙 each)'}
-                        </button>
                       )}
                     </div>
                   </div>
@@ -807,10 +796,11 @@ const RoutingPage: React.FC = () => {
                 <div className="flex justify-between">
                   <span>Total Distance:</span>
                   <span className="font-bold">
-                    {optimizedRoute.length > 1 && 
-                      optimizedRoute.slice(0, -1).reduce((total, place, index) => 
-                        total + calculateDistance(place, optimizedRoute[index + 1]), 0
-                      ).toFixed(2)
+                    {optimizedRoute.length > 1 
+                      ? optimizedRoute.slice(0, -1).reduce((total, place, index) => 
+                          total + calculateDistance(place, optimizedRoute[index + 1]), 0
+                        ).toFixed(2)
+                      : '0'
                     } km
                   </span>
                 </div>
