@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSpring, animated } from 'react-spring';
 import { useDrag } from 'react-use-gesture';
 import type { TravelPlace } from '../types/TravelPlace';
@@ -10,6 +10,8 @@ interface TinderCardProps {
 }
 
 const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  
   const [{ x, y, rotate, scale }, api] = useSpring(() => ({
     x: 0,
     y: 0,
@@ -19,8 +21,8 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
 
   const bind = useDrag(
     (state: any) => {
-      const { movement: [mx, my], direction: [xDir], down } = state;
-      const trigger = Math.abs(mx) > 100;
+      const { movement: [mx, my], direction: [xDir], down, velocity } = state;
+      const trigger = Math.abs(mx) > 80 || (velocity > 0.5 && Math.abs(mx) > 50);
       const dir = xDir < 0 ? 'left' : 'right';
       
       if (!down && trigger) {
@@ -30,19 +32,19 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
           y: my,
           rotate: mx / 10,
           scale: 1,
-          config: { tension: 200, friction: 30 }
+          config: { tension: 200, friction: 25 }
         });
       } else {
         api.start({
           x: down ? mx : 0,
           y: down ? my : 0,
-          rotate: down ? mx / 10 : 0,
-          scale: down ? 1.1 : 1,
-          config: { tension: 300, friction: 30 }
+          rotate: down ? mx / 12 : 0,
+          scale: down ? 1.02 : 1,
+          config: { tension: 500, friction: 30 }
         });
       }
     },
-    { enabled: isTop }
+    { enabled: isTop, filterTaps: true, threshold: 10 }
   );
 
   return (
@@ -55,85 +57,91 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
         scale,
         touchAction: 'none',
       }}
-      className={`absolute bg-white rounded-2xl shadow-xl overflow-hidden cursor-grab active:cursor-grabbing ${
-        isTop ? 'z-20' : 'z-10'
-      } w-[85vw] max-w-sm h-[70vh] max-h-[600px] min-h-[500px] mt-120`}
+      className={`absolute bg-white rounded-3xl shadow-2xl overflow-hidden select-none ${
+        isTop ? 'z-20' : 'z-10 opacity-50 scale-95'
+      } w-full h-full`}
     >
       <div className="relative h-full">
+        {/* Loading skeleton */}
+        {!imageLoaded && (
+          <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+        )}
+        
         <img
           src={place.image}
           alt={place.name}
-          className="w-full h-3/5 sm:h-2/3 object-cover"
+          className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           draggable={false}
+          onLoad={() => setImageLoaded(true)}
         />
         
-        {/* Overlay indicators */}
+        {/* Swipe indicators */}
         <animated.div
           style={{
-            opacity: x.to((val: number) => (val > 0 ? val / 100 : 0)),
+            opacity: x.to((val: number) => Math.min(val / 60, 1)),
           }}
-          className="absolute top-6 sm:top-8 right-6 sm:right-8 bg-green-500 text-white px-3 sm:px-4 py-2 rounded-lg font-bold text-base sm:text-lg transform rotate-12"
+          className="absolute top-1/2 right-6 -translate-y-1/2 flex items-center justify-center"
         >
-          LOVE IT!
+          <div className="w-20 h-20 bg-green-500/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+            <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            </svg>
+          </div>
         </animated.div>
         
         <animated.div
           style={{
-            opacity: x.to((val: number) => (val < 0 ? Math.abs(val) / 100 : 0)),
+            opacity: x.to((val: number) => Math.min(Math.abs(val) / 60, 1) * (val < 0 ? 1 : 0)),
           }}
-          className="absolute top-6 sm:top-8 left-6 sm:left-8 bg-red-500 text-white px-3 sm:px-4 py-2 rounded-lg font-bold text-base sm:text-lg transform -rotate-12"
+          className="absolute top-1/2 left-6 -translate-y-1/2 flex items-center justify-center"
         >
-          PASS
+          <div className="w-20 h-20 bg-gray-600/90 backdrop-blur-sm rounded-full flex items-center justify-center shadow-lg border-4 border-white">
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
         </animated.div>
 
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+
         {/* Content */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 sm:p-6 text-white">
-          <h3 className="text-xl sm:text-2xl font-bold mb-1">{place.name}</h3>
-          <p className="text-xs sm:text-sm opacity-90 mb-2 line-clamp-2">{place.description}</p>
+        <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+          <h3 className="text-2xl font-bold mb-1 drop-shadow-md">{place.name}</h3>
           
-          {/* Tags Section */}
+          {place.country && (
+            <div className="flex items-center text-white/80 text-sm mb-2">
+              <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              </svg>
+              {place.country}
+            </div>
+          )}
+          
+          <p className="text-sm text-white/90 mb-3 line-clamp-2">{place.description}</p>
+          
+          {/* Tags */}
           {place.tags && place.tags.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-3">
-              {place.tags.map((tag, index) => (
+            <div className="flex flex-wrap gap-1.5">
+              {place.tags.slice(0, 4).map((tag, index) => (
                 <span
                   key={index}
-                  className={`px-2 py-1 rounded-full text-xs font-medium ${
-                    tag === 'Green' 
-                      ? 'bg-green-500/20 text-green-100 border border-green-400/30'
-                      : tag === 'Culture'
-                      ? 'bg-purple-500/20 text-purple-100 border border-purple-400/30'
-                      : tag === 'PM2.5 free'
-                      ? 'bg-blue-500/20 text-blue-100 border border-blue-400/30'
-                      : tag === 'Street'
-                      ? 'bg-orange-500/20 text-orange-100 border border-orange-400/30'
-                      : 'bg-gray-500/20 text-gray-100 border border-gray-400/30'
-                  }`}
+                  className="px-2.5 py-1 rounded-full text-xs font-medium bg-white/20 backdrop-blur-sm text-white border border-white/30"
                 >
-                  {tag === 'Green' && '🌿'} 
-                  {tag === 'Culture' && '🏛️'} 
-                  {tag === 'PM2.5 free' && '💨'} 
-                  {tag === 'Street' && '🛣️'} 
                   {tag}
                 </span>
               ))}
             </div>
           )}
           
-          <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center space-x-1">
-              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-              </svg>
-              <span className="text-xs">{place.lat.toFixed(4)}, {place.long.toFixed(4)}</span>
+          {/* Rating */}
+          {place.rating && (
+            <div className="flex items-center mt-3 space-x-1">
+              <span className="text-amber-400">⭐</span>
+              <span className="font-semibold">{place.rating}</span>
+              <span className="text-white/60 text-sm">rating</span>
             </div>
-            
-            <div className="flex items-center space-x-1">
-              <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-              </svg>
-              <span className="text-xs">{place.distance}</span>
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </animated.div>

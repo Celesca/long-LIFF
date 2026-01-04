@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { TravelPlace } from '../types/TravelPlace';
 import PersonalityModal from './PersonalityModal';
-import CoinCounter from './CoinCounter';
+import Layout from './Layout';
 import { getUserStorageKey, getUserId } from '../hooks/useLiff';
 import { api, type Place } from '../services/api';
 
@@ -93,208 +93,176 @@ const GalleryPage: React.FC = () => {
     }
   };
 
-  const handleTravelPlan = (personality: string, duration: string) => {
+  const handleTravelPlan = (personality: string, duration: string, city: string) => {
     navigate('/routing', { 
-      state: { personality, duration } 
+      state: { personality, duration, city } 
     });
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white flex flex-col items-center justify-center p-6">
-        <div className="text-center space-y-4">
-          <div className="w-16 h-16 mx-auto border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-          <h2 className="text-xl font-bold text-purple-800">Loading gallery...</h2>
+      <Layout showHeader headerTitle="My Collection" showCoinCounter>
+        <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
+          <div className="text-center space-y-4">
+            <div className="w-16 h-16 mx-auto border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+            <h2 className="text-lg font-semibold text-gray-700">Loading your collection...</h2>
+          </div>
         </div>
-      </div>
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white">
-      {/* Header - Responsive */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-purple-100 sticky top-0 z-10">
-        <div className="p-4 sm:p-6">
-          {/* Mobile Layout */}
-          <div className="flex flex-col space-y-4 md:hidden">
-            {/* Top row - Back button and title */}
-            <div className="flex items-center justify-between">
-              <Link 
-                to="/"
-                className="flex items-center space-x-2 text-purple-600 hover:text-purple-700"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                </svg>
-                <span className="font-medium text-sm">Back</span>
-              </Link>
-              
-              <div className="text-center">
-                <h1 className="text-lg font-bold text-purple-800">My Gallery</h1>
-                <p className="text-xs text-purple-500">{likedPlaces.length} saved places</p>
-              </div>
-            </div>
-            
-            {/* Bottom row - Actions */}
-            <div className="flex items-center justify-between gap-2">
-              <CoinCounter />
-              <div className="flex items-center gap-2">
-                {likedPlaces.length > 0 && (
-                  <button
-                    onClick={() => setIsModalOpen(true)}
-                    className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-3 py-2 rounded-lg font-medium text-sm hover:from-purple-600 hover:to-purple-700 transition-all duration-200"
-                  >
-                    Travel
-                  </button>
-                )}
-                {likedPlaces.length > 0 && (
-                  <button
-                    onClick={clearGallery}
-                    className="text-red-500 hover:text-red-600 text-xs font-medium"
-                  >
-                    Clear All
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Desktop Layout */}
-          <div className="hidden md:flex items-center justify-between">
-            <Link 
-              to="/"
-              className="flex items-center space-x-2 text-purple-600 hover:text-purple-700"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <span className="font-medium">Back</span>
-            </Link>
-            
-            <div className="text-center">
-              <h1 className="text-xl font-bold text-purple-800">My Gallery</h1>
-              <p className="text-sm text-purple-500">{likedPlaces.length} saved places</p>
-            </div>
-            
-            <div className="flex items-center space-x-3">
-              <CoinCounter />
-              {likedPlaces.length > 0 && (
-                <button
-                  onClick={() => setIsModalOpen(true)}
-                  className="bg-gradient-to-r from-purple-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200"
-                >
-                  Travel
-                </button>
-              )}
-              {likedPlaces.length > 0 && (
-                <button
-                  onClick={clearGallery}
-                  className="text-red-500 hover:text-red-600 text-sm font-medium"
-                >
-                  Clear All
-                </button>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="p-6">
+    <Layout 
+      showHeader 
+      headerTitle="My Collection" 
+      showCoinCounter
+      rightAction={
+        likedPlaces.length > 0 ? (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1.5 rounded-full font-medium text-sm shadow-sm active:scale-95 transition-transform"
+          >
+            Plan Trip
+          </button>
+        ) : null
+      }
+    >
+      <div className="px-4 py-4 max-w-lg mx-auto">
         {likedPlaces.length === 0 ? (
           // Empty state
           <div className="text-center py-16">
-            <div className="w-24 h-24 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-6">
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-pink-100 to-purple-100 rounded-3xl flex items-center justify-center mb-6">
               <svg className="w-12 h-12 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
               </svg>
             </div>
             
-            <h2 className="text-2xl font-bold text-purple-800 mb-4">
-              No places saved yet
+            <h2 className="text-xl font-bold text-gray-800 mb-3">
+              No saved places yet
             </h2>
             
-            <p className="text-purple-600 mb-8 max-w-sm mx-auto">
-              Start swiping through destinations to build your dream travel collection!
+            <p className="text-gray-500 mb-6 max-w-xs mx-auto">
+              Start exploring to build your dream travel collection!
             </p>
             
             <Link
               to="/tinder"
-              className="inline-block bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-8 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200"
+              className="inline-flex items-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
             >
+              <span className="mr-2">🗺️</span>
               Start Exploring
             </Link>
           </div>
         ) : (
-          // Gallery grid
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {likedPlaces.map((place) => (
-              <div 
-                key={place.id}
-                className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300"
+          <>
+            {/* Stats bar */}
+            <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
+              <p className="text-sm text-gray-500">
+                <span className="font-bold text-purple-600">{likedPlaces.length}</span> places saved
+              </p>
+              <button
+                onClick={clearGallery}
+                className="text-sm text-red-500 font-medium active:scale-95 transition-transform"
               >
-                <div className="relative">
-                  <img
-                    src={place.image}
-                    alt={place.name}
-                    className="w-full h-48 object-cover"
-                  />
-                  
-                  <button
-                    onClick={() => removePlace(place.id)}
-                    className="absolute top-3 right-3 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-colors duration-200"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-                
-                <div className="p-5">
-                  <h3 className="text-xl font-bold text-purple-800 mb-2">
-                    {place.name}
-                  </h3>
-                  
-                  <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                    {place.description}
-                  </p>
-                  
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm text-purple-600">
-                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                Clear All
+              </button>
+            </div>
+
+            {/* Gallery grid */}
+            <div className="space-y-4">
+              {likedPlaces.map((place) => (
+                <div 
+                  key={place.id}
+                  className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 active:shadow-md transition-shadow"
+                >
+                  <div className="relative">
+                    <img
+                      src={place.image}
+                      alt={place.name}
+                      className="w-full h-40 object-cover"
+                    />
+                    
+                    {/* Remove button */}
+                    <button
+                      onClick={() => removePlace(place.id)}
+                      className="absolute top-3 right-3 w-8 h-8 bg-black/50 backdrop-blur-sm text-white rounded-full flex items-center justify-center active:bg-black/70 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
-                      <span className="font-mono text-xs">
-                        {place.lat.toFixed(4)}, {place.long.toFixed(4)}
-                      </span>
-                    </div>
-                    
+                    </button>
+
+                    {/* Rating badge */}
                     {place.rating && (
-                      <div className="flex items-center text-sm">
+                      <div className="absolute bottom-3 left-3 flex items-center bg-white/90 backdrop-blur-sm px-2 py-1 rounded-lg text-sm">
                         <span className="mr-1">⭐</span>
-                        <span className="text-gray-700 font-medium">{place.rating}</span>
-                        <span className="text-gray-500 ml-1">/ 5.0</span>
-                      </div>
-                    )}
-                    
-                    {place.country && (
-                      <div className="inline-block bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-medium">
-                        {place.country}
+                        <span className="font-semibold">{place.rating}</span>
                       </div>
                     )}
                   </div>
                   
-                  <button
-                    onClick={() => {
-                      window.open(`https://www.google.com/maps?q=${place.lat},${place.long}`, '_blank');
-                    }}
-                    className="w-full mt-4 bg-purple-100 text-purple-700 py-2 px-4 rounded-lg hover:bg-purple-200 transition-colors duration-200 font-medium text-sm"
-                  >
-                    View on Map
-                  </button>
+                  <div className="p-4">
+                    <div className="flex items-start justify-between mb-2">
+                      <h3 className="text-lg font-bold text-gray-800 flex-1 mr-2">
+                        {place.name}
+                      </h3>
+                      {place.country && (
+                        <span className="bg-purple-100 text-purple-600 px-2 py-0.5 rounded-full text-xs font-medium whitespace-nowrap">
+                          {place.country}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <p className="text-gray-500 text-sm line-clamp-2 mb-3">
+                      {place.description}
+                    </p>
+                    
+                    {/* Tags */}
+                    {place.tags && place.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {place.tags.slice(0, 3).map((tag, idx) => (
+                          <span key={idx} className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded text-xs">
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                    
+                    {/* Actions */}
+                    <button
+                      onClick={() => {
+                        window.open(`https://www.google.com/maps?q=${place.lat},${place.long}`, '_blank');
+                      }}
+                      className="flex items-center justify-center w-full bg-gray-100 text-gray-700 py-2.5 px-4 rounded-xl active:bg-gray-200 transition-colors font-medium text-sm"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                      View on Map
+                    </button>
+                  </div>
                 </div>
+              ))}
+            </div>
+
+            {/* Plan trip CTA at bottom */}
+            <div className="mt-6 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl p-4 shadow-lg">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h4 className="text-white font-bold">Ready to travel?</h4>
+                  <p className="text-white/80 text-sm">Create your trip itinerary</p>
+                </div>
+                <button
+                  onClick={() => setIsModalOpen(true)}
+                  className="bg-white text-purple-600 px-4 py-2 rounded-xl font-semibold text-sm shadow-md active:scale-95 transition-transform"
+                >
+                  Plan Trip
+                </button>
               </div>
-            ))}
-          </div>
+            </div>
+          </>
         )}
       </div>
 
@@ -304,7 +272,7 @@ const GalleryPage: React.FC = () => {
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleTravelPlan}
       />
-    </div>
+    </Layout>
   );
 };
 

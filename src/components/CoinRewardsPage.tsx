@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { CoinSystem } from '../utils/coinSystem';
+import Layout from './Layout';
 
 interface Reward {
   id: string;
@@ -156,86 +157,48 @@ const CoinRewardsPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-yellow-50 via-orange-50 to-amber-50">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-64 h-64 bg-yellow-200/30 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute top-1/3 -left-20 w-48 h-48 bg-orange-200/30 rounded-full blur-3xl animate-float-delayed"></div>
-        <div className="absolute bottom-20 right-1/4 w-56 h-56 bg-amber-200/30 rounded-full blur-3xl animate-float"></div>
-      </div>
-
-      {/* Header */}
-      <div className="bg-gradient-to-r from-yellow-400 via-orange-400 to-amber-500 text-white sticky top-0 z-20">
-        <div className="p-4 sm:p-6">
-          <div className="flex items-center justify-between max-w-6xl mx-auto">
-            <Link 
-              to="/"
-              className="flex items-center space-x-2 text-white/90 hover:text-white transition-colors"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              <span className="font-medium">Back</span>
-            </Link>
-            
-            <div className="text-center">
-              <h1 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
-                <span className="animate-bounce-slow">🪙</span> Rewards
-              </h1>
-              <p className="text-sm text-white/80">Redeem your coins for discounts</p>
-            </div>
-            
-            {/* Coin Balance */}
-            <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl">🪙</span>
-                <span className="font-bold text-lg">{userCoins.toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
+    <Layout 
+      showHeader 
+      headerTitle="Rewards"
+      rightAction={
+        <div className="flex items-center space-x-1.5 bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1.5 rounded-full shadow-sm">
+          <span className="text-lg">🪙</span>
+          <span className="font-bold text-white">{userCoins.toLocaleString()}</span>
         </div>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-4 py-6 relative z-10">
-        {/* How to Earn Coins Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-yellow-100 animate-fade-in">
-          <h2 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <span className="text-2xl">💡</span> How to Earn Coins
+      }
+    >
+      <div className="px-4 py-4 max-w-lg mx-auto">
+        {/* How to Earn Coins - Compact */}
+        <div className="bg-white rounded-2xl shadow-sm p-4 mb-4 border border-amber-100">
+          <h2 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
+            <span>💡</span> How to Earn
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
-              <div className="text-3xl mb-2">📸</div>
-              <div className="font-semibold text-purple-700">+10 coins</div>
-              <div className="text-xs text-gray-600">Upload Photo</div>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-green-50 to-green-100 rounded-xl">
-              <div className="text-3xl mb-2">✅</div>
-              <div className="font-semibold text-green-700">+5 coins</div>
-              <div className="text-xs text-gray-600">Visit a Place</div>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl">
-              <div className="text-3xl mb-2">🏆</div>
-              <div className="font-semibold text-orange-700">+100 coins</div>
-              <div className="text-xs text-gray-600">Complete Journey</div>
-            </div>
-            <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl">
-              <div className="text-3xl mb-2">⭐</div>
-              <div className="font-semibold text-blue-700">+20 coins</div>
-              <div className="text-xs text-gray-600">Write Review</div>
-            </div>
+          <div className="grid grid-cols-4 gap-2">
+            {[
+              { icon: '📸', coins: '+10', label: 'Photo' },
+              { icon: '✅', coins: '+5', label: 'Visit' },
+              { icon: '🏆', coins: '+100', label: 'Journey' },
+              { icon: '⭐', coins: '+20', label: 'Review' },
+            ].map((item, idx) => (
+              <div key={idx} className="text-center p-2 bg-amber-50 rounded-xl">
+                <div className="text-xl mb-1">{item.icon}</div>
+                <div className="font-semibold text-amber-700 text-xs">{item.coins}</div>
+                <div className="text-[10px] text-gray-500">{item.label}</div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Category Filter */}
-        <div className="flex flex-wrap gap-2 mb-6 animate-fade-in-delayed">
+        {/* Category Filter - Horizontal Scroll */}
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-hide">
           {['all', 'food', 'experience', 'souvenir'].map((category) => (
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`px-4 py-2 rounded-full font-medium text-sm transition-all duration-300 transform hover:scale-105 ${
+              className={`px-4 py-2 rounded-full font-medium text-sm whitespace-nowrap transition-all active:scale-95 ${
                 selectedCategory === category
-                  ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white shadow-lg'
-                  : 'bg-white text-gray-600 hover:bg-gray-100 shadow'
+                  ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-md'
+                  : 'bg-white text-gray-600 shadow-sm border border-gray-100'
               }`}
             >
               {category === 'all' ? '🎉 All' : `${categoryIcons[category]} ${category.charAt(0).toUpperCase() + category.slice(1)}`}
@@ -243,27 +206,26 @@ const CoinRewardsPage: React.FC = () => {
           ))}
         </div>
 
-        {/* Rewards Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredRewards.map((reward, index) => (
+        {/* Rewards List */}
+        <div className="space-y-4">
+          {filteredRewards.map((reward) => (
             <div 
               key={reward.id}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 animate-slide-up"
-              style={{ animationDelay: `${index * 100}ms` }}
+              className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100"
             >
               {/* Image */}
-              <div className="relative h-40 overflow-hidden">
+              <div className="relative h-36">
                 <img
                   src={reward.image}
                   alt={reward.name}
-                  className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                  className="w-full h-full object-cover"
                 />
-                <div className={`absolute top-3 left-3 bg-gradient-to-r ${categoryColors[reward.category]} text-white px-3 py-1 rounded-full text-xs font-medium`}>
+                <div className={`absolute top-3 left-3 bg-gradient-to-r ${categoryColors[reward.category]} text-white px-2 py-0.5 rounded-full text-xs font-medium`}>
                   {categoryIcons[reward.category]} {reward.category}
                 </div>
                 
                 {/* Coin Cost Badge */}
-                <div className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-bold flex items-center gap-1 shadow-lg">
+                <div className="absolute top-3 right-3 bg-amber-400 text-amber-900 px-2 py-1 rounded-full text-sm font-bold flex items-center gap-1 shadow-md">
                   <span>🪙</span>
                   <span>{reward.coinCost}</span>
                 </div>
@@ -271,66 +233,30 @@ const CoinRewardsPage: React.FC = () => {
 
               {/* Content */}
               <div className="p-4">
-                <h3 className="font-bold text-gray-800 mb-2 line-clamp-1">{reward.name}</h3>
-                <p className="text-gray-600 text-sm mb-3 line-clamp-2">{reward.description}</p>
+                <h3 className="font-bold text-gray-800 mb-1">{reward.name}</h3>
+                <p className="text-gray-500 text-sm mb-3 line-clamp-2">{reward.description}</p>
                 
-                <div className="flex items-center text-xs text-gray-500 mb-3">
-                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 24 24">
+                <div className="flex items-center text-xs text-gray-400 mb-3">
+                  <svg className="w-3.5 h-3.5 mr-1" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
                   </svg>
                   {reward.location}
                 </div>
-                
-                {reward.originalPrice && (
-                  <div className="text-xs text-gray-400 mb-2">
-                    Original: <span className="line-through">{reward.originalPrice}</span>
-                  </div>
-                )}
 
                 <button
                   onClick={() => handleRedeem(reward)}
                   disabled={userCoins < reward.coinCost}
-                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-all duration-300 ${
+                  className={`w-full py-3 rounded-xl font-semibold text-sm transition-all active:scale-95 ${
                     userCoins >= reward.coinCost
-                      ? 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white hover:from-yellow-500 hover:to-orange-600 transform hover:scale-105 shadow-lg'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      ? 'bg-gradient-to-r from-amber-400 to-orange-500 text-white shadow-md'
+                      : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  {userCoins >= reward.coinCost ? '🎁 Redeem Now' : `Need ${reward.coinCost - userCoins} more coins`}
+                  {userCoins >= reward.coinCost ? '🎁 Redeem Now' : `Need ${reward.coinCost - userCoins} more`}
                 </button>
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Chiang Mai Featured Places */}
-        <div className="mt-10 animate-fade-in">
-          <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-            <span className="text-2xl">🏔️</span> Featured Places in Chiang Mai
-          </h2>
-          <div className="bg-white rounded-2xl shadow-lg p-6 overflow-hidden">
-            <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
-              {[
-                { name: 'Doi Suthep', image: 'https://upload.wikimedia.org/wikipedia/commons/0/0f/Ho_Kum_Luang_%28I%29.jpg', tag: 'Temple' },
-                { name: 'Old City', image: 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/2e/0e/cd/b2/caption.jpg?w=900&h=500&s=1', tag: 'Culture' },
-                { name: 'Nimman', image: 'https://res.cloudinary.com/pillarshotels/image/upload/f_auto/web/cms/resources/attractions/on-03-1500x1000-w1800h1360.jpeg', tag: 'Shopping' },
-                { name: 'Ang Kaew', image: 'https://media.readthecloud.co/wp-content/uploads/2021/12/29133520/angkaew-11-750x500.jpg', tag: 'Nature' },
-              ].map((place, index) => (
-                <div 
-                  key={index}
-                  className="flex-shrink-0 w-48 rounded-xl overflow-hidden shadow-md transform hover:scale-105 transition-transform duration-300"
-                >
-                  <div className="relative h-32">
-                    <img src={place.image} alt={place.name} className="w-full h-full object-cover" />
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent p-3">
-                      <div className="text-white font-medium text-sm">{place.name}</div>
-                      <div className="text-white/80 text-xs">{place.tag}</div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
@@ -342,7 +268,7 @@ const CoinRewardsPage: React.FC = () => {
             <h3 className="text-xl font-bold text-gray-800 mb-2">Congratulations!</h3>
             <p className="text-gray-600 mb-4">You've redeemed: {redeemedReward.name}</p>
             
-            <div className="bg-gradient-to-r from-yellow-100 to-orange-100 rounded-xl p-4 mb-4">
+            <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-xl p-4 mb-4">
               <p className="text-sm text-gray-600 mb-2">Your discount code:</p>
               <div className="flex items-center justify-center gap-2">
                 <code className="bg-white px-4 py-2 rounded-lg font-mono font-bold text-lg text-orange-600 border-2 border-dashed border-orange-300">
@@ -350,7 +276,7 @@ const CoinRewardsPage: React.FC = () => {
                 </code>
                 <button
                   onClick={() => copyCode(redeemedReward.discountCode || '')}
-                  className="p-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                  className="p-2 bg-orange-500 text-white rounded-lg active:bg-orange-600 transition-colors"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
@@ -366,14 +292,14 @@ const CoinRewardsPage: React.FC = () => {
             
             <button
               onClick={() => setShowModal(false)}
-              className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transition-all"
+              className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-3 rounded-xl font-semibold active:scale-95 transition-all"
             >
               Awesome! 🙌
             </button>
           </div>
         </div>
       )}
-    </div>
+    </Layout>
   );
 };
 

@@ -19,6 +19,7 @@ L.Icon.Default.mergeOptions({
 interface RoutingPageProps {
   personality?: string;
   duration?: string;
+  city?: string;
 }
 
 interface JourneyPlace {
@@ -35,7 +36,7 @@ interface Journey {
 
 const RoutingPage: React.FC = () => {
   const location = useLocation();
-  const { personality, duration } = (location.state as RoutingPageProps) || {};
+  const { personality, duration, city } = (location.state as RoutingPageProps) || {};
   const [optimizedRoute, setOptimizedRoute] = useState<TravelPlace[]>([]);
   const [, setCurrentJourney] = useState<Journey | null>(null);
   const [visitedPlaces, setVisitedPlaces] = useState<Set<string>>(new Set());
@@ -177,7 +178,12 @@ const RoutingPage: React.FC = () => {
     const storageKey = getUserStorageKey('likedPlaces');
     const saved = localStorage.getItem(storageKey);
     if (saved) {
-      const places = JSON.parse(saved);
+      let places: TravelPlace[] = JSON.parse(saved);
+      
+      // Filter places by selected city (unless 'all' is selected)
+      if (city && city !== 'all') {
+        places = places.filter(p => p.city === city);
+      }
       
       // Simple routing algorithm based on personality and duration
       const route = optimizeRoute(places, personality, duration);
@@ -194,7 +200,7 @@ const RoutingPage: React.FC = () => {
         setCurrentJourney(newJourney);
       }
     }
-  }, [personality, duration, optimizeRoute]);
+  }, [personality, duration, city, optimizeRoute]);
 
   const handlePlaceVisit = (placeId: string, photos: string[] = []) => {
     if (photos.length > 0) {
@@ -232,8 +238,23 @@ const RoutingPage: React.FC = () => {
   const MapVisualization = () => {
     const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
     
-    // Center the map on Thailand (Chiang Mai area)
-    const thailandCenter: [number, number] = [18.7883, 98.9930];
+    // City center coordinates
+    const getCityCenter = (): [number, number] => {
+      switch (city) {
+        case 'Bangkok':
+          return [13.7563, 100.5018];
+        case 'Phuket':
+          return [7.8804, 98.3923];
+        case 'Chiang Mai':
+        default:
+          return [18.7883, 98.9930];
+      }
+    };
+    
+    // Center the map based on selected city or first place in route
+    const mapCenter: [number, number] = optimizedRoute.length > 0 
+      ? [optimizedRoute[0].lat, optimizedRoute[0].long]
+      : getCityCenter();
     
     // Create path coordinates for the polyline
     const pathCoordinates = optimizedRoute.map(place => [place.lat, place.long] as [number, number]);
@@ -264,7 +285,9 @@ const RoutingPage: React.FC = () => {
     return (
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-purple-800">Interactive Route Map - Thailand</h3>
+          <h3 className="text-xl font-bold text-purple-800">
+            Interactive Route Map - {city && city !== 'all' ? city : 'Thailand'}
+          </h3>
           
           {/* Map Type Toggle */}
           <div className="flex bg-purple-100 rounded-lg p-1">
@@ -293,7 +316,7 @@ const RoutingPage: React.FC = () => {
         
         <div className="h-[500px] rounded-xl overflow-hidden border-2 border-purple-100">
           <MapContainer
-            center={thailandCenter}
+            center={mapCenter}
             zoom={12}
             style={{ height: '100%', width: '100%' }}
             className="rounded-xl"
@@ -443,6 +466,39 @@ const RoutingPage: React.FC = () => {
     }
   };
 
+  // Show message if no places found for selected city
+  if (optimizedRoute.length === 0) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white flex flex-col items-center justify-center p-6">
+        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md text-center">
+          <div className="w-20 h-20 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-6">
+            <span className="text-4xl">🗺️</span>
+          </div>
+          <h2 className="text-2xl font-bold text-purple-800 mb-3">
+            No Places Found in {city && city !== 'all' ? city : 'Your Selection'}
+          </h2>
+          <p className="text-gray-600 mb-6">
+            You haven't saved any places in this city yet. Go back to explore and swipe right on places you like!
+          </p>
+          <div className="space-y-3">
+            <Link
+              to="/tinder"
+              className="block w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transition-all"
+            >
+              Explore Places
+            </Link>
+            <Link
+              to="/gallery"
+              className="block w-full border border-purple-300 text-purple-600 py-3 px-6 rounded-xl font-semibold hover:bg-purple-50 transition-all"
+            >
+              Back to Collection
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white">
       {/* Header - Responsive */}
@@ -464,7 +520,9 @@ const RoutingPage: React.FC = () => {
               
               <div className="text-center flex-1 mx-2">
                 <h1 className="text-base font-bold text-purple-800">Your Travel Route</h1>
-                <p className="text-xs text-purple-500">{optimizedRoute.length} destinations</p>
+                <p className="text-xs text-purple-500">
+                  {city && city !== 'all' ? `📍 ${city} • ` : ''}{optimizedRoute.length} destinations
+                </p>
               </div>
             </div>
             
@@ -495,7 +553,9 @@ const RoutingPage: React.FC = () => {
             
             <div className="text-center">
               <h1 className="text-xl font-bold text-purple-800">Your Travel Route</h1>
-              <p className="text-sm text-purple-500">{optimizedRoute.length} destinations</p>
+              <p className="text-sm text-purple-500">
+                {city && city !== 'all' ? `📍 ${city} • ` : ''}{optimizedRoute.length} destinations
+              </p>
             </div>
             
             <div className="flex items-center space-x-4">
