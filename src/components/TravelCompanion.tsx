@@ -32,6 +32,8 @@ const TravelCompanion: React.FC = () => {
   const [showPhotoModal, setShowPhotoModal] = useState(false);
   const [selectedPlace, setSelectedPlace] = useState<JourneyPlace | null>(null);
   const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
+  const [tripSummary, setTripSummary] = useState<{ totalCoins: number; totalPhotos: number; placesVisited: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
 
@@ -89,27 +91,55 @@ const TravelCompanion: React.FC = () => {
   const handleConfirmVisit = () => {
     if (!selectedPlace || !journey || uploadedPhotos.length === 0) return;
 
-    // Mark place as visited and earn coins
-    const coinsEarned = CoinSystem.markPlaceAsVisited(selectedPlace.id, uploadedPhotos);
+    // Calculate coins earned from photos
+    const photoCoins = uploadedPhotos.length * 10; // 10 coins per photo
     
-    // Update the active journey
-    CoinSystem.updateActiveJourneyPlace(selectedPlace.id, {
+    // Update the active journey with visit info
+    const updatedJourney = CoinSystem.updateActiveJourneyPlace(selectedPlace.id, {
       visited: true,
       visitDate: new Date().toISOString(),
       userPhotos: uploadedPhotos,
-      coinsEarned
+      coinsEarned: photoCoins
     });
 
+    // Add coins to user profile
+    CoinSystem.addCoinsToProfile(photoCoins);
+
     // Trigger coin animation
-    window.dispatchEvent(new CustomEvent('coinUpdate', { detail: { earned: coinsEarned } }));
+    window.dispatchEvent(new CustomEvent('coinUpdate', { detail: { earned: photoCoins } }));
 
     // Refresh journey state
-    const updatedJourney = CoinSystem.getActiveJourney();
     setJourney(updatedJourney);
     
     setShowPhotoModal(false);
     setSelectedPlace(null);
     setUploadedPhotos([]);
+
+    // Check if all places are now visited
+    if (updatedJourney && updatedJourney.places.every(p => p.visited)) {
+      // Calculate trip summary
+      const totalCoins = updatedJourney.places.reduce((sum, p) => sum + (p.coinsEarned || 0), 0);
+      const totalPhotos = updatedJourney.places.reduce((sum, p) => sum + (p.userPhotos?.length || 0), 0);
+      const completionBonus = 100; // Journey completion bonus
+      
+      // Add completion bonus
+      CoinSystem.addCoinsToProfile(completionBonus);
+      window.dispatchEvent(new CustomEvent('coinUpdate', { detail: { earned: completionBonus } }));
+      
+      setTripSummary({
+        totalCoins: totalCoins + completionBonus,
+        totalPhotos,
+        placesVisited: updatedJourney.places.length
+      });
+      setShowCompletionModal(true);
+    }
+  };
+
+  const handleFinishTrip = () => {
+    // Save journey to history and end it
+    CoinSystem.endActiveJourney();
+    setShowCompletionModal(false);
+    navigate('/');
   };
 
   const handleEndJourney = () => {
@@ -564,7 +594,93 @@ const TravelCompanion: React.FC = () => {
         .scrollbar-hide::-webkit-scrollbar {
           display: none;
         }
+        @keyframes confetti {
+          0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+        .confetti-piece {
+          animation: confetti 3s ease-out forwards;
+        }
       `}</style>
+
+      {/* Completion Modal */}
+      {showCompletionModal && tripSummary && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          {/* Confetti Background */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            {[...Array(30)].map((_, i) => (
+              <div
+                key={i}
+                className="confetti-piece absolute"
+                style={{
+                  left: `${Math.random() * 100}%`,
+                  top: '-20px',
+                  width: '10px',
+                  height: '10px',
+                  borderRadius: Math.random() > 0.5 ? '50%' : '0',
+                  backgroundColor: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][Math.floor(Math.random() * 6)],
+                  animationDelay: `${Math.random() * 2}s`
+                }}
+              />
+            ))}
+          </div>
+
+          <div className="bg-white rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl animate-bounce-in">
+            {/* Header with gradient */}
+            <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 p-6 text-center">
+              <div className="text-6xl mb-2">🎉</div>
+              <h2 className="text-2xl font-bold text-white drop-shadow-lg">
+                Congratulations!
+              </h2>
+              <p className="text-white/90 mt-1">You completed your journey!</p>
+            </div>
+
+            {/* Trip Summary */}
+            <div className="p-6 space-y-4">
+              <div className="text-center mb-4">
+                <p className="text-gray-600 text-sm">Your Trip to</p>
+                <h3 className="text-xl font-bold text-purple-600">{journey?.city}</h3>
+              </div>
+
+              {/* Stats Grid */}
+              <div className="grid grid-cols-3 gap-3">
+                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 text-center">
+                  <div className="text-3xl mb-1">📍</div>
+                  <div className="text-2xl font-bold text-purple-600">{tripSummary.placesVisited}</div>
+                  <div className="text-xs text-gray-500">Places Visited</div>
+                </div>
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 text-center">
+                  <div className="text-3xl mb-1">📸</div>
+                  <div className="text-2xl font-bold text-blue-600">{tripSummary.totalPhotos}</div>
+                  <div className="text-xs text-gray-500">Photos Taken</div>
+                </div>
+                <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4 text-center">
+                  <div className="text-3xl mb-1">🪙</div>
+                  <div className="text-2xl font-bold text-amber-600">{tripSummary.totalCoins}</div>
+                  <div className="text-xs text-gray-500">Coins Earned</div>
+                </div>
+              </div>
+
+              {/* Bonus Section */}
+              <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-4 flex items-center space-x-3">
+                <span className="text-3xl">🏆</span>
+                <div>
+                  <p className="font-semibold text-emerald-700">Journey Completion Bonus!</p>
+                  <p className="text-sm text-emerald-600">+100 bonus coins added</p>
+                </div>
+              </div>
+
+              {/* Action Button */}
+              <button
+                onClick={handleFinishTrip}
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
+              >
+                🏠 Back to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

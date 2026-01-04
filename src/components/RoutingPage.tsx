@@ -32,6 +32,10 @@ const RoutingPage: React.FC = () => {
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
   const [emergencyPlace, setEmergencyPlace] = useState<TravelPlace | null>(null);
   const [alternativePlaces, setAlternativePlaces] = useState<TravelPlace[]>([]);
+  // Place swap state
+  const [showSwapModal, setShowSwapModal] = useState(false);
+  const [swapPlace, setSwapPlace] = useState<{ place: TravelPlace; index: number } | null>(null);
+  const [swapAlternatives, setSwapAlternatives] = useState<TravelPlace[]>([]);
 
   // Helper functions (declared early to avoid dependency ordering issues)
   function shuffleArray(array: TravelPlace[]): TravelPlace[] {
@@ -215,6 +219,52 @@ const RoutingPage: React.FC = () => {
     if (optimizedRoute.length <= 1) return;
     const newRoute = optimizedRoute.filter((_, i) => i !== index);
     setOptimizedRoute(newRoute);
+  };
+
+  // Open swap modal for a place
+  const openSwapModal = (place: TravelPlace, index: number) => {
+    setSwapPlace({ place, index });
+    
+    // Get liked places from localStorage
+    try {
+      const storageKey = getUserStorageKey('likedPlaces');
+      const saved = localStorage.getItem(storageKey);
+      const liked: TravelPlace[] = saved ? JSON.parse(saved) : [];
+      
+      // Get current route place IDs
+      const routeIds = new Set(optimizedRoute.map(p => p.id));
+      
+      // Filter places from the same city that are not already in the route
+      const placeCity = place.city || city || 'all';
+      let candidates = liked.filter(p => 
+        p.id !== place.id && 
+        !routeIds.has(p.id) && 
+        (placeCity === 'all' || p.city === placeCity)
+      );
+      
+      // Sort by rating
+      candidates.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      
+      // Take up to 6 alternatives
+      setSwapAlternatives(candidates.slice(0, 6));
+    } catch {
+      setSwapAlternatives([]);
+    }
+    
+    setShowSwapModal(true);
+  };
+
+  // Handle place swap
+  const handleSwapPlace = (newPlace: TravelPlace) => {
+    if (!swapPlace) return;
+    
+    const newRoute = [...optimizedRoute];
+    newRoute[swapPlace.index] = newPlace;
+    setOptimizedRoute(newRoute);
+    
+    setShowSwapModal(false);
+    setSwapPlace(null);
+    setSwapAlternatives([]);
   };
 
   // optimizeRoute & helpers now declared earlier
@@ -626,6 +676,118 @@ const RoutingPage: React.FC = () => {
           </div>
         )}
 
+        {/* Place Swap Modal */}
+        {showSwapModal && swapPlace && (
+          <div className="fixed inset-0 z-[10000] flex items-center justify-center">
+            <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowSwapModal(false)}></div>
+            <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-hidden animate-fade-in">
+              {/* Header */}
+              <div className="sticky top-0 bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-lg font-bold flex items-center space-x-2">
+                    <span>🔄</span>
+                    <span>Swap Place</span>
+                  </h2>
+                  <button
+                    onClick={() => setShowSwapModal(false)}
+                    className="text-white/80 hover:text-white transition"
+                    aria-label="Close swap modal"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                <p className="text-sm text-white/80 mt-1">
+                  Replace <span className="font-semibold">{swapPlace.place.name}</span>
+                </p>
+              </div>
+
+              <div className="p-4 overflow-y-auto max-h-[60vh]">
+                {/* Current place */}
+                <div className="mb-4 p-3 bg-gray-50 rounded-xl border-2 border-gray-200">
+                  <p className="text-xs text-gray-500 mb-1">Current Place</p>
+                  <div className="flex items-center space-x-3">
+                    {swapPlace.place.image && (
+                      <img src={swapPlace.place.image} alt={swapPlace.place.name} className="w-12 h-12 rounded-lg object-cover" />
+                    )}
+                    <div>
+                      <p className="font-semibold text-gray-800">{swapPlace.place.name}</p>
+                      <div className="flex items-center space-x-2 text-xs text-gray-500">
+                        {swapPlace.place.city && <span>📍 {swapPlace.place.city}</span>}
+                        {swapPlace.place.rating && <span>⭐ {swapPlace.place.rating}</span>}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Arrow */}
+                <div className="flex justify-center my-2">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Alternative places */}
+                {swapAlternatives.length > 0 ? (
+                  <div>
+                    <p className="text-sm font-semibold text-gray-700 mb-3">
+                      Choose from {swapPlace.place.city || 'your'} alternatives:
+                    </p>
+                    <div className="space-y-2">
+                      {swapAlternatives.map(alt => (
+                        <div 
+                          key={alt.id} 
+                          className="p-3 border rounded-xl hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer flex items-center justify-between"
+                          onClick={() => handleSwapPlace(alt)}
+                        >
+                          <div className="flex items-center space-x-3 flex-1 min-w-0">
+                            {alt.image && (
+                              <img src={alt.image} alt={alt.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+                            )}
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-purple-800 truncate">{alt.name}</p>
+                              {alt.description && (
+                                <p className="text-xs text-gray-500 line-clamp-1">{alt.description}</p>
+                              )}
+                              <div className="flex items-center space-x-2 text-xs text-gray-400 mt-1">
+                                {alt.city && <span>📍 {alt.city}</span>}
+                                {alt.rating && <span>⭐ {alt.rating}</span>}
+                              </div>
+                            </div>
+                          </div>
+                          <button className="ml-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs px-3 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 flex-shrink-0">
+                            Select
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-yellow-50 text-yellow-700 rounded-lg text-sm text-center">
+                    <span className="text-2xl block mb-2">😔</span>
+                    No alternative places available in {swapPlace.place.city || 'this city'}.
+                    <br />
+                    <span className="text-xs">Try swiping more places in the Explore page!</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="sticky bottom-0 bg-white border-t p-4">
+                <button
+                  onClick={() => setShowSwapModal(false)}
+                  className="w-full py-3 text-sm font-medium rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Travel Settings Summary */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <h2 className="text-lg font-bold text-purple-800 mb-4">Trip Configuration</h2>
@@ -753,17 +915,30 @@ const RoutingPage: React.FC = () => {
                           <h4 className="font-bold text-purple-800 truncate">{place.name}</h4>
                           <p className="text-sm text-gray-600 line-clamp-2">{place.description}</p>
                         </div>
-                        {/* Remove button */}
-                        <button
-                          onClick={() => removeFromRoute(index)}
-                          disabled={optimizedRoute.length <= 1}
-                          className="ml-2 p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-30"
-                          title="Remove from route"
-                        >
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
+                        {/* Action buttons */}
+                        <div className="flex items-center space-x-1 ml-2">
+                          {/* Swap button */}
+                          <button
+                            onClick={() => openSwapModal(place, index)}
+                            className="p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
+                            title="Swap with alternative"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                            </svg>
+                          </button>
+                          {/* Remove button */}
+                          <button
+                            onClick={() => removeFromRoute(index)}
+                            disabled={optimizedRoute.length <= 1}
+                            className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-30"
+                            title="Remove from route"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                          </button>
+                        </div>
                       </div>
                       
                       <div className="flex items-center space-x-3 mt-2 text-xs text-purple-600">

@@ -45,6 +45,25 @@ export class CoinSystem {
     };
   }
 
+  static saveUserProfile(profile: UserProfile): void {
+    const storageKey = getUserStorageKey('userProfile');
+    localStorage.setItem(storageKey, JSON.stringify(profile));
+  }
+
+  static addCoinsToProfile(coins: number): void {
+    const profile = this.getUserProfile();
+    profile.totalCoins += coins;
+    this.saveUserProfile(profile);
+  }
+
+  static getPhotoUploadCoins(): number {
+    return this.PHOTO_UPLOAD_COINS;
+  }
+
+  static getJourneyCompletionBonus(): number {
+    return this.JOURNEY_COMPLETION_BONUS;
+  }
+
   // Active Journey Management
   static getActiveJourney(): ActiveJourney | null {
     const storageKey = getUserStorageKey(this.ACTIVE_JOURNEY_KEY);
@@ -176,11 +195,6 @@ export class CoinSystem {
       total,
       percentage: total > 0 ? Math.round((visited / total) * 100) : 0
     };
-  }
-
-  static saveUserProfile(profile: UserProfile): void {
-    const storageKey = getUserStorageKey('userProfile');
-    localStorage.setItem(storageKey, JSON.stringify(profile));
   }
 
   static markPlaceAsVisited(placeId: string, userPhotos: string[] = []): number {
