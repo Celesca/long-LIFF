@@ -15,6 +15,7 @@ const mapPlaceToTravelPlace = (place: Place): TravelPlace => ({
   image: place.image_url || '',
   description: place.description,
   country: place.country,
+  city: place.city,
   rating: place.rating,
   distance: place.distance,
   tags: place.tags || [],

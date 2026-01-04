@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import type { TravelPlace } from '../types/TravelPlace';
@@ -36,6 +36,7 @@ interface Journey {
 
 const RoutingPage: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { personality, duration, city } = (location.state as RoutingPageProps) || {};
   const [optimizedRoute, setOptimizedRoute] = useState<TravelPlace[]>([]);
   const [, setCurrentJourney] = useState<Journey | null>(null);
@@ -466,6 +467,20 @@ const RoutingPage: React.FC = () => {
     }
   };
 
+  // Start active journey and navigate to travel companion
+  const startActiveJourney = () => {
+    if (optimizedRoute.length === 0) return;
+    
+    CoinSystem.startActiveJourney(
+      personality || 'default',
+      duration || 'custom',
+      city || 'all',
+      optimizedRoute
+    );
+    
+    navigate('/travel-companion');
+  };
+
   // Show message if no places found for selected city
   if (optimizedRoute.length === 0) {
     return (
@@ -810,7 +825,16 @@ const RoutingPage: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="mt-8 flex justify-center space-x-4">
+        <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4 px-4">
+          {/* Start Journey Button - Primary CTA */}
+          <button 
+            onClick={startActiveJourney}
+            className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-4 px-8 rounded-xl font-bold text-lg shadow-lg hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2"
+          >
+            <span>🚀</span>
+            <span>Start Journey Now</span>
+          </button>
+          
           <button 
             onClick={() => {
               const url = optimizedRoute.map(place => `${place.lat},${place.long}`).join('/');
@@ -823,11 +847,25 @@ const RoutingPage: React.FC = () => {
           
           <Link 
             to="/gallery"
-            className="bg-gray-200 text-gray-700 py-3 px-8 rounded-xl font-semibold hover:bg-gray-300 transition-colors duration-200"
+            className="bg-gray-200 text-gray-700 py-3 px-8 rounded-xl font-semibold hover:bg-gray-300 transition-colors duration-200 text-center"
           >
             Modify Selection
           </Link>
         </div>
+
+        {/* Mobile: Start Journey Floating Button */}
+        <div className="fixed bottom-6 left-4 right-4 z-50 md:hidden">
+          <button 
+            onClick={startActiveJourney}
+            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-2xl flex items-center justify-center space-x-2"
+          >
+            <span className="text-2xl">🚀</span>
+            <span>Start Journey</span>
+          </button>
+        </div>
+        
+        {/* Bottom padding for floating button on mobile */}
+        <div className="h-24 md:h-8" />
       </div>
     </div>
   );

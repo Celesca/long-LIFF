@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import { useLiff } from '../hooks/useLiff';
+import { CoinSystem, type ActiveJourney } from '../utils/coinSystem';
 
 const featuredPlaces = [
   { 
@@ -45,14 +46,26 @@ const quickActions = [
 
 const LaunchPage: React.FC = () => {
   const { isLoggedIn, displayName, pictureUrl } = useLiff();
+  const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [greeting, setGreeting] = useState('');
+  const [activeJourney, setActiveJourney] = useState<ActiveJourney | null>(null);
+  const [journeyProgress, setJourneyProgress] = useState({ visited: 0, total: 0, percentage: 0 });
 
   useEffect(() => {
     const hour = new Date().getHours();
     if (hour < 12) setGreeting('Good morning');
     else if (hour < 18) setGreeting('Good afternoon');
     else setGreeting('Good evening');
+  }, []);
+
+  // Check for active journey
+  useEffect(() => {
+    const journey = CoinSystem.getActiveJourney();
+    setActiveJourney(journey);
+    if (journey) {
+      setJourneyProgress(CoinSystem.getJourneyProgress());
+    }
   }, []);
 
   useEffect(() => {
@@ -100,6 +113,58 @@ const LaunchPage: React.FC = () => {
             </Link>
           ))}
         </div>
+
+        {/* Continue Your Travel Banner - Shows when there's an active journey */}
+        {activeJourney && (
+          <div className="mb-6 animate-fade-in">
+            <div className="bg-gradient-to-r from-emerald-500 to-teal-600 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+              {/* Decorative background */}
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+              
+              <div className="relative">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+                      <span className="text-xl">🚶‍♂️</span>
+                    </div>
+                    <div>
+                      <p className="text-emerald-100 text-xs font-medium">ONGOING TRIP</p>
+                      <h3 className="text-white font-bold text-lg">{activeJourney.city === 'all' ? 'Multi-City' : activeJourney.city}</h3>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-white/80 text-xs">Progress</p>
+                    <p className="text-white font-bold text-xl">{journeyProgress.percentage}%</p>
+                  </div>
+                </div>
+
+                {/* Progress bar */}
+                <div className="w-full bg-white/20 rounded-full h-2 mb-3">
+                  <div 
+                    className="bg-white rounded-full h-2 transition-all duration-500"
+                    style={{ width: `${journeyProgress.percentage}%` }}
+                  />
+                </div>
+
+                <div className="flex items-center justify-between text-white/90 text-sm mb-4">
+                  <span>📍 {journeyProgress.visited}/{journeyProgress.total} places visited</span>
+                  <span>⏱️ {activeJourney.duration}</span>
+                </div>
+
+                <button
+                  onClick={() => navigate('/travel-companion')}
+                  className="w-full bg-white text-emerald-600 py-3 px-6 rounded-xl font-bold text-base shadow-md hover:shadow-lg transition-all duration-200 active:scale-98 flex items-center justify-center space-x-2"
+                >
+                  <span>Continue Your Journey</span>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Featured Carousel */}
         <div className="mb-6 animate-fade-in-delayed">

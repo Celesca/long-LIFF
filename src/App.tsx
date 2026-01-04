@@ -8,6 +8,7 @@ import TinderPage from "./components/TinderPage.js";
 import GalleryPage from "./components/GalleryPage.js";
 import RoutingPage from "./components/RoutingPage.js";
 import CoinRewardsPage from "./components/CoinRewardsPage.js";
+import TravelCompanion from "./components/TravelCompanion.js";
 import { api } from "./services/api";
 
 // Development mode - bypass LIFF authentication
@@ -199,6 +200,7 @@ function App() {
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/routing" element={<RoutingPage />} />
           <Route path="/rewards" element={<CoinRewardsPage />} />
+          <Route path="/travel-companion" element={<TravelCompanion />} />
         </Routes>
       </Router>
     </LiffContext.Provider>
