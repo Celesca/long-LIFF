@@ -217,7 +217,7 @@ const TinderPage: React.FC = () => {
 
   return (
     <Layout hideNavbar>
-      <div className="min-h-screen flex flex-col">
+      <div className="min-h-screen flex flex-col pb-24">
         {/* Compact Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-white/80 backdrop-blur-lg border-b border-gray-100 sticky top-0 z-30">
           <Link 
@@ -279,8 +279,8 @@ const TinderPage: React.FC = () => {
         </div>
 
         {/* Cards Area */}
-        <div className="flex-1 flex flex-col items-center justify-center px-4 py-4">
-          <div className="relative w-full max-w-sm aspect-[3/4]">
+        <div className="flex-1 flex flex-col items-center justify-center px-4 py-2 min-h-0">
+          <div className="relative w-full max-w-xs sm:max-w-sm h-[60vh] max-h-[450px]">
             {remainingPlaces.map((place, index) => (
               <TinderCard
                 key={place.id}
