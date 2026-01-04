@@ -189,7 +189,7 @@ export const bangkokPlaces: TravelPlace[] = [
     name: 'Wat Arun',
     lat: 13.7437,
     long: 100.4888,
-    image: 'https://static.wixstatic.com/media/2cc94a_07e55de318fe41538e17cb9de596cb45~mv2.jpg/v1/fill/w_317,h_178,al_c,q_80,usm_0.66_1.00_0.01,enc_avif,quality_auto/shutterstock_2183013411.jpg',
+    image: 'https://lp-cms-production.s3.amazonaws.com/public/2021-06/shutterstockRF_517093306.jpg',
     description: 'The Temple of Dawn with its iconic 82-meter spire decorated with colorful porcelain. Climb the steep steps for panoramic river views, especially magical at sunset when the spire glows golden.',
     city: 'Bangkok',
     country: 'Thailand',
