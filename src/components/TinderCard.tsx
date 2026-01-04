@@ -57,9 +57,9 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
         scale,
         touchAction: 'none',
       }}
-      className={`absolute bg-white rounded-3xl shadow-2xl overflow-hidden select-none ${
+      className={`absolute inset-0 bg-white rounded-2xl shadow-2xl overflow-hidden select-none ${
         isTop ? 'z-20' : 'z-10 opacity-50 scale-95'
-      } w-full h-full`}
+      }`}
     >
       <div className="relative h-full">
         {/* Loading skeleton */}
