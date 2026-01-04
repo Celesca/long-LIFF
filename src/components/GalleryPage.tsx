@@ -4,23 +4,7 @@ import type { TravelPlace } from '../types/TravelPlace';
 import PersonalityModal from './PersonalityModal';
 import Layout from './Layout';
 import { getUserStorageKey, getUserId } from '../hooks/useLiff';
-import { api, type Place } from '../services/api';
-
-// Convert API Place to TravelPlace format
-const mapPlaceToTravelPlace = (place: Place): TravelPlace => ({
-  id: place.external_id,
-  name: place.name,
-  lat: place.latitude,
-  long: place.longitude,
-  image: place.image_url || '',
-  description: place.description,
-  country: place.country,
-  city: place.city,
-  rating: place.rating,
-  distance: place.distance,
-  tags: place.tags || [],
-  backendId: place.id,
-});
+import { mockApi } from '../services/mockApi';
 
 const GalleryPage: React.FC = () => {
   const [likedPlaces, setLikedPlaces] = useState<TravelPlace[]>([]);
@@ -31,23 +15,11 @@ const GalleryPage: React.FC = () => {
 
   useEffect(() => {
     const fetchLikedPlaces = async () => {
-      if (!userId) {
-        // Fallback to localStorage
-        const storageKey = getUserStorageKey('likedPlaces');
-        const saved = localStorage.getItem(storageKey);
-        if (saved) {
-          setLikedPlaces(JSON.parse(saved));
-        }
-        setLoading(false);
-        return;
-      }
-
       try {
-        const response = await api.getLikedPlaces(userId);
-        const mappedPlaces = response.places.map(mapPlaceToTravelPlace);
-        setLikedPlaces(mappedPlaces);
+        const response = await mockApi.getLikedPlaces(userId || 'anonymous');
+        setLikedPlaces(response.places);
       } catch (err) {
-        console.error('Failed to fetch liked places from backend:', err);
+        console.error('Failed to fetch liked places:', err);
         // Fallback to localStorage
         const storageKey = getUserStorageKey('likedPlaces');
         const saved = localStorage.getItem(storageKey);
@@ -64,33 +36,22 @@ const GalleryPage: React.FC = () => {
 
   const clearGallery = async () => {
     setLikedPlaces([]);
-    const storageKey = getUserStorageKey('likedPlaces');
-    localStorage.removeItem(storageKey);
     
-    // Also clear in backend
-    if (userId) {
-      try {
-        await api.clearLikedPlaces(userId);
-      } catch (err) {
-        console.error('Failed to clear liked places in backend:', err);
-      }
+    try {
+      await mockApi.clearLikedPlaces(userId || 'anonymous');
+    } catch (err) {
+      console.error('Failed to clear liked places:', err);
     }
   };
 
   const removePlace = async (placeId: string) => {
-    const placeToRemove = likedPlaces.find(p => p.id === placeId);
     const updated = likedPlaces.filter(place => place.id !== placeId);
     setLikedPlaces(updated);
-    const storageKey = getUserStorageKey('likedPlaces');
-    localStorage.setItem(storageKey, JSON.stringify(updated));
     
-    // Also remove from backend
-    if (userId && placeToRemove?.backendId) {
-      try {
-        await api.removeLikedPlace(userId, placeToRemove.backendId);
-      } catch (err) {
-        console.error('Failed to remove liked place from backend:', err);
-      }
+    try {
+      await mockApi.removeLikedPlace(userId || 'anonymous', placeId);
+    } catch (err) {
+      console.error('Failed to remove liked place:', err);
     }
   };
 

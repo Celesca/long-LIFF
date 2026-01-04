@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { api, type City } from '../services/api';
+import { mockApi } from '../services/mockApi';
+
+interface City {
+  name: string;
+  place_count: number;
+}
 
 interface CityPreferenceModalProps {
   isOpen: boolean;
@@ -33,15 +38,16 @@ const CityPreferenceModal: React.FC<CityPreferenceModalProps> = ({
     try {
       setLoading(true);
       setError(null);
-      const response = await api.getAvailableCities();
+      const response = await mockApi.getAvailableCities();
       setAvailableCities(response.cities);
     } catch (err) {
       console.error('Failed to fetch cities:', err);
       setError('Failed to load cities. Please try again.');
       // Fallback to hardcoded cities
       setAvailableCities([
+        { name: 'Bangkok', place_count: 12 },
         { name: 'Chiang Mai', place_count: 12 },
-        { name: 'Bangkok', place_count: 8 },
+        { name: 'Phuket', place_count: 12 },
       ]);
     } finally {
       setLoading(false);

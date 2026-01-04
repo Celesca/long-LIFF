@@ -3,100 +3,54 @@ import { Link, useNavigate } from 'react-router-dom';
 import TinderCard from '../components/TinderCard';
 import CityPreferenceModal from '../components/CityPreferenceModal';
 import Layout from './Layout';
-import { api, type Place } from '../services/api';
-import { getUserId } from '../hooks/useLiff';
+import { mockApi } from '../services/mockApi';
+import { getUserId, getUserStorageKey } from '../hooks/useLiff';
 import type { TravelPlace } from '../types/TravelPlace';
 
-// Convert API Place to TravelPlace format for TinderCard compatibility
-const mapPlaceToTravelPlace = (place: Place): TravelPlace => ({
-  id: place.external_id,
-  name: place.name,
-  lat: place.latitude,
-  long: place.longitude,
-  image: place.image_url || '',
-  description: place.description,
-  country: place.country,
-  city: place.city,
-  rating: place.rating,
-  distance: place.distance,
-  tags: place.tags || [],
-  backendId: place.id,
-});
-
 const TinderPage: React.FC = () => {
-  const [places, setPlaces] = useState<(TravelPlace & { backendId?: number })[]>([]);
+  const [places, setPlaces] = useState<TravelPlace[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedPlaces, setLikedPlaces] = useState<TravelPlace[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCityModal, setShowCityModal] = useState(false);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
-  const [useBackend, setUseBackend] = useState(true);
   const [swipeAnimation, setSwipeAnimation] = useState<'left' | 'right' | null>(null);
 
   const userId = getUserId();
   const navigate = useNavigate();
 
-  // Fetch places from backend
+  // Fetch places using mock API
   const fetchPlaces = useCallback(async (cities: string[]) => {
-    if (!userId) {
-      setError('Please login first');
-      setLoading(false);
-      return;
-    }
-
     try {
       setLoading(true);
       setError(null);
 
-      // Register/get user first
-      await api.createOrGetUser(
-        userId,
-        localStorage.getItem('liff_displayName') || undefined,
-        localStorage.getItem('liff_pictureUrl') || undefined
-      );
+      // Initialize user
+      await mockApi.createOrGetUser(userId || 'anonymous');
 
       // Fetch tinder places (excludes already swiped)
-      const response = await api.getTinderPlaces(userId, cities.length > 0 ? cities : undefined);
-      const mappedPlaces = response.places.map(mapPlaceToTravelPlace);
-      setPlaces(mappedPlaces);
+      const response = await mockApi.getTinderPlaces(userId || 'anonymous', cities.length > 0 ? cities : undefined);
+      setPlaces(response.places);
       setCurrentIndex(0);
 
       // Fetch liked places
-      const likedResponse = await api.getLikedPlaces(userId);
-      const mappedLiked = likedResponse.places.map(mapPlaceToTravelPlace);
-      setLikedPlaces(mappedLiked);
+      const likedResponse = await mockApi.getLikedPlaces(userId || 'anonymous');
+      setLikedPlaces(likedResponse.places);
 
-      setUseBackend(true);
     } catch (err) {
-      console.error('Failed to fetch places from backend:', err);
-      setError('Could not connect to server. Using offline mode.');
-      setUseBackend(false);
-      loadFromLocalStorage();
+      console.error('Failed to fetch places:', err);
+      setError('Could not load places. Please try again.');
     } finally {
       setLoading(false);
     }
   }, [userId]);
 
-  // Fallback: Load from localStorage (offline mode)
-  const loadFromLocalStorage = () => {
-    const storageKey = userId ? `${userId}_likedPlaces` : 'likedPlaces';
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      setLikedPlaces(JSON.parse(saved));
-    }
-  };
-
   // Initial load - check if user has city preferences
   useEffect(() => {
     const checkPreferencesAndLoad = async () => {
-      if (!userId) {
-        setLoading(false);
-        return;
-      }
-
       try {
-        const prefs = await api.getPreferences(userId);
+        const prefs = await mockApi.getPreferences(userId || 'anonymous');
         if (prefs.selected_cities && prefs.selected_cities.length > 0) {
           setSelectedCities(prefs.selected_cities);
           fetchPlaces(prefs.selected_cities);
@@ -119,12 +73,10 @@ const TinderPage: React.FC = () => {
     setSelectedCities(cities);
     setShowCityModal(false);
 
-    if (userId) {
-      try {
-        await api.updatePreferences(userId, { selected_cities: cities });
-      } catch (err) {
-        console.error('Failed to save preferences:', err);
-      }
+    try {
+      await mockApi.updatePreferences(userId || 'anonymous', { selected_cities: cities });
+    } catch (err) {
+      console.error('Failed to save preferences:', err);
     }
 
     fetchPlaces(cities);
@@ -135,26 +87,22 @@ const TinderPage: React.FC = () => {
     const currentPlace = places[currentIndex];
     if (!currentPlace) return;
 
-    // Record swipe in backend
-    if (useBackend && userId && currentPlace.backendId) {
-      try {
-        await api.createSwipe(userId, currentPlace.backendId, direction);
-      } catch (err) {
-        console.error('Failed to record swipe:', err);
-      }
+    // Record swipe using mock API
+    try {
+      await mockApi.createSwipe(userId || 'anonymous', currentPlace.id, direction);
+    } catch (err) {
+      console.error('Failed to record swipe:', err);
     }
 
     if (direction === 'right') {
       setLikedPlaces(prev => {
         const updated = [...prev, currentPlace];
-        const storageKey = userId ? `${userId}_likedPlaces` : 'likedPlaces';
-        localStorage.setItem(storageKey, JSON.stringify(updated));
         return updated;
       });
     }
 
     setCurrentIndex(prev => prev + 1);
-  }, [places, currentIndex, useBackend, userId]);
+  }, [places, currentIndex, userId]);
 
   const handleButtonAction = (direction: 'left' | 'right') => {
     handleSwipe(direction);
