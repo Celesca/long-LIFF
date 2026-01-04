@@ -10,17 +10,10 @@ import RoutingPage from "./components/RoutingPage.js";
 import CoinRewardsPage from "./components/CoinRewardsPage.js";
 import TravelCompanion from "./components/TravelCompanion.js";
 import HistoryPage from "./components/HistoryPage.js";
-import { api } from "./services/api";
+import { mockApi } from "./services/mockApi";
 
 // Development mode - bypass LIFF authentication
-const DEV_MODE = true; // Set to false for production with real LINE LIFF
-
-// Mock user for development
-const MOCK_USER = {
-  userId: "dev_user_12345",
-  displayName: "Dev User",
-  pictureUrl: "https://via.placeholder.com/150/8B5CF6/FFFFFF?text=DEV",
-};
+const DEV_MODE = false; // Set to true for local development without LINE app
 
 // Create context for LIFF user data
 export const LiffContext = createContext<{
@@ -46,29 +39,28 @@ function App() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    // Development mode - bypass LIFF and use mock user
+    // Development mode - bypass LIFF and use mock user (for local testing without LINE app)
     if (DEV_MODE) {
       console.log("DEV MODE: Bypassing LIFF authentication");
+      const mockUser = {
+        userId: "dev_user_" + Date.now(),
+        displayName: "Dev User",
+        pictureUrl: "https://via.placeholder.com/150/8B5CF6/FFFFFF?text=DEV",
+      };
       setIsLiffReady(true);
       setIsLoggedIn(true);
-      setUserId(MOCK_USER.userId);
-      setDisplayName(MOCK_USER.displayName);
-      setPictureUrl(MOCK_USER.pictureUrl);
+      setUserId(mockUser.userId);
+      setDisplayName(mockUser.displayName);
+      setPictureUrl(mockUser.pictureUrl);
 
       // Store in localStorage
-      localStorage.setItem("liff_userId", MOCK_USER.userId);
-      localStorage.setItem("liff_displayName", MOCK_USER.displayName);
-      localStorage.setItem("liff_pictureUrl", MOCK_USER.pictureUrl);
+      localStorage.setItem("liff_userId", mockUser.userId);
+      localStorage.setItem("liff_displayName", mockUser.displayName);
+      localStorage.setItem("liff_pictureUrl", mockUser.pictureUrl);
 
-      // Register mock user with backend
-      api.createOrGetUser(
-        MOCK_USER.userId,
-        MOCK_USER.displayName,
-        MOCK_USER.pictureUrl
-      ).then(() => {
-        console.log("DEV MODE: Mock user registered with backend");
-      }).catch((err) => {
-        console.error("DEV MODE: Failed to register mock user:", err);
+      // Initialize user in mockApi
+      mockApi.createOrGetUser(mockUser.userId).catch((err) => {
+        console.error("DEV MODE: Failed to initialize mock user:", err);
       });
 
       return;
@@ -118,15 +110,9 @@ function App() {
                 displayName: profile.displayName,
               });
 
-              // Register user with backend
-              api.createOrGetUser(
-                profile.userId,
-                profile.displayName,
-                profile.pictureUrl
-              ).then(() => {
-                console.log("User registered with backend");
-              }).catch((err) => {
-                console.error("Failed to register user with backend:", err);
+              // Initialize user in mockApi (localStorage-based)
+              mockApi.createOrGetUser(profile.userId).catch((err) => {
+                console.error("Failed to initialize user:", err);
               });
             })
             .catch((err) => {
