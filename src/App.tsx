@@ -8,6 +8,12 @@ import TinderPage from "./components/TinderPage.js";
 import GalleryPage from "./components/GalleryPage.js";
 import RoutingPage from "./components/RoutingPage.js";
 import CoinRewardsPage from "./components/CoinRewardsPage.js";
+import TravelCompanion from "./components/TravelCompanion.js";
+import HistoryPage from "./components/HistoryPage.js";
+import { mockApi } from "./services/mockApi";
+
+// Development mode - bypass LIFF authentication
+const DEV_MODE = false; // Set to true for local development without LINE app
 
 // Create context for LIFF user data
 export const LiffContext = createContext<{
@@ -33,6 +39,34 @@ function App() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // Development mode - bypass LIFF and use mock user (for local testing without LINE app)
+    if (DEV_MODE) {
+      console.log("DEV MODE: Bypassing LIFF authentication");
+      const mockUser = {
+        userId: "dev_user_" + Date.now(),
+        displayName: "Dev User",
+        pictureUrl: "https://via.placeholder.com/150/8B5CF6/FFFFFF?text=DEV",
+      };
+      setIsLiffReady(true);
+      setIsLoggedIn(true);
+      setUserId(mockUser.userId);
+      setDisplayName(mockUser.displayName);
+      setPictureUrl(mockUser.pictureUrl);
+
+      // Store in localStorage
+      localStorage.setItem("liff_userId", mockUser.userId);
+      localStorage.setItem("liff_displayName", mockUser.displayName);
+      localStorage.setItem("liff_pictureUrl", mockUser.pictureUrl);
+
+      // Initialize user in mockApi
+      mockApi.createOrGetUser(mockUser.userId).catch((err) => {
+        console.error("DEV MODE: Failed to initialize mock user:", err);
+      });
+
+      return;
+    }
+
+    // Production mode - use real LIFF
     // Initialize LIFF once when the app mounts.
     // Use Vite's import.meta.env at build time, and a window-level fallback for runtime overrides.
     const liffId =
@@ -74,6 +108,11 @@ function App() {
               console.log("User logged in:", {
                 userId: profile.userId,
                 displayName: profile.displayName,
+              });
+
+              // Initialize user in mockApi (localStorage-based)
+              mockApi.createOrGetUser(profile.userId).catch((err) => {
+                console.error("Failed to initialize user:", err);
               });
             })
             .catch((err) => {
@@ -148,6 +187,8 @@ function App() {
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/routing" element={<RoutingPage />} />
           <Route path="/rewards" element={<CoinRewardsPage />} />
+          <Route path="/travel-companion" element={<TravelCompanion />} />
+          <Route path="/history" element={<HistoryPage />} />
         </Routes>
       </Router>
     </LiffContext.Provider>

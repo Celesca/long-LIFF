@@ -3,12 +3,40 @@ import React from 'react';
 interface PersonalityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (personality: string, duration: string) => void;
+  onConfirm: (personality: string, duration: string, city: string) => void;
 }
 
 const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, onConfirm }) => {
   const [selectedPersonality, setSelectedPersonality] = React.useState<string>('');
   const [selectedDuration, setSelectedDuration] = React.useState<string>('');
+  const [selectedCity, setSelectedCity] = React.useState<string>('');
+
+  const cities = [
+    {
+      id: 'all',
+      name: 'All Cities',
+      description: 'Mix destinations from all available cities',
+      icon: '🌏'
+    },
+    {
+      id: 'Chiang Mai',
+      name: 'Chiang Mai',
+      description: 'Northern charm with temples, nature & culture',
+      icon: '🏔️'
+    },
+    {
+      id: 'Bangkok',
+      name: 'Bangkok',
+      description: 'Vibrant capital with temples, markets & nightlife',
+      icon: '🏙️'
+    },
+    {
+      id: 'Phuket',
+      name: 'Phuket',
+      description: 'Beautiful beaches, islands & seafood paradise',
+      icon: '🏝️'
+    }
+  ];
 
   const personalities = [
     {
@@ -53,8 +81,8 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
   ];
 
   const handleConfirm = () => {
-    if (selectedPersonality && selectedDuration) {
-      onConfirm(selectedPersonality, selectedDuration);
+    if (selectedPersonality && selectedDuration && selectedCity) {
+      onConfirm(selectedPersonality, selectedDuration, selectedCity);
       onClose();
     }
   };
@@ -81,6 +109,39 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
         </div>
 
         <div className="p-6">
+          {/* City/Province Selection */}
+          <div className="mb-8">
+            <h3 className="text-lg font-bold text-purple-800 mb-4">🗺️ Where do you want to go?</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {cities.map((city) => (
+                <button
+                  key={city.id}
+                  onClick={() => setSelectedCity(city.id)}
+                  className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:cursor-pointer hover:shadow-md ${
+                    selectedCity === city.id
+                      ? 'border-purple-500 bg-purple-50'
+                      : 'border-gray-200 hover:border-purple-300'
+                  }`}
+                >
+                  <div className="flex flex-col items-center text-center space-y-2">
+                    <span className="text-3xl">{city.icon}</span>
+                    <div>
+                      <h4 className="font-semibold text-purple-800">{city.name}</h4>
+                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">{city.description}</p>
+                    </div>
+                    {selectedCity === city.id && (
+                      <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
+                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Personality Selection */}
           <div className="mb-8">
             <h3 className="text-lg font-bold text-purple-800 mb-4">Select Your Travel Personality</h3>
@@ -161,9 +222,9 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
             </button>
             <button
               onClick={handleConfirm}
-              disabled={!selectedPersonality || !selectedDuration}
+              disabled={!selectedPersonality || !selectedDuration || !selectedCity}
               className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
-                selectedPersonality && selectedDuration
+                selectedPersonality && selectedDuration && selectedCity
                   ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 transform hover:scale-105'
                   : 'bg-gray-200 text-gray-500 cursor-not-allowed'
               }`}

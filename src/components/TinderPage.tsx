@@ -1,39 +1,108 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import TinderCard from '../components/TinderCard';
-import { mockTravelPlaces } from '../data/travelPlaces';
+import CityPreferenceModal from '../components/CityPreferenceModal';
+import Layout from './Layout';
+import { mockApi } from '../services/mockApi';
+import { getUserId, getUserStorageKey } from '../hooks/useLiff';
 import type { TravelPlace } from '../types/TravelPlace';
-import { getUserStorageKey } from '../hooks/useLiff';
 
 const TinderPage: React.FC = () => {
-  const [places] = useState(mockTravelPlaces);
+  const [places, setPlaces] = useState<TravelPlace[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedPlaces, setLikedPlaces] = useState<TravelPlace[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [showCityModal, setShowCityModal] = useState(false);
+  const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [swipeAnimation, setSwipeAnimation] = useState<'left' | 'right' | null>(null);
 
-  // Load liked places from user-specific localStorage on component mount
-  useEffect(() => {
-    const storageKey = getUserStorageKey('likedPlaces');
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      setLikedPlaces(JSON.parse(saved));
+  const userId = getUserId();
+  const navigate = useNavigate();
+
+  // Fetch places using mock API
+  const fetchPlaces = useCallback(async (cities: string[]) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Initialize user
+      await mockApi.createOrGetUser(userId || 'anonymous');
+
+      // Fetch tinder places (excludes already swiped)
+      const response = await mockApi.getTinderPlaces(userId || 'anonymous', cities.length > 0 ? cities : undefined);
+      setPlaces(response.places);
+      setCurrentIndex(0);
+
+      // Fetch liked places
+      const likedResponse = await mockApi.getLikedPlaces(userId || 'anonymous');
+      setLikedPlaces(likedResponse.places);
+
+    } catch (err) {
+      console.error('Failed to fetch places:', err);
+      setError('Could not load places. Please try again.');
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  }, [userId]);
 
-  // Save liked places to user-specific localStorage whenever likedPlaces changes
+  // Initial load - check if user has city preferences
   useEffect(() => {
-    const storageKey = getUserStorageKey('likedPlaces');
-    localStorage.setItem(storageKey, JSON.stringify(likedPlaces));
-  }, [likedPlaces]);
+    const checkPreferencesAndLoad = async () => {
+      try {
+        const prefs = await mockApi.getPreferences(userId || 'anonymous');
+        if (prefs.selected_cities && prefs.selected_cities.length > 0) {
+          setSelectedCities(prefs.selected_cities);
+          fetchPlaces(prefs.selected_cities);
+        } else {
+          setShowCityModal(true);
+          setLoading(false);
+        }
+      } catch (err) {
+        console.error('Failed to fetch preferences:', err);
+        setShowCityModal(true);
+        setLoading(false);
+      }
+    };
 
-  const handleSwipe = useCallback((direction: 'left' | 'right') => {
+    checkPreferencesAndLoad();
+  }, [userId, fetchPlaces]);
+
+  // Handle city selection
+  const handleCitySelection = async (cities: string[]) => {
+    setSelectedCities(cities);
+    setShowCityModal(false);
+
+    try {
+      await mockApi.updatePreferences(userId || 'anonymous', { selected_cities: cities });
+    } catch (err) {
+      console.error('Failed to save preferences:', err);
+    }
+
+    fetchPlaces(cities);
+  };
+
+  // Handle swipe action
+  const handleSwipe = useCallback(async (direction: 'left' | 'right') => {
     const currentPlace = places[currentIndex];
-    
-    if (direction === 'right' && currentPlace) {
-      setLikedPlaces(prev => [...prev, currentPlace]);
+    if (!currentPlace) return;
+
+    // Record swipe using mock API
+    try {
+      await mockApi.createSwipe(userId || 'anonymous', currentPlace.id, direction);
+    } catch (err) {
+      console.error('Failed to record swipe:', err);
     }
-    
+
+    if (direction === 'right') {
+      setLikedPlaces(prev => {
+        const updated = [...prev, currentPlace];
+        return updated;
+      });
+    }
+
     setCurrentIndex(prev => prev + 1);
-  }, [places, currentIndex]);
+  }, [places, currentIndex, userId]);
 
   const handleButtonAction = (direction: 'left' | 'right') => {
     handleSwipe(direction);
@@ -42,127 +111,230 @@ const TinderPage: React.FC = () => {
   const remainingPlaces = places.slice(currentIndex, currentIndex + 2);
   const isFinished = currentIndex >= places.length;
 
-  if (isFinished) {
+  // Loading state
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white flex flex-col items-center justify-center p-6">
-        <div className="text-center space-y-6 max-w-md">
-          <div className="w-20 h-20 mx-auto bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center">
-            <span className="text-3xl">🎉</span>
-          </div>
-          
-          <h2 className="text-3xl font-bold text-purple-800">
-            That's all for now!
-          </h2>
-          
-          <p className="text-purple-600">
-            You've explored all available destinations. Check out your gallery to see what you loved!
-          </p>
-          
-          <div className="bg-white p-4 rounded-xl border border-purple-100">
-            <div className="text-2xl font-bold text-purple-700">{likedPlaces.length}</div>
-            <div className="text-sm text-purple-500">Places saved to gallery</div>
-          </div>
-          
-          <div className="space-y-3">
-            <Link
-              to="/gallery"
-              className="block w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transition-all duration-200"
-            >
-              View My Gallery
-            </Link>
-            
-            <Link
-              to="/"
-              className="block w-full bg-white text-purple-600 py-3 px-6 rounded-xl font-semibold border-2 border-purple-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200"
-            >
-              Back to Home
-            </Link>
+      <Layout hideNavbar>
+        <div className="min-h-screen flex flex-col items-center justify-center p-6">
+          <div className="text-center space-y-4">
+            <div className="relative w-20 h-20 mx-auto">
+              <div className="absolute inset-0 border-4 border-purple-200 rounded-full"></div>
+              <div className="absolute inset-0 border-4 border-transparent border-t-purple-600 rounded-full animate-spin"></div>
+              <div className="absolute inset-2 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center">
+                <span className="text-2xl">🗺️</span>
+              </div>
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">Loading places...</h2>
+            <p className="text-gray-500">Finding amazing destinations for you</p>
           </div>
         </div>
-      </div>
+      </Layout>
+    );
+  }
+
+  // Error state with retry
+  if (error && places.length === 0) {
+    return (
+      <Layout showHeader showBackButton headerTitle="Explore">
+        <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
+          <div className="text-center space-y-4 max-w-md">
+            <div className="w-20 h-20 mx-auto bg-red-100 rounded-2xl flex items-center justify-center">
+              <span className="text-4xl">😕</span>
+            </div>
+            <h2 className="text-xl font-bold text-gray-800">Something went wrong</h2>
+            <p className="text-gray-500">{error}</p>
+            <div className="space-y-3 pt-4">
+              <button
+                onClick={() => fetchPlaces(selectedCities)}
+                className="block w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
+  // Finished state
+  if (isFinished) {
+    return (
+      <Layout showHeader headerTitle="All Done!" showCoinCounter>
+        <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
+          <div className="text-center space-y-6 max-w-md">
+            <div className="w-24 h-24 mx-auto bg-gradient-to-br from-purple-400 to-pink-500 rounded-3xl flex items-center justify-center shadow-lg animate-bounce-slow">
+              <span className="text-4xl">🎉</span>
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-800">
+              You've seen them all!
+            </h2>
+            
+            <p className="text-gray-600">
+              {selectedCities.length > 0 
+                ? `All destinations in ${selectedCities.join(' & ')} explored!` 
+                : 'All available destinations explored!'}
+            </p>
+            
+            <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+              <div className="flex items-center justify-center space-x-2">
+                <span className="text-3xl">❤️</span>
+                <span className="text-3xl font-bold text-purple-600">{likedPlaces.length}</span>
+              </div>
+              <div className="text-sm text-gray-500 mt-1">Places saved</div>
+            </div>
+            
+            <div className="space-y-3 w-full">
+              <button
+                onClick={() => setShowCityModal(true)}
+                className="flex items-center justify-center w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3.5 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
+              >
+                <span className="mr-2">🌍</span>
+                Explore Other Cities
+              </button>
+              
+              <button
+                onClick={() => navigate('/gallery')}
+                className="flex items-center justify-center w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3.5 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
+              >
+                <span className="mr-2">📸</span>
+                View My Collection
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <CityPreferenceModal
+          isOpen={showCityModal}
+          onClose={() => setShowCityModal(false)}
+          onConfirm={handleCitySelection}
+          initialCities={selectedCities}
+        />
+      </Layout>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white">
-      {/* Header */}
-      <div className="flex items-center justify-between p-4 sm:p-6">
-        <Link 
-          to="/"
-          className="flex items-center space-x-2 text-purple-600 hover:text-purple-700"
-        >
-          <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          <span className="font-medium text-sm sm:text-base">Back</span>
-        </Link>
-        
-        <div className="text-center">
-          <div className="text-lg sm:text-xl font-bold text-purple-800">LONG</div>
-        </div>
-        
-        <Link 
-          to="/gallery"
-          className="flex items-center space-x-2 text-purple-600 hover:text-purple-700"
-        >
-          <span className="font-medium text-sm sm:text-base">Gallery</span>
-          <div className="bg-purple-100 text-purple-700 rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">
-            {likedPlaces.length}
-          </div>
-        </Link>
-      </div>
-
-      {/* Progress bar */}
-      <div className="px-4 sm:px-6 mb-6 sm:mb-8">
-        <div className="w-full bg-purple-200 rounded-full h-2">
-          <div 
-            className="bg-gradient-to-r from-purple-400 to-purple-600 h-2 rounded-full transition-all duration-300"
-            style={{ width: `${((currentIndex + 1) / places.length) * 100}%` }}
-          />
-        </div>
-      </div>
-
-      {/* Cards container */}
-      <div className="flex justify-center items-start pt-8 sm:pt-12 min-h-[60vh] px-4 pb-32">
-        <div className="relative flex justify-center items-center">
-          {remainingPlaces.map((place, index) => (
-            <TinderCard
-              key={place.id}
-              place={place}
-              onSwipe={handleSwipe}
-              isTop={index === 0}
-            />
-          ))}
-        </div>
-      </div>
-
-      {/* Action buttons */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-sm border-t border-purple-100 p-4 sm:p-6">
-        <div className="flex justify-center space-x-6 sm:space-x-8 max-w-sm mx-auto">
-          <button
-            onClick={() => handleButtonAction('left')}
-            className="w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-full shadow-lg border-2 border-red-200 flex items-center justify-center hover:border-red-300 hover:bg-red-50 transition-all duration-200 transform hover:scale-110 active:scale-95"
+    <Layout hideNavbar>
+      <div className="min-h-screen flex flex-col">
+        {/* Compact Header */}
+        <div className="flex items-center justify-between px-4 py-3 bg-white/80 backdrop-blur-lg border-b border-gray-100 sticky top-0 z-30">
+          <Link 
+            to="/"
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 active:bg-gray-200 transition-colors"
           >
-            <svg className="w-7 h-7 sm:w-8 sm:h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </Link>
+          
+          {/* City Filter Chip */}
+          <button
+            onClick={() => setShowCityModal(true)}
+            className="flex items-center space-x-2 bg-purple-100 hover:bg-purple-200 px-4 py-2 rounded-full transition-colors active:scale-95"
+          >
+            <span className="text-sm">📍</span>
+            <span className="font-medium text-purple-700 text-sm">
+              {selectedCities.length === 0
+                ? 'All Cities'
+                : selectedCities.length === 1
+                ? selectedCities[0]
+                : `${selectedCities.length} Cities`}
+            </span>
+            <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
           
-          <button
-            onClick={() => handleButtonAction('right')}
-            className="w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-full shadow-lg border-2 border-green-200 flex items-center justify-center hover:border-green-300 hover:bg-green-50 transition-all duration-200 transform hover:scale-110 active:scale-95"
+          {/* Gallery Link with Badge */}
+          <Link 
+            to="/gallery"
+            className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 active:bg-gray-200 transition-colors"
           >
-            <svg className="w-7 h-7 sm:w-8 sm:h-8 text-green-500" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
-          </button>
+            {likedPlaces.length > 0 && (
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-pink-500 text-white rounded-full text-xs flex items-center justify-center font-bold">
+                {likedPlaces.length > 9 ? '9+' : likedPlaces.length}
+              </span>
+            )}
+          </Link>
         </div>
-        
-        <div className="text-center mt-3 sm:mt-4 text-xs sm:text-sm text-purple-500">
-          Swipe or tap to choose • ❤️ to save • ✕ to pass
+
+        {/* Progress Indicator */}
+        <div className="px-4 py-3 bg-white/50">
+          <div className="flex items-center space-x-3">
+            <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
+                style={{ width: `${Math.min(((currentIndex + 1) / places.length) * 100, 100)}%` }}
+              />
+            </div>
+            <span className="text-xs font-medium text-gray-500 whitespace-nowrap">
+              {currentIndex + 1}/{places.length}
+            </span>
+          </div>
         </div>
+
+        {/* Cards Area */}
+        <div className="flex-1 flex flex-col items-center justify-center px-4 py-4">
+          <div className="relative w-full max-w-sm aspect-[3/4]">
+            {remainingPlaces.map((place, index) => (
+              <TinderCard
+                key={place.id}
+                place={place}
+                onSwipe={handleSwipe}
+                isTop={index === 0}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Action Buttons - Fixed at Bottom */}
+        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-area-bottom">
+          <div className="flex items-center justify-center space-x-6 py-4 px-6 max-w-lg mx-auto">
+            {/* Skip Button */}
+            <button
+              onClick={() => handleButtonAction('left')}
+              className={`relative w-16 h-16 bg-white rounded-full shadow-lg border-2 border-gray-200 flex items-center justify-center active:scale-90 transition-all duration-200 ${
+                swipeAnimation === 'left' ? 'scale-110 border-red-400 bg-red-50' : ''
+              }`}
+            >
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            
+            {/* Info indicator */}
+            <div className="text-center px-2">
+              <p className="text-xs text-gray-400">Swipe or tap</p>
+            </div>
+            
+            {/* Like Button */}
+            <button
+              onClick={() => handleButtonAction('right')}
+              className={`relative w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-all duration-200 ${
+                swipeAnimation === 'right' ? 'scale-110 shadow-xl shadow-pink-200' : ''
+              }`}
+            >
+              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* City Preference Modal */}
+        <CityPreferenceModal
+          isOpen={showCityModal}
+          onClose={() => setShowCityModal(false)}
+          onConfirm={handleCitySelection}
+          initialCities={selectedCities}
+        />
       </div>
-    </div>
+    </Layout>
   );
 };
 
