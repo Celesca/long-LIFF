@@ -10,6 +10,16 @@ import RoutingPage from "./components/RoutingPage.js";
 import CoinRewardsPage from "./components/CoinRewardsPage.js";
 import { api } from "./services/api";
 
+// Development mode - bypass LIFF authentication
+const DEV_MODE = true; // Set to false for production with real LINE LIFF
+
+// Mock user for development
+const MOCK_USER = {
+  userId: "dev_user_12345",
+  displayName: "Dev User",
+  pictureUrl: "https://via.placeholder.com/150/8B5CF6/FFFFFF?text=DEV",
+};
+
 // Create context for LIFF user data
 export const LiffContext = createContext<{
   isLoggedIn: boolean;
@@ -34,6 +44,35 @@ function App() {
   const [error, setError] = useState("");
 
   useEffect(() => {
+    // Development mode - bypass LIFF and use mock user
+    if (DEV_MODE) {
+      console.log("DEV MODE: Bypassing LIFF authentication");
+      setIsLiffReady(true);
+      setIsLoggedIn(true);
+      setUserId(MOCK_USER.userId);
+      setDisplayName(MOCK_USER.displayName);
+      setPictureUrl(MOCK_USER.pictureUrl);
+
+      // Store in localStorage
+      localStorage.setItem("liff_userId", MOCK_USER.userId);
+      localStorage.setItem("liff_displayName", MOCK_USER.displayName);
+      localStorage.setItem("liff_pictureUrl", MOCK_USER.pictureUrl);
+
+      // Register mock user with backend
+      api.createOrGetUser(
+        MOCK_USER.userId,
+        MOCK_USER.displayName,
+        MOCK_USER.pictureUrl
+      ).then(() => {
+        console.log("DEV MODE: Mock user registered with backend");
+      }).catch((err) => {
+        console.error("DEV MODE: Failed to register mock user:", err);
+      });
+
+      return;
+    }
+
+    // Production mode - use real LIFF
     // Initialize LIFF once when the app mounts.
     // Use Vite's import.meta.env at build time, and a window-level fallback for runtime overrides.
     const liffId =
