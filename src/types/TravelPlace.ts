@@ -9,6 +9,8 @@ export interface TravelPlace {
   rating?: number;
   distance?: string;
   tags: string[];
+  // Backend reference (database ID)
+  backendId?: number;
 }
 
 export interface VisitedPlace extends TravelPlace {

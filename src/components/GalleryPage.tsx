@@ -3,33 +3,94 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { TravelPlace } from '../types/TravelPlace';
 import PersonalityModal from './PersonalityModal';
 import CoinCounter from './CoinCounter';
-import { getUserStorageKey } from '../hooks/useLiff';
+import { getUserStorageKey, getUserId } from '../hooks/useLiff';
+import { api, type Place } from '../services/api';
+
+// Convert API Place to TravelPlace format
+const mapPlaceToTravelPlace = (place: Place): TravelPlace => ({
+  id: place.external_id,
+  name: place.name,
+  lat: place.latitude,
+  long: place.longitude,
+  image: place.image_url || '',
+  description: place.description,
+  country: place.country,
+  rating: place.rating,
+  distance: place.distance,
+  tags: place.tags || [],
+  backendId: place.id,
+});
 
 const GalleryPage: React.FC = () => {
   const [likedPlaces, setLikedPlaces] = useState<TravelPlace[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const userId = getUserId();
 
   useEffect(() => {
-    // Load user-specific liked places from localStorage
-    const storageKey = getUserStorageKey('likedPlaces');
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      setLikedPlaces(JSON.parse(saved));
-    }
-  }, []);
+    const fetchLikedPlaces = async () => {
+      if (!userId) {
+        // Fallback to localStorage
+        const storageKey = getUserStorageKey('likedPlaces');
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          setLikedPlaces(JSON.parse(saved));
+        }
+        setLoading(false);
+        return;
+      }
 
-  const clearGallery = () => {
+      try {
+        const response = await api.getLikedPlaces(userId);
+        const mappedPlaces = response.places.map(mapPlaceToTravelPlace);
+        setLikedPlaces(mappedPlaces);
+      } catch (err) {
+        console.error('Failed to fetch liked places from backend:', err);
+        // Fallback to localStorage
+        const storageKey = getUserStorageKey('likedPlaces');
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+          setLikedPlaces(JSON.parse(saved));
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLikedPlaces();
+  }, [userId]);
+
+  const clearGallery = async () => {
     setLikedPlaces([]);
     const storageKey = getUserStorageKey('likedPlaces');
     localStorage.removeItem(storageKey);
+    
+    // Also clear in backend
+    if (userId) {
+      try {
+        await api.clearLikedPlaces(userId);
+      } catch (err) {
+        console.error('Failed to clear liked places in backend:', err);
+      }
+    }
   };
 
-  const removePlace = (placeId: string) => {
+  const removePlace = async (placeId: string) => {
+    const placeToRemove = likedPlaces.find(p => p.id === placeId);
     const updated = likedPlaces.filter(place => place.id !== placeId);
     setLikedPlaces(updated);
     const storageKey = getUserStorageKey('likedPlaces');
     localStorage.setItem(storageKey, JSON.stringify(updated));
+    
+    // Also remove from backend
+    if (userId && placeToRemove?.backendId) {
+      try {
+        await api.removeLikedPlace(userId, placeToRemove.backendId);
+      } catch (err) {
+        console.error('Failed to remove liked place from backend:', err);
+      }
+    }
   };
 
   const handleTravelPlan = (personality: string, duration: string) => {
@@ -37,6 +98,17 @@ const GalleryPage: React.FC = () => {
       state: { personality, duration } 
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white flex flex-col items-center justify-center p-6">
+        <div className="text-center space-y-4">
+          <div className="w-16 h-16 mx-auto border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+          <h2 className="text-xl font-bold text-purple-800">Loading gallery...</h2>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white">

@@ -8,6 +8,7 @@ import TinderPage from "./components/TinderPage.js";
 import GalleryPage from "./components/GalleryPage.js";
 import RoutingPage from "./components/RoutingPage.js";
 import CoinRewardsPage from "./components/CoinRewardsPage.js";
+import { api } from "./services/api";
 
 // Create context for LIFF user data
 export const LiffContext = createContext<{
@@ -74,6 +75,17 @@ function App() {
               console.log("User logged in:", {
                 userId: profile.userId,
                 displayName: profile.displayName,
+              });
+
+              // Register user with backend
+              api.createOrGetUser(
+                profile.userId,
+                profile.displayName,
+                profile.pictureUrl
+              ).then(() => {
+                console.log("User registered with backend");
+              }).catch((err) => {
+                console.error("Failed to register user with backend:", err);
               });
             })
             .catch((err) => {
