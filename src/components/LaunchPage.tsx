@@ -95,7 +95,7 @@ const LaunchPage: React.FC = () => {
               </h2>
             </div>
           </div>
-          <p className="text-gray-600">Discover your next adventure today</p>
+          <p className="text-gray-600">มิติใหม่แห่งการท่องเที่ยวในไทย!</p>
         </div>
 
         {/* Quick Actions Grid */}
