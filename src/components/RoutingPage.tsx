@@ -191,7 +191,7 @@ const RoutingPage: React.FC = () => {
             trip_duration: duration || 'custom',
             location_filter: 'All'
           },
-          likedPlaces.map(p => p.id)
+          likedPlaces.map((p: TravelPlace) => p.id)
         );
 
         if (result && result.places) {
@@ -206,7 +206,7 @@ const RoutingPage: React.FC = () => {
             province: p.province,
             category: p.category,
             rating: 4.8 // Mock rating if missing
-          })).filter(p => p.lat !== 0 && p.long !== 0); // Filter out invalid coords
+          })).filter((p: TravelPlace) => p.lat !== 0 && p.long !== 0); // Filter out invalid coords
 
           setOptimizedRoute(mappedRoute);
 
