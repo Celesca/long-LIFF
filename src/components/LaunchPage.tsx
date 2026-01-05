@@ -5,32 +5,32 @@ import { useLiff } from '../hooks/useLiff';
 import { CoinSystem, type ActiveJourney } from '../utils/coinSystem';
 
 const featuredPlaces = [
-  { 
-    url: 'https://cms.dmpcdn.com/travel/2020/11/03/9d45da30-1dbc-11eb-9275-d9e61fe8653e_original.jpg', 
-    name: 'Wat Umong', 
+  {
+    url: 'https://cms.dmpcdn.com/travel/2020/11/03/9d45da30-1dbc-11eb-9275-d9e61fe8653e_original.jpg',
+    name: 'Wat Umong',
     city: 'Chiang Mai',
     category: 'Temple'
   },
-  { 
-    url: 'https://media.readthecloud.co/wp-content/uploads/2021/12/29133520/angkaew-11-750x500.jpg', 
-    name: 'Ang Kaew', 
+  {
+    url: 'https://media.readthecloud.co/wp-content/uploads/2021/12/29133520/angkaew-11-750x500.jpg',
+    name: 'Ang Kaew',
     city: 'Chiang Mai',
     category: 'Nature'
   },
-  { 
-    url: 'https://upload.wikimedia.org/wikipedia/commons/0/0f/Ho_Kum_Luang_%28I%29.jpg', 
-    name: 'Hor Kham Luang', 
+  {
+    url: 'https://upload.wikimedia.org/wikipedia/commons/0/0f/Ho_Kum_Luang_%28I%29.jpg',
+    name: 'Hor Kham Luang',
     city: 'Chiang Mai',
     category: 'Palace'
   },
-  { 
-    url: 'https://res.cloudinary.com/pillarshotels/image/upload/f_auto/web/cms/resources/attractions/on-03-1500x1000-w1800h1360.jpeg', 
-    name: 'One Nimman', 
+  {
+    url: 'https://res.cloudinary.com/pillarshotels/image/upload/f_auto/web/cms/resources/attractions/on-03-1500x1000-w1800h1360.jpeg',
+    name: 'One Nimman',
     city: 'Chiang Mai',
     category: 'Shopping'
   },
   {
-    url: 'https://images.squarespace-cdn.com/content/v1/5dcac1b7f7b75f56509c0a367/c96597eb-4afc-4346-b33c-1669a5281cd4/DSC00016.jpg',
+    url: 'https://images.squarespace-cdn.com/content/v1/5dcac1b37b75f56509c0a367/c96597eb-4afc-4346-b33c-1669a5281cd4/DSC00016.jpg',
     name: 'Ginger Farm',
     city: 'Chiang Mai',
     category: 'Farm'
@@ -121,7 +121,7 @@ const LaunchPage: React.FC = () => {
               {/* Decorative background */}
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
               <div className="absolute bottom-0 left-0 w-20 h-20 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
-              
+
               <div className="relative">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-2">
@@ -141,7 +141,7 @@ const LaunchPage: React.FC = () => {
 
                 {/* Progress bar */}
                 <div className="w-full bg-white/20 rounded-full h-2 mb-3">
-                  <div 
+                  <div
                     className="bg-white rounded-full h-2 transition-all duration-500"
                     style={{ width: `${journeyProgress.percentage}%` }}
                   />
@@ -172,16 +172,15 @@ const LaunchPage: React.FC = () => {
             <h3 className="text-lg font-bold text-gray-800">สถานที่แนะนำ</h3>
             <Link to="/tinder" className="text-sm text-purple-600 font-medium">ดูทั้งหมด →</Link>
           </div>
-          
+
           <div className="relative h-52 rounded-2xl overflow-hidden shadow-lg">
             {featuredPlaces.map((place, index) => (
               <div
                 key={index}
-                className={`absolute inset-0 transition-all duration-700 ${
-                  index === currentImageIndex 
-                    ? 'opacity-100 scale-100' 
+                className={`absolute inset-0 transition-all duration-700 ${index === currentImageIndex
+                    ? 'opacity-100 scale-100'
                     : 'opacity-0 scale-105'
-                }`}
+                  }`}
               >
                 <img
                   src={place.url}
@@ -198,18 +197,17 @@ const LaunchPage: React.FC = () => {
                 </div>
               </div>
             ))}
-            
+
             {/* Carousel Indicators */}
             <div className="absolute bottom-4 right-4 flex space-x-1.5">
               {featuredPlaces.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentImageIndex(index)}
-                  className={`h-1.5 rounded-full transition-all duration-300 ${
-                    index === currentImageIndex 
-                      ? 'w-6 bg-white' 
+                  className={`h-1.5 rounded-full transition-all duration-300 ${index === currentImageIndex
+                      ? 'w-6 bg-white'
                       : 'w-1.5 bg-white/50'
-                  }`}
+                    }`}
                 />
               ))}
             </div>
