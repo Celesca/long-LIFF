@@ -157,6 +157,20 @@ const TinderPage: React.FC = () => {
     );
   }
 
+  // Handle reset destinations
+  const handleResetDestinations = async () => {
+    try {
+      setLoading(true);
+      await mockApi.resetAllProgress(userId || 'anonymous');
+      // Refetch places to start fresh
+      await fetchPlaces(selectedCities);
+    } catch (err) {
+      console.error('Failed to reset destinations:', err);
+      setError('Could not reset destinations. Please try again.');
+      setLoading(false);
+    }
+  };
+
   // Finished state
   if (isFinished) {
     return (
@@ -200,6 +214,14 @@ const TinderPage: React.FC = () => {
               >
                 <span className="mr-2">📸</span>
                 View My Collection
+              </button>
+              
+              <button
+                onClick={handleResetDestinations}
+                className="flex items-center justify-center w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3.5 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
+              >
+                <span className="mr-2">🔄</span>
+                Reset & Swipe Again
               </button>
             </div>
           </div>
