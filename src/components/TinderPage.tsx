@@ -2,6 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import TinderCard from '../components/TinderCard';
 import CityPreferenceModal from '../components/CityPreferenceModal';
+import PlaceDetailModal from '../components/PlaceDetailModal';
 import Layout from './Layout';
 import { mockApi } from '../services/mockApi';
 import { getUserId, getUserStorageKey } from '../hooks/useLiff';
@@ -16,6 +17,7 @@ const TinderPage: React.FC = () => {
   const [showCityModal, setShowCityModal] = useState(false);
   const [selectedCities, setSelectedCities] = useState<string[]>([]);
   const [swipeAnimation, setSwipeAnimation] = useState<'left' | 'right' | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
 
   const userId = getUserId();
   const navigate = useNavigate();
@@ -180,17 +182,17 @@ const TinderPage: React.FC = () => {
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-purple-400 to-pink-500 rounded-3xl flex items-center justify-center shadow-lg animate-bounce-slow">
               <span className="text-4xl">🎉</span>
             </div>
-            
+
             <h2 className="text-2xl font-bold text-gray-800">
               คุณดูครบหมดแล้ว!
             </h2>
-            
+
             <p className="text-gray-600">
-              {selectedCities.length > 0 
-                ? `สำรวจสถานที่ใน${selectedCities.join(' & ')}ครบแล้ว!` 
+              {selectedCities.length > 0
+                ? `สำรวจสถานที่ใน${selectedCities.join(' & ')}ครบแล้ว!`
                 : 'สำรวจสถานที่ทั้งหมดครบแล้ว!'}
             </p>
-            
+
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
               <div className="flex items-center justify-center space-x-2">
                 <span className="text-3xl">❤️</span>
@@ -198,7 +200,7 @@ const TinderPage: React.FC = () => {
               </div>
               <div className="text-sm text-gray-500 mt-1">สถานที่ที่บันทึก</div>
             </div>
-            
+
             <div className="space-y-3 w-full">
               <button
                 onClick={() => setShowCityModal(true)}
@@ -207,7 +209,7 @@ const TinderPage: React.FC = () => {
                 <span className="mr-2">🌍</span>
                 สำรวจเมืองอื่น
               </button>
-              
+
               <button
                 onClick={() => navigate('/gallery')}
                 className="flex items-center justify-center w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3.5 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
@@ -215,7 +217,7 @@ const TinderPage: React.FC = () => {
                 <span className="mr-2">📸</span>
                 ดูที่บันทึกของฉัน
               </button>
-              
+
               <button
                 onClick={handleResetDestinations}
                 className="flex items-center justify-center w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3.5 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
@@ -242,7 +244,7 @@ const TinderPage: React.FC = () => {
       <div className="min-h-screen flex flex-col pb-24">
         {/* Compact Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-white/80 backdrop-blur-lg border-b border-gray-100 sticky top-0 z-30">
-          <Link 
+          <Link
             to="/"
             className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 active:bg-gray-200 transition-colors"
           >
@@ -250,7 +252,7 @@ const TinderPage: React.FC = () => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </Link>
-          
+
           {/* City Filter Chip */}
           <button
             onClick={() => setShowCityModal(true)}
@@ -261,16 +263,16 @@ const TinderPage: React.FC = () => {
               {selectedCities.length === 0
                 ? 'ทุกเมือง'
                 : selectedCities.length === 1
-                ? selectedCities[0]
-                : `${selectedCities.length} เมือง`}
+                  ? selectedCities[0]
+                  : `${selectedCities.length} เมือง`}
             </span>
             <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          
+
           {/* Gallery Link with Badge */}
-          <Link 
+          <Link
             to="/gallery"
             className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 active:bg-gray-200 transition-colors"
           >
@@ -289,7 +291,7 @@ const TinderPage: React.FC = () => {
         <div className="px-4 py-3 bg-white/50">
           <div className="flex items-center space-x-3">
             <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(((currentIndex + 1) / places.length) * 100, 100)}%` }}
               />
@@ -316,35 +318,43 @@ const TinderPage: React.FC = () => {
 
         {/* Action Buttons - Fixed at Bottom */}
         <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-area-bottom">
-          <div className="flex items-center justify-center space-x-6 py-4 px-6 max-w-lg mx-auto">
+          <div className="flex items-center justify-center space-x-4 py-4 px-6 max-w-lg mx-auto">
             {/* Skip Button */}
             <button
               onClick={() => handleButtonAction('left')}
-              className={`relative w-16 h-16 bg-white rounded-full shadow-lg border-2 border-gray-200 flex items-center justify-center active:scale-90 transition-all duration-200 ${
-                swipeAnimation === 'left' ? 'scale-110 border-red-400 bg-red-50' : ''
-              }`}
+              className={`relative w-14 h-14 bg-white rounded-full shadow-lg border-2 border-gray-200 flex items-center justify-center active:scale-90 transition-all duration-200 ${swipeAnimation === 'left' ? 'scale-110 border-red-400 bg-red-50' : ''
+                }`}
             >
-              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            
-            {/* Info indicator */}
-            <div className="text-center px-2">
-              <p className="text-xs text-gray-400">ปัดหรือแตะ</p>
-            </div>
-            
+
+            {/* More Info Button */}
+            <button
+              onClick={() => setShowDetailModal(true)}
+              className="relative w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-all duration-200"
+            >
+              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+
             {/* Like Button */}
             <button
               onClick={() => handleButtonAction('right')}
-              className={`relative w-16 h-16 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-all duration-200 ${
-                swipeAnimation === 'right' ? 'scale-110 shadow-xl shadow-pink-200' : ''
-              }`}
+              className={`relative w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 rounded-full shadow-lg flex items-center justify-center active:scale-90 transition-all duration-200 ${swipeAnimation === 'right' ? 'scale-110 shadow-xl shadow-pink-200' : ''
+                }`}
             >
-              <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+              <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
             </button>
+          </div>
+
+          {/* Helper text */}
+          <div className="text-center pb-3 -mt-2">
+            <p className="text-xs text-gray-400">ปัดซ้าย ❌ | ℹ️ ข้อมูล | ปัดขวา ❤️</p>
           </div>
         </div>
 
@@ -354,6 +364,13 @@ const TinderPage: React.FC = () => {
           onClose={() => setShowCityModal(false)}
           onConfirm={handleCitySelection}
           initialCities={selectedCities}
+        />
+
+        {/* Place Detail Modal */}
+        <PlaceDetailModal
+          place={remainingPlaces[0] || null}
+          isOpen={showDetailModal}
+          onClose={() => setShowDetailModal(false)}
         />
       </div>
     </Layout>

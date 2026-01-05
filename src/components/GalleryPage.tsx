@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import type { TravelPlace } from '../types/TravelPlace';
 import PersonalityModal from './PersonalityModal';
+import PlaceDetailModal from './PlaceDetailModal';
 import Layout from './Layout';
 import { getUserStorageKey, getUserId } from '../hooks/useLiff';
 import { mockApi } from '../services/mockApi';
@@ -10,6 +11,8 @@ const GalleryPage: React.FC = () => {
   const [likedPlaces, setLikedPlaces] = useState<TravelPlace[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [loading, setLoading] = useState(true);
+  const [selectedPlace, setSelectedPlace] = useState<TravelPlace | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
   const navigate = useNavigate();
   const userId = getUserId();
 
@@ -36,7 +39,7 @@ const GalleryPage: React.FC = () => {
 
   const clearGallery = async () => {
     setLikedPlaces([]);
-    
+
     try {
       // Clear both liked places AND swipes so user can explore again
       await mockApi.resetAllProgress(userId || 'anonymous');
@@ -48,7 +51,7 @@ const GalleryPage: React.FC = () => {
   const removePlace = async (placeId: string) => {
     const updated = likedPlaces.filter(place => place.id !== placeId);
     setLikedPlaces(updated);
-    
+
     try {
       await mockApi.removeLikedPlace(userId || 'anonymous', placeId);
     } catch (err) {
@@ -57,8 +60,8 @@ const GalleryPage: React.FC = () => {
   };
 
   const handleTravelPlan = (personality: string, duration: string, city: string) => {
-    navigate('/routing', { 
-      state: { personality, duration, city } 
+    navigate('/routing', {
+      state: { personality, duration, city }
     });
   };
 
@@ -76,9 +79,9 @@ const GalleryPage: React.FC = () => {
   }
 
   return (
-    <Layout 
-      showHeader 
-      headerTitle="ที่บันทึก" 
+    <Layout
+      showHeader
+      headerTitle="ที่บันทึก"
       showCoinCounter
       rightAction={
         likedPlaces.length > 0 ? (
@@ -97,18 +100,18 @@ const GalleryPage: React.FC = () => {
           <div className="text-center py-16">
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-pink-100 to-purple-100 rounded-3xl flex items-center justify-center mb-6">
               <svg className="w-12 h-12 text-purple-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
               </svg>
             </div>
-            
+
             <h2 className="text-xl font-bold text-gray-800 mb-3">
               ยังไม่มีสถานที่ที่บันทึก
             </h2>
-            
+
             <p className="text-gray-500 mb-6 max-w-xs mx-auto">
               เริ่มสำรวจเพื่อสร้างคอลเลคชันการท่องเที่ยวในฝันของคุณ!
             </p>
-            
+
             <Link
               to="/tinder"
               className="inline-flex items-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
@@ -135,9 +138,10 @@ const GalleryPage: React.FC = () => {
             {/* Gallery grid */}
             <div className="space-y-4">
               {likedPlaces.map((place) => (
-                <div 
+                <div
                   key={place.id}
-                  className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 active:shadow-md transition-shadow"
+                  className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100 active:shadow-md transition-shadow cursor-pointer"
+                  onClick={() => { setSelectedPlace(place); setShowDetailModal(true); }}
                 >
                   <div className="relative">
                     <img
@@ -145,7 +149,7 @@ const GalleryPage: React.FC = () => {
                       alt={place.name}
                       className="w-full h-40 object-cover"
                     />
-                    
+
                     {/* Remove button */}
                     <button
                       onClick={() => removePlace(place.id)}
@@ -164,7 +168,7 @@ const GalleryPage: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="text-lg font-bold text-gray-800 flex-1 mr-2">
@@ -176,11 +180,11 @@ const GalleryPage: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    
+
                     <p className="text-gray-500 text-sm line-clamp-2 mb-3">
                       {place.description}
                     </p>
-                    
+
                     {/* Tags */}
                     {place.tags && place.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1 mb-3">
@@ -191,7 +195,7 @@ const GalleryPage: React.FC = () => {
                         ))}
                       </div>
                     )}
-                    
+
                     {/* Actions */}
                     <button
                       onClick={() => {
@@ -234,6 +238,13 @@ const GalleryPage: React.FC = () => {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onConfirm={handleTravelPlan}
+      />
+
+      {/* Place Detail Modal */}
+      <PlaceDetailModal
+        place={selectedPlace}
+        isOpen={showDetailModal}
+        onClose={() => setShowDetailModal(false)}
       />
     </Layout>
   );
