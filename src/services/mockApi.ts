@@ -186,6 +186,20 @@ export const mockApi = {
     localStorage.setItem(likedKey, JSON.stringify([]));
   },
 
+  async clearSwipes(userId: string): Promise<void> {
+    await delay();
+    const swipesKey = getUserStorageKey(STORAGE_KEYS.SWIPES);
+    localStorage.setItem(swipesKey, JSON.stringify([]));
+  },
+
+  async resetAllProgress(userId: string): Promise<void> {
+    await delay();
+    const likedKey = getUserStorageKey(STORAGE_KEYS.LIKED_PLACES);
+    const swipesKey = getUserStorageKey(STORAGE_KEYS.SWIPES);
+    localStorage.setItem(likedKey, JSON.stringify([]));
+    localStorage.setItem(swipesKey, JSON.stringify([]));
+  },
+
   // ============ Preferences ============
   
   async getPreferences(userId: string): Promise<UserPreference> {
