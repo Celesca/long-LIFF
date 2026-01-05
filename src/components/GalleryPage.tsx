@@ -38,7 +38,8 @@ const GalleryPage: React.FC = () => {
     setLikedPlaces([]);
     
     try {
-      await mockApi.clearLikedPlaces(userId || 'anonymous');
+      // Clear both liked places AND swipes so user can explore again
+      await mockApi.resetAllProgress(userId || 'anonymous');
     } catch (err) {
       console.error('Failed to clear liked places:', err);
     }
