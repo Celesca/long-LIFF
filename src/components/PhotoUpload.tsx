@@ -54,12 +54,12 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="text-lg font-bold text-purple-800">
-            📸 Upload Photos to Mark as Visited
+            📸 อัปโหลดภาพเพื่อทำเครื่องหมายว่าเยี่ยมแล้ว
           </h3>
           <p className="text-sm text-purple-600">{placeName}</p>
         </div>
         <div className="text-sm text-gray-500">
-          {uploadedPhotos.length}/{maxPhotos} photos
+          {uploadedPhotos.length}/{maxPhotos} ภาพ
         </div>
       </div>
 
@@ -95,7 +95,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
                 <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                 </svg>
-                <span className="text-xs">Add Photo</span>
+                <span className="text-xs">เพิ่มรูป</span>
               </>
             )}
           </button>
@@ -109,12 +109,12 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
           </svg>
           <div>
-            <p className="font-medium text-purple-800 mb-1">Photo Upload Requirements:</p>
+            <p className="font-medium text-purple-800 mb-1">ข้อกำหนดการอัปโหลดภาพ:</p>
             <ul className="text-xs space-y-1">
-              <li>• Upload at least 1 photo to mark this place as visited</li>
-              <li>• Earn +10 coins per photo uploaded</li>
-              <li>• Max {maxPhotos} photos per location</li>
-              <li>• Share your travel memories!</li>
+              <li>• อัปโหลดอย่างน้อย 1 ภาพเพื่อทำเครื่องหมายว่าเยี่ยมสถานที่นี้แล้ว</li>
+              <li>• รับ +10 เหรียญต่อภาพที่อัปโหลด</li>
+              <li>• สูงสุด {maxPhotos} ภาพต่อสถานที่</li>
+              <li>• แบ่งปันความทรงจำการเดินทางของคุณ!</li>
             </ul>
           </div>
         </div>

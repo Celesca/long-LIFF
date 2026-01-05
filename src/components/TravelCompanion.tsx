@@ -143,7 +143,7 @@ const TravelCompanion: React.FC = () => {
   };
 
   const handleEndJourney = () => {
-    if (confirm('Are you sure you want to end this journey? Your progress will be saved.')) {
+    if (confirm('คุณแน่ใจหรือว่าต้องการจบการเดินทางนี้? ความคืบหน้าของคุณจะถูกบันทึก')) {
       CoinSystem.endActiveJourney();
       navigate('/');
     }
@@ -216,7 +216,7 @@ const TravelCompanion: React.FC = () => {
             
             <div className="text-center flex-1 mx-3">
               <h1 className="font-bold text-gray-800 text-sm">
-                {journey.city === 'all' ? 'Multi-City Trip' : journey.city}
+                {journey.city === 'all' ? 'ทริปหลายเมือง' : journey.city}
               </h1>
               <p className="text-xs text-gray-500">{journey.duration}</p>
             </div>
@@ -227,7 +227,7 @@ const TravelCompanion: React.FC = () => {
           {/* Progress Bar */}
           <div className="mt-3">
             <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
-              <span>{progress.visited} of {progress.total} places</span>
+              <span>{progress.visited} จาก {progress.total} สถานที่</span>
               <span>{progress.percentage}%</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
@@ -249,7 +249,7 @@ const TravelCompanion: React.FC = () => {
                 : 'text-gray-500'
             }`}
           >
-            📍 Places
+            📍 สถานที่
           </button>
           <button
             onClick={() => setActiveTab('map')}
@@ -259,7 +259,7 @@ const TravelCompanion: React.FC = () => {
                 : 'text-gray-500'
             }`}
           >
-            🗺️ Map
+            🗺️ แผนที่
           </button>
         </div>
       </div>
@@ -287,7 +287,7 @@ const TravelCompanion: React.FC = () => {
                         ? 'bg-emerald-500 text-white' 
                         : 'bg-purple-500 text-white'
                     }`}>
-                      {currentPlace.visited ? '✓ Visited' : `Stop ${currentIndex + 1}`}
+                      {currentPlace.visited ? '✓ เยี่ยมแล้ว' : `จุดที่ ${currentIndex + 1}`}
                     </div>
 
                     {/* Place Info Overlay */}
@@ -314,12 +314,12 @@ const TravelCompanion: React.FC = () => {
                           className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-98 transition-transform flex items-center justify-center space-x-2"
                         >
                           <span className="text-2xl">📸</span>
-                          <span>Check In with Photo</span>
+                          <span>เช็คอินด้วยภาพถ่าย</span>
                         </button>
                       ) : (
                         <div className="w-full bg-emerald-50 text-emerald-700 py-4 rounded-xl font-bold text-center flex items-center justify-center space-x-2">
                           <span>✅</span>
-                          <span>You earned {currentPlace.coinsEarned} coins!</span>
+                          <span>คุณได้รับ {currentPlace.coinsEarned} เหรียญ!</span>
                         </div>
                       )}
 
@@ -330,7 +330,7 @@ const TravelCompanion: React.FC = () => {
                         className="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold flex items-center justify-center space-x-2"
                       >
                         <span>🧭</span>
-                        <span>Navigate with Google Maps</span>
+                        <span>นำทางด้วย Google Maps</span>
                       </button>
                     </div>
                   </div>
@@ -340,7 +340,7 @@ const TravelCompanion: React.FC = () => {
 
             {/* Horizontal Place Carousel */}
             <div className="flex-1 bg-gray-50 pt-2 pb-4">
-              <p className="px-4 text-sm font-semibold text-gray-700 mb-2">All Destinations</p>
+              <p className="px-4 text-sm font-semibold text-gray-700 mb-2">จุดหมายปลายทางทั้งหมด</p>
               <div 
                 ref={carouselRef}
                 className="flex overflow-x-auto gap-4 px-4 pb-4 snap-x snap-mandatory scrollbar-hide"
@@ -407,9 +407,9 @@ const TravelCompanion: React.FC = () => {
                   <Popup>
                     <div className="text-center p-2">
                       <p className="font-bold text-purple-800">{place.name}</p>
-                      <p className="text-xs text-gray-500">Stop {index + 1}</p>
+                      <p className="text-xs text-gray-500">จุดที่ {index + 1}</p>
                       {place.visited && (
-                        <p className="text-xs text-emerald-600 mt-1">✓ Visited</p>
+                        <p className="text-xs text-emerald-600 mt-1">✓ เยี่ยมแล้ว</p>
                       )}
                     </div>
                   </Popup>
@@ -438,18 +438,18 @@ const TravelCompanion: React.FC = () => {
                 />
                 <div className="flex-1 min-w-0">
                   <p className="font-bold text-gray-800 truncate">{currentPlace?.name}</p>
-                  <p className="text-sm text-gray-500">Stop {currentIndex + 1} of {journey.places.length}</p>
+                  <p className="text-sm text-gray-500">จุดที่ {currentIndex + 1} จาก {journey.places.length}</p>
                 </div>
                 {!currentPlace?.visited ? (
                   <button
                     onClick={() => currentPlace && openPhotoUpload(currentPlace)}
                     className="bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex-shrink-0"
                   >
-                    📸 Check In
+                    📸 เช็คอิน
                   </button>
                 ) : (
                   <div className="bg-emerald-100 text-emerald-700 px-3 py-2 rounded-lg text-sm font-medium flex-shrink-0">
-                    ✓ Done
+                    ✓ เสร็จแล้ว
                   </div>
                 )}
               </div>
@@ -468,14 +468,14 @@ const TravelCompanion: React.FC = () => {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          <span className="font-medium">Prev</span>
+          <span className="font-medium">ก่อนหน้า</span>
         </button>
 
         <button
           onClick={handleEndJourney}
           className="text-red-500 font-medium text-sm px-3 py-2"
         >
-          End Trip
+          จบทริป
         </button>
 
         <button
@@ -483,7 +483,7 @@ const TravelCompanion: React.FC = () => {
           onClick={() => handlePlaceSelect(currentIndex + 1)}
           className="flex items-center space-x-1 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed bg-purple-100 text-purple-700 active:bg-purple-200"
         >
-          <span className="font-medium">Next</span>
+          <span className="font-medium">ถัดไป</span>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
@@ -495,7 +495,7 @@ const TravelCompanion: React.FC = () => {
         <div className="fixed inset-0 z-[9999] bg-black/50 flex items-end sm:items-center justify-center">
           <div className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-3xl max-h-[90vh] overflow-y-auto animate-slide-up">
             <div className="sticky top-0 bg-white p-4 border-b flex items-center justify-between">
-              <h3 className="font-bold text-lg">Check In at {selectedPlace.name}</h3>
+              <h3 className="font-bold text-lg">เช็คอินที่ {selectedPlace.name}</h3>
               <button
                 onClick={() => setShowPhotoModal(false)}
                 className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
@@ -506,7 +506,7 @@ const TravelCompanion: React.FC = () => {
 
             <div className="p-4">
               <p className="text-gray-600 mb-4">
-                Take or upload a photo to prove you visited this place and earn coins!
+                ถ่ายหรืออัปโหลดภาพเพื่อยืนยันว่าคุณมาเยี่ยมสถานที่นี้แล้วและรับเหรียญ!
               </p>
 
               {/* Photo Preview Grid */}
@@ -538,7 +538,7 @@ const TravelCompanion: React.FC = () => {
                     ) : (
                       <>
                         <span className="text-2xl">📷</span>
-                        <span className="text-xs mt-1">Add Photo</span>
+                        <span className="text-xs mt-1">เพิ่มรูป</span>
                       </>
                     )}
                   </button>
@@ -559,8 +559,8 @@ const TravelCompanion: React.FC = () => {
               <div className="bg-amber-50 rounded-xl p-3 mb-4 flex items-center space-x-3">
                 <span className="text-2xl">🪙</span>
                 <div>
-                  <p className="font-semibold text-amber-800">Earn {uploadedPhotos.length * 10} coins!</p>
-                  <p className="text-xs text-amber-600">10 coins per photo uploaded</p>
+                  <p className="font-semibold text-amber-800">รับ {uploadedPhotos.length * 10} เหรียญ!</p>
+                  <p className="text-xs text-amber-600">10 เหรียญต่อภาพที่อัปโหลด</p>
                 </div>
               </div>
 
@@ -571,13 +571,13 @@ const TravelCompanion: React.FC = () => {
                   disabled={uploadedPhotos.length === 0}
                   className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Confirm Visit & Earn Coins
+                  ยืนยันการเยี่ยมชม & รับเหรียญ
                 </button>
                 <button
                   onClick={() => setShowPhotoModal(false)}
                   className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-medium"
                 >
-                  Cancel
+                  ยกเลิก
                 </button>
               </div>
             </div>
@@ -630,15 +630,15 @@ const TravelCompanion: React.FC = () => {
             <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 p-6 text-center">
               <div className="text-6xl mb-2">🎉</div>
               <h2 className="text-2xl font-bold text-white drop-shadow-lg">
-                Congratulations!
+                ยินดีด้วย!
               </h2>
-              <p className="text-white/90 mt-1">You completed your journey!</p>
+              <p className="text-white/90 mt-1">คุณทำทริปเสร็จสมบูรณ์แล้ว!</p>
             </div>
 
             {/* Trip Summary */}
             <div className="p-6 space-y-4">
               <div className="text-center mb-4">
-                <p className="text-gray-600 text-sm">Your Trip to</p>
+                <p className="text-gray-600 text-sm">ทริปของคุณไป</p>
                 <h3 className="text-xl font-bold text-purple-600">{journey?.city}</h3>
               </div>
 
@@ -647,17 +647,17 @@ const TravelCompanion: React.FC = () => {
                 <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 text-center">
                   <div className="text-3xl mb-1">📍</div>
                   <div className="text-2xl font-bold text-purple-600">{tripSummary.placesVisited}</div>
-                  <div className="text-xs text-gray-500">Places Visited</div>
+                  <div className="text-xs text-gray-500">สถานที่ที่เยี่ยม</div>
                 </div>
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 text-center">
                   <div className="text-3xl mb-1">📸</div>
                   <div className="text-2xl font-bold text-blue-600">{tripSummary.totalPhotos}</div>
-                  <div className="text-xs text-gray-500">Photos Taken</div>
+                  <div className="text-xs text-gray-500">ภาพถ่าย</div>
                 </div>
                 <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4 text-center">
                   <div className="text-3xl mb-1">🪙</div>
                   <div className="text-2xl font-bold text-amber-600">{tripSummary.totalCoins}</div>
-                  <div className="text-xs text-gray-500">Coins Earned</div>
+                  <div className="text-xs text-gray-500">เหรียญที่ได้รับ</div>
                 </div>
               </div>
 
@@ -665,8 +665,8 @@ const TravelCompanion: React.FC = () => {
               <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-4 flex items-center space-x-3">
                 <span className="text-3xl">🏆</span>
                 <div>
-                  <p className="font-semibold text-emerald-700">Journey Completion Bonus!</p>
-                  <p className="text-sm text-emerald-600">+100 bonus coins added</p>
+                  <p className="font-semibold text-emerald-700">โบนัสทริปสำเร็จ!</p>
+                  <p className="text-sm text-emerald-600">+100 โบนัสเหรียญเพิ่มเติมแล้ว</p>
                 </div>
               </div>
 
@@ -675,7 +675,7 @@ const TravelCompanion: React.FC = () => {
                 onClick={handleFinishTrip}
                 className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
               >
-                🏠 Back to Home
+                🏠 กลับหน้าแรก
               </button>
             </div>
           </div>

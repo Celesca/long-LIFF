@@ -14,7 +14,7 @@ const HistoryPage: React.FC = () => {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
+    return date.toLocaleDateString('th-TH', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -31,7 +31,7 @@ const HistoryPage: React.FC = () => {
   };
 
   const clearHistory = () => {
-    if (confirm('Are you sure you want to clear all trip history?')) {
+    if (confirm('คุณแน่ใจหรือว่าต้องการล้างประวัติทริปทั้งหมด?')) {
       CoinSystem.clearJourneyHistory();
       setJourneyHistory([]);
     }
@@ -43,15 +43,15 @@ const HistoryPage: React.FC = () => {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-800">Trip History</h1>
-            <p className="text-gray-500 text-sm">Your past adventures</p>
+            <h1 className="text-2xl font-bold text-gray-800">ประวัติทริป</h1>
+            <p className="text-gray-500 text-sm">การเดินทางที่ผ่านมาของคุณ</p>
           </div>
           {journeyHistory.length > 0 && (
             <button
               onClick={clearHistory}
               className="text-red-500 text-sm font-medium hover:text-red-600"
             >
-              Clear All
+              ล้างทั้งหมด
             </button>
           )}
         </div>
@@ -62,13 +62,13 @@ const HistoryPage: React.FC = () => {
             <div className="w-24 h-24 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-4">
               <span className="text-5xl">🗺️</span>
             </div>
-            <h2 className="text-xl font-bold text-gray-700 mb-2">No trips yet</h2>
-            <p className="text-gray-500 mb-6">Start your first adventure and it will appear here!</p>
+            <h2 className="text-xl font-bold text-gray-700 mb-2">ยังไม่มีทริป</h2>
+            <p className="text-gray-500 mb-6">เริ่มการเดินทางครั้งแรกแล้วจะแสดงที่นี่!</p>
             <Link
               to="/tinder"
               className="inline-flex items-center px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition"
             >
-              Explore Places
+              สำรวจสถานที่
               <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
@@ -92,7 +92,7 @@ const HistoryPage: React.FC = () => {
                           {journey.city === 'Bangkok' ? '🏙️' : journey.city === 'Chiang Mai' ? '🌄' : journey.city === 'Phuket' ? '🏖️' : '🗺️'}
                         </span>
                         <h3 className="font-bold text-gray-800">
-                          {journey.city === 'all' ? 'Multi-City Trip' : journey.city}
+                          {journey.city === 'all' ? 'ทริปหลายเมือง' : journey.city}
                         </h3>
                       </div>
                       <p className="text-sm text-gray-500">{journey.duration}</p>
@@ -103,7 +103,7 @@ const HistoryPage: React.FC = () => {
                       </p>
                       {stats.visited === journey.places.length && (
                         <span className="inline-block mt-1 px-2 py-0.5 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                          Completed ✓
+                          สำเร็จแล้ว ✓
                         </span>
                       )}
                     </div>
@@ -113,15 +113,15 @@ const HistoryPage: React.FC = () => {
                   <div className="flex items-center space-x-4 text-sm">
                     <div className="flex items-center space-x-1 text-purple-600">
                       <span>📍</span>
-                      <span>{stats.visited}/{journey.places.length} places</span>
+                      <span>{stats.visited}/{journey.places.length} สถานที่</span>
                     </div>
                     <div className="flex items-center space-x-1 text-amber-600">
                       <span>🪙</span>
-                      <span>{stats.totalCoins} coins</span>
+                      <span>{stats.totalCoins} เหรียญ</span>
                     </div>
                     <div className="flex items-center space-x-1 text-blue-600">
                       <span>📸</span>
-                      <span>{stats.totalPhotos} photos</span>
+                      <span>{stats.totalPhotos} รูป</span>
                     </div>
                   </div>
 
@@ -161,7 +161,7 @@ const HistoryPage: React.FC = () => {
               <div className="sticky top-0 bg-white px-5 py-4 border-b flex items-center justify-between">
                 <div>
                   <h2 className="font-bold text-lg text-gray-800">
-                    {selectedJourney.city === 'all' ? 'Multi-City Trip' : selectedJourney.city}
+                    {selectedJourney.city === 'all' ? 'ทริปหลายเมือง' : selectedJourney.city}
                   </h2>
                   <p className="text-sm text-gray-500">{formatDate(selectedJourney.startDate)}</p>
                 </div>
@@ -181,24 +181,24 @@ const HistoryPage: React.FC = () => {
                     <p className="text-2xl font-bold text-purple-600">
                       {selectedJourney.places.filter(p => p.visited).length}
                     </p>
-                    <p className="text-xs text-gray-500">Places Visited</p>
+                    <p className="text-xs text-gray-500">สถานที่เยี่ยมชม</p>
                   </div>
                   <div className="bg-amber-50 rounded-xl p-3 text-center">
                     <p className="text-2xl font-bold text-amber-600">
                       {selectedJourney.places.reduce((sum, p) => sum + (p.coinsEarned || 0), 0)}
                     </p>
-                    <p className="text-xs text-gray-500">Coins Earned</p>
+                    <p className="text-xs text-gray-500">เหรียญที่ได้</p>
                   </div>
                   <div className="bg-blue-50 rounded-xl p-3 text-center">
                     <p className="text-2xl font-bold text-blue-600">
                       {selectedJourney.places.reduce((sum, p) => sum + (p.userPhotos?.length || 0), 0)}
                     </p>
-                    <p className="text-xs text-gray-500">Photos</p>
+                    <p className="text-xs text-gray-500">รูปถ่าย</p>
                   </div>
                 </div>
 
                 {/* Places List */}
-                <h3 className="font-semibold text-gray-700 mb-3">Visited Places</h3>
+                <h3 className="font-semibold text-gray-700 mb-3">สถานที่ที่เยี่ยมชม</h3>
                 <div className="space-y-3">
                   {selectedJourney.places.map((place, index) => (
                     <div 
@@ -246,7 +246,7 @@ const HistoryPage: React.FC = () => {
                   onClick={() => setSelectedJourney(null)}
                   className="w-full bg-purple-600 text-white py-3 rounded-xl font-semibold"
                 >
-                  Close
+                  ปิด
                 </button>
               </div>
             </div>
