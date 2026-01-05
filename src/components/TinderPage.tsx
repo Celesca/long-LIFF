@@ -124,8 +124,8 @@ const TinderPage: React.FC = () => {
                 <span className="text-2xl">🗺️</span>
               </div>
             </div>
-            <h2 className="text-xl font-bold text-gray-800">Loading places...</h2>
-            <p className="text-gray-500">Finding amazing destinations for you</p>
+            <h2 className="text-xl font-bold text-gray-800">กำลังโหลด...</h2>
+            <p className="text-gray-500">กำลังค้นหาสถานที่ท่องเที่ยวสุดพิเศษสำหรับคุณ</p>
           </div>
         </div>
       </Layout>
@@ -135,20 +135,20 @@ const TinderPage: React.FC = () => {
   // Error state with retry
   if (error && places.length === 0) {
     return (
-      <Layout showHeader showBackButton headerTitle="Explore">
+      <Layout showHeader showBackButton headerTitle="สำรวจ">
         <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-4 max-w-md">
             <div className="w-20 h-20 mx-auto bg-red-100 rounded-2xl flex items-center justify-center">
               <span className="text-4xl">😕</span>
             </div>
-            <h2 className="text-xl font-bold text-gray-800">Something went wrong</h2>
+            <h2 className="text-xl font-bold text-gray-800">มีบางอย่างผิดพลาด</h2>
             <p className="text-gray-500">{error}</p>
             <div className="space-y-3 pt-4">
               <button
                 onClick={() => fetchPlaces(selectedCities)}
                 className="block w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
               >
-                Try Again
+                ลองใหม่
               </button>
             </div>
           </div>
@@ -174,7 +174,7 @@ const TinderPage: React.FC = () => {
   // Finished state
   if (isFinished) {
     return (
-      <Layout showHeader headerTitle="All Done!" showCoinCounter>
+      <Layout showHeader headerTitle="เสร็จสิ้น!" showCoinCounter>
         <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-6 max-w-md">
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-purple-400 to-pink-500 rounded-3xl flex items-center justify-center shadow-lg animate-bounce-slow">
@@ -182,13 +182,13 @@ const TinderPage: React.FC = () => {
             </div>
             
             <h2 className="text-2xl font-bold text-gray-800">
-              You've seen them all!
+              คุณดูครบหมดแล้ว!
             </h2>
             
             <p className="text-gray-600">
               {selectedCities.length > 0 
-                ? `All destinations in ${selectedCities.join(' & ')} explored!` 
-                : 'All available destinations explored!'}
+                ? `สำรวจสถานที่ใน${selectedCities.join(' & ')}ครบแล้ว!` 
+                : 'สำรวจสถานที่ทั้งหมดครบแล้ว!'}
             </p>
             
             <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
@@ -196,7 +196,7 @@ const TinderPage: React.FC = () => {
                 <span className="text-3xl">❤️</span>
                 <span className="text-3xl font-bold text-purple-600">{likedPlaces.length}</span>
               </div>
-              <div className="text-sm text-gray-500 mt-1">Places saved</div>
+              <div className="text-sm text-gray-500 mt-1">สถานที่ที่บันทึก</div>
             </div>
             
             <div className="space-y-3 w-full">
@@ -205,7 +205,7 @@ const TinderPage: React.FC = () => {
                 className="flex items-center justify-center w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-3.5 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
               >
                 <span className="mr-2">🌍</span>
-                Explore Other Cities
+                สำรวจเมืองอื่น
               </button>
               
               <button
@@ -213,7 +213,7 @@ const TinderPage: React.FC = () => {
                 className="flex items-center justify-center w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-3.5 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
               >
                 <span className="mr-2">📸</span>
-                View My Collection
+                ดูที่บันทึกของฉัน
               </button>
               
               <button
@@ -221,7 +221,7 @@ const TinderPage: React.FC = () => {
                 className="flex items-center justify-center w-full bg-gradient-to-r from-orange-500 to-red-500 text-white py-3.5 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
               >
                 <span className="mr-2">🔄</span>
-                Reset & Swipe Again
+                รีเซ็ต & ปัดใหม่
               </button>
             </div>
           </div>
@@ -259,10 +259,10 @@ const TinderPage: React.FC = () => {
             <span className="text-sm">📍</span>
             <span className="font-medium text-purple-700 text-sm">
               {selectedCities.length === 0
-                ? 'All Cities'
+                ? 'ทุกเมือง'
                 : selectedCities.length === 1
                 ? selectedCities[0]
-                : `${selectedCities.length} Cities`}
+                : `${selectedCities.length} เมือง`}
             </span>
             <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -331,7 +331,7 @@ const TinderPage: React.FC = () => {
             
             {/* Info indicator */}
             <div className="text-center px-2">
-              <p className="text-xs text-gray-400">Swipe or tap</p>
+              <p className="text-xs text-gray-400">ปัดหรือแตะ</p>
             </div>
             
             {/* Like Button */}

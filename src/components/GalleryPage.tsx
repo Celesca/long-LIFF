@@ -64,11 +64,11 @@ const GalleryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Layout showHeader headerTitle="My Collection" showCoinCounter>
+      <Layout showHeader headerTitle="ที่บันทึก" showCoinCounter>
         <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-4">
             <div className="w-16 h-16 mx-auto border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-            <h2 className="text-lg font-semibold text-gray-700">Loading your collection...</h2>
+            <h2 className="text-lg font-semibold text-gray-700">กำลังโหลดที่บันทึกของคุณ...</h2>
           </div>
         </div>
       </Layout>
@@ -78,7 +78,7 @@ const GalleryPage: React.FC = () => {
   return (
     <Layout 
       showHeader 
-      headerTitle="My Collection" 
+      headerTitle="ที่บันทึก" 
       showCoinCounter
       rightAction={
         likedPlaces.length > 0 ? (
@@ -86,7 +86,7 @@ const GalleryPage: React.FC = () => {
             onClick={() => setIsModalOpen(true)}
             className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1.5 rounded-full font-medium text-sm shadow-sm active:scale-95 transition-transform"
           >
-            Plan Trip
+            วางแผนทริป
           </button>
         ) : null
       }
@@ -102,11 +102,11 @@ const GalleryPage: React.FC = () => {
             </div>
             
             <h2 className="text-xl font-bold text-gray-800 mb-3">
-              No saved places yet
+              ยังไม่มีสถานที่ที่บันทึก
             </h2>
             
             <p className="text-gray-500 mb-6 max-w-xs mx-auto">
-              Start exploring to build your dream travel collection!
+              เริ่มสำรวจเพื่อสร้างคอลเลคชันการท่องเที่ยวในฝันของคุณ!
             </p>
             
             <Link
@@ -114,7 +114,7 @@ const GalleryPage: React.FC = () => {
               className="inline-flex items-center bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-3 px-6 rounded-xl font-semibold shadow-md active:scale-95 transition-all"
             >
               <span className="mr-2">🗺️</span>
-              Start Exploring
+              เริ่มสำรวจ
             </Link>
           </div>
         ) : (
@@ -122,13 +122,13 @@ const GalleryPage: React.FC = () => {
             {/* Stats bar */}
             <div className="flex items-center justify-between mb-4 pb-4 border-b border-gray-100">
               <p className="text-sm text-gray-500">
-                <span className="font-bold text-purple-600">{likedPlaces.length}</span> places saved
+                <span className="font-bold text-purple-600">{likedPlaces.length}</span> สถานที่ที่บันทึก
               </p>
               <button
                 onClick={clearGallery}
                 className="text-sm text-red-500 font-medium active:scale-95 transition-transform"
               >
-                Clear All
+                ล้างทั้งหมด
               </button>
             </div>
 
@@ -203,7 +203,7 @@ const GalleryPage: React.FC = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                       </svg>
-                      View on Map
+                      ดูบนแผนที่
                     </button>
                   </div>
                 </div>
@@ -214,14 +214,14 @@ const GalleryPage: React.FC = () => {
             <div className="mt-6 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl p-4 shadow-lg">
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="text-white font-bold">Ready to travel?</h4>
-                  <p className="text-white/80 text-sm">Create your trip itinerary</p>
+                  <h4 className="text-white font-bold">พร้อมเดินทางหรือยัง?</h4>
+                  <p className="text-white/80 text-sm">สร้างแผนการเดินทางของคุณ</p>
                 </div>
                 <button
                   onClick={() => setIsModalOpen(true)}
                   className="bg-white text-purple-600 px-4 py-2 rounded-xl font-semibold text-sm shadow-md active:scale-95 transition-transform"
                 >
-                  Plan Trip
+                  วางแผนทริป
                 </button>
               </div>
             </div>

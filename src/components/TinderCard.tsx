@@ -139,7 +139,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
             <div className="flex items-center mt-3 space-x-1">
               <span className="text-amber-400">⭐</span>
               <span className="font-semibold">{place.rating}</span>
-              <span className="text-white/60 text-sm">rating</span>
+              <span className="text-white/60 text-sm">คะแนน</span>
             </div>
           )}
         </div>

@@ -38,10 +38,10 @@ const featuredPlaces = [
 ];
 
 const quickActions = [
-  { icon: '🗺️', label: 'Explore', path: '/tinder', color: 'from-purple-500 to-indigo-600' },
-  { icon: '❤️', label: 'Saved', path: '/gallery', color: 'from-pink-500 to-rose-600' },
-  { icon: '🪙', label: 'Rewards', path: '/rewards', color: 'from-amber-400 to-orange-500' },
-  { icon: '📜', label: 'History', path: '/history', color: 'from-teal-400 to-cyan-600' },
+  { icon: '🗺️', label: 'สำรวจ', path: '/tinder', color: 'from-purple-500 to-indigo-600' },
+  { icon: '❤️', label: 'ที่บันทึก', path: '/gallery', color: 'from-pink-500 to-rose-600' },
+  { icon: '🪙', label: 'รางวัล', path: '/rewards', color: 'from-amber-400 to-orange-500' },
+  { icon: '📜', label: 'ประวัติ', path: '/history', color: 'from-teal-400 to-cyan-600' },
 ];
 
 const LaunchPage: React.FC = () => {
@@ -54,9 +54,9 @@ const LaunchPage: React.FC = () => {
 
   useEffect(() => {
     const hour = new Date().getHours();
-    if (hour < 12) setGreeting('Good morning');
-    else if (hour < 18) setGreeting('Good afternoon');
-    else setGreeting('Good evening');
+    if (hour < 12) setGreeting('สวัสดีตอนเช้า');
+    else if (hour < 18) setGreeting('สวัสดีตอนบ่าย');
+    else setGreeting('สวัสดีตอนเย็น');
   }, []);
 
   // Check for active journey
@@ -91,7 +91,7 @@ const LaunchPage: React.FC = () => {
             <div>
               <p className="text-gray-500 text-sm">{greeting}</p>
               <h2 className="text-xl font-bold text-gray-800">
-                {isLoggedIn ? displayName || 'Traveler' : 'Welcome'}! 👋
+                {isLoggedIn ? displayName || 'นักเดินทาง' : 'ยินดีต้อนรับ'}! 👋
               </h2>
             </div>
           </div>
@@ -129,12 +129,12 @@ const LaunchPage: React.FC = () => {
                       <span className="text-xl">🚶‍♂️</span>
                     </div>
                     <div>
-                      <p className="text-emerald-100 text-xs font-medium">ONGOING TRIP</p>
-                      <h3 className="text-white font-bold text-lg">{activeJourney.city === 'all' ? 'Multi-City' : activeJourney.city}</h3>
+                      <p className="text-emerald-100 text-xs font-medium">กำลังเดินทาง</p>
+                      <h3 className="text-white font-bold text-lg">{activeJourney.city === 'all' ? 'หลายเมือง' : activeJourney.city}</h3>
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-white/80 text-xs">Progress</p>
+                    <p className="text-white/80 text-xs">ความคืบหน้า</p>
                     <p className="text-white font-bold text-xl">{journeyProgress.percentage}%</p>
                   </div>
                 </div>
@@ -148,7 +148,7 @@ const LaunchPage: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-between text-white/90 text-sm mb-4">
-                  <span>📍 {journeyProgress.visited}/{journeyProgress.total} places visited</span>
+                  <span>📍 {journeyProgress.visited}/{journeyProgress.total} สถานที่เยี่ยมชมแล้ว</span>
                   <span>⏱️ {activeJourney.duration}</span>
                 </div>
 
@@ -156,7 +156,7 @@ const LaunchPage: React.FC = () => {
                   onClick={() => navigate('/travel-companion')}
                   className="w-full bg-white text-emerald-600 py-3 px-6 rounded-xl font-bold text-base shadow-md hover:shadow-lg transition-all duration-200 active:scale-98 flex items-center justify-center space-x-2"
                 >
-                  <span>Continue Your Journey</span>
+                  <span>เดินทางต่อ</span>
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -169,8 +169,8 @@ const LaunchPage: React.FC = () => {
         {/* Featured Carousel */}
         <div className="mb-6 animate-fade-in-delayed">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-lg font-bold text-gray-800">Featured Places</h3>
-            <Link to="/tinder" className="text-sm text-purple-600 font-medium">See all →</Link>
+            <h3 className="text-lg font-bold text-gray-800">สถานที่แนะนำ</h3>
+            <Link to="/tinder" className="text-sm text-purple-600 font-medium">ดูทั้งหมด →</Link>
           </div>
           
           <div className="relative h-52 rounded-2xl overflow-hidden shadow-lg">
@@ -220,13 +220,13 @@ const LaunchPage: React.FC = () => {
         <div className="bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl p-5 mb-6 shadow-lg animate-slide-up" style={{ animationDelay: '0.2s' }}>
           <div className="flex items-center justify-between">
             <div className="flex-1 mr-4">
-              <h3 className="text-white font-bold text-lg mb-1">Ready to explore?</h3>
-              <p className="text-white/80 text-sm mb-3">Swipe through amazing destinations</p>
+              <h3 className="text-white font-bold text-lg mb-1">พร้อมเที่ยวหรือยัง?</h3>
+              <p className="text-white/80 text-sm mb-3">ปัดดูสถานที่ท่องเที่ยวสุดพิเศษ</p>
               <Link
                 to="/tinder"
                 className="inline-flex items-center px-4 py-2 bg-white text-purple-600 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
               >
-                Start Swiping
+                เริ่มปัดดูเลย
                 <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
@@ -238,13 +238,13 @@ const LaunchPage: React.FC = () => {
 
         {/* How it Works */}
         <div className="mb-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
-          <h3 className="text-lg font-bold text-gray-800 mb-4">How it works</h3>
+          <h3 className="text-lg font-bold text-gray-800 mb-4">วิธีใช้งาน</h3>
           <div className="space-y-3">
             {[
-              { step: 1, title: 'Swipe right', desc: 'to save places you love', icon: '👉', color: 'bg-green-100 text-green-600' },
-              { step: 2, title: 'Build your list', desc: 'of favorite destinations', icon: '📋', color: 'bg-purple-100 text-purple-600' },
-              { step: 3, title: 'Earn coins', desc: 'as you discover places', icon: '🪙', color: 'bg-amber-100 text-amber-600' },
-              { step: 4, title: 'Redeem rewards', desc: 'for exclusive discounts', icon: '🎁', color: 'bg-pink-100 text-pink-600' },
+              { step: 1, title: 'ปัดขวา', desc: 'เพื่อบันทึกสถานที่ที่คุณชอบ', icon: '👉', color: 'bg-green-100 text-green-600' },
+              { step: 2, title: 'สร้างลิสต์', desc: 'ของสถานที่ที่คุณชอบ', icon: '📋', color: 'bg-purple-100 text-purple-600' },
+              { step: 3, title: 'สะสมเหรียญ', desc: 'รับเหรียญขณะค้นพบสถานที่', icon: '🪙', color: 'bg-amber-100 text-amber-600' },
+              { step: 4, title: 'แลกรางวัล', desc: 'รับส่วนลดพิเศษ', icon: '🎁', color: 'bg-pink-100 text-pink-600' },
             ].map((item) => (
               <div key={item.step} className="flex items-center p-3 bg-white rounded-xl shadow-sm">
                 <div className={`w-10 h-10 ${item.color} rounded-xl flex items-center justify-center text-lg mr-3`}>
@@ -265,9 +265,9 @@ const LaunchPage: React.FC = () => {
         {/* Stats Section */}
         <div className="grid grid-cols-3 gap-3 mb-6 animate-fade-in" style={{ animationDelay: '0.4s' }}>
           {[
-            { value: '20+', label: 'Places', icon: '📍' },
-            { value: '8+', label: 'Rewards', icon: '🎁' },
-            { value: '2', label: 'Cities', icon: '🏙️' },
+            { value: '20+', label: 'สถานที่', icon: '📍' },
+            { value: '8+', label: 'รางวัล', icon: '🎁' },
+            { value: '2', label: 'เมือง', icon: '🏙️' },
           ].map((stat, index) => (
             <div key={index} className="bg-white p-4 rounded-2xl shadow-sm text-center">
               <div className="text-2xl mb-1">{stat.icon}</div>

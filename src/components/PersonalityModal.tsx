@@ -14,26 +14,26 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
   const cities = [
     {
       id: 'all',
-      name: 'All Cities',
-      description: 'Mix destinations from all available cities',
+      name: 'ทุกเมือง',
+      description: 'ผสมผสานสถานที่จากทุกเมืองที่มี',
       icon: '🌏'
     },
     {
       id: 'Chiang Mai',
-      name: 'Chiang Mai',
-      description: 'Northern charm with temples, nature & culture',
+      name: 'เชียงใหม่',
+      description: 'เสน่ห์เมืองเหนือ วัด ธรรมชาติ & วัฒนธรรม',
       icon: '🏔️'
     },
     {
       id: 'Bangkok',
-      name: 'Bangkok',
-      description: 'Vibrant capital with temples, markets & nightlife',
+      name: 'กรุงเทพ',
+      description: 'เมืองหลวงคึกคัก วัด ตลาด & ไลฟ์ไสต์',
       icon: '🏙️'
     },
     {
       id: 'Phuket',
-      name: 'Phuket',
-      description: 'Beautiful beaches, islands & seafood paradise',
+      name: 'ภูเก็ต',
+      description: 'ชายหาดสวยงาม เกาะ & สวรรค์อาหารทะเล',
       icon: '🏝️'
     }
   ];
@@ -41,20 +41,20 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
   const personalities = [
     {
       id: 'introvert mode',
-      name: 'Introvert Mode',
-      description: 'Peaceful, less crowded places like temples and nature spots',
+      name: 'โหมดสงบ',
+      description: 'สถานที่สงบ ไม่แออัด เช่น วัดและธรรมชาติ',
       icon: '🧘‍♀️'
     },
     {
       id: 'extrovert mode',
-      name: 'Extrovert Mode', 
-      description: 'Vibrant markets, social spots, and lively attractions',
+      name: 'โหมดสังสรรค์', 
+      description: 'ตลาดคึกคัก จุดสังสรรค์ และสถานที่มีชีวิตชีวา',
       icon: '🎉'
     },
     {
       id: 'adventure mode',
-      name: 'Adventure Mode',
-      description: 'Exciting activities and outdoor experiences',
+      name: 'โหมดผจญภัย',
+      description: 'กิจกรรมตื่นเต้นและประสบการณ์กลางแจ้ง',
       icon: '🏔️'
     }
   ];
@@ -63,19 +63,19 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
     {
       id: '1 วัน ไม่ค้างคืน',
       name: '1 วัน ไม่ค้างคืน',
-      description: 'Day trip - Maximum 3 destinations (randomly selected)',
+      description: 'เดย์ทริป - สูงสุด 3 สถานที่ (สุ่มเลือก)',
       icon: '☀️'
     },
     {
       id: '2 วัน 1 คืน',
       name: '2 วัน 1 คืน', 
-      description: 'Weekend getaway - Maximum 6 destinations (optimally selected)',
+      description: 'ทริปสั้นๆ - สูงสุด 6 สถานที่ (เลือกอย่างเหมาะ)',
       icon: '🌙'
     },
     {
       id: 'custom',
-      name: 'Custom Duration',
-      description: 'Flexible itinerary - All your saved places included',
+      name: 'กำหนดเอง',
+      description: 'แผนยืดหยุ่น - รวมทุกสถานที่ที่คุณบันทึก',
       icon: '📅'
     }
   ];
@@ -95,7 +95,7 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
         {/* Header */}
         <div className="p-6 border-b border-purple-100">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-purple-800">Plan Your Journey</h2>
+            <h2 className="text-2xl font-bold text-purple-800">วางแผนการเดินทาง</h2>
             <button
               onClick={onClose}
               className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors"
@@ -105,13 +105,13 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
               </svg>
             </button>
           </div>
-          <p className="text-purple-600 mt-2">Choose your travel personality and trip duration to get a personalized route</p>
+          <p className="text-purple-600 mt-2">เลือกสไตล์การท่องเที่ยวและระยะเวลาเพื่อรับเส้นทางที่เหมาะกับคุณ</p>
         </div>
 
         <div className="p-6">
           {/* City/Province Selection */}
           <div className="mb-8">
-            <h3 className="text-lg font-bold text-purple-800 mb-4">🗺️ Where do you want to go?</h3>
+            <h3 className="text-lg font-bold text-purple-800 mb-4">🗺️ คุณอยากไปที่ไหน?</h3>
             <div className="grid grid-cols-2 gap-3">
               {cities.map((city) => (
                 <button
@@ -144,7 +144,7 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
 
           {/* Personality Selection */}
           <div className="mb-8">
-            <h3 className="text-lg font-bold text-purple-800 mb-4">Select Your Travel Personality</h3>
+            <h3 className="text-lg font-bold text-purple-800 mb-4">เลือกสไตล์การท่องเที่ยว</h3>
             <div className="grid grid-cols-1 gap-3">
               {personalities.map((personality) => (
                 <button
@@ -179,7 +179,7 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
 
           {/* Duration Selection */}
           <div className="mb-8">
-            <h3 className="text-lg font-bold text-purple-800 mb-4">Trip Duration</h3>
+            <h3 className="text-lg font-bold text-purple-800 mb-4">ระยะเวลาทริป</h3>
             <div className="grid grid-cols-1 gap-3">
               {durations.map((duration) => (
                 <button
@@ -218,7 +218,7 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
               onClick={onClose}
               className="flex-1 py-3 px-6 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors"
             >
-              Cancel
+              ยกเลิก
             </button>
             <button
               onClick={handleConfirm}
@@ -229,7 +229,7 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
                   : 'bg-gray-200 text-gray-500 cursor-not-allowed'
               }`}
             >
-              Create Route
+              สร้างเส้นทาง
             </button>
           </div>
         </div>

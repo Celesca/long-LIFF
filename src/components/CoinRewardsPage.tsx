@@ -54,7 +54,7 @@ const CoinRewardsPage: React.FC = () => {
   return (
     <Layout 
       showHeader 
-      headerTitle="Rewards"
+      headerTitle="รางวัล"
       rightAction={
         <div className="flex items-center space-x-1.5 bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1.5 rounded-full shadow-sm">
           <span className="text-lg">🪙</span>
@@ -66,14 +66,14 @@ const CoinRewardsPage: React.FC = () => {
         {/* How to Earn Coins - Compact */}
         <div className="bg-white rounded-2xl shadow-sm p-4 mb-4 border border-amber-100">
           <h2 className="text-sm font-bold text-gray-800 mb-3 flex items-center gap-2">
-            <span>💡</span> How to Earn
+            <span>💡</span> วิธีสะสมเหรียญ
           </h2>
           <div className="grid grid-cols-4 gap-2">
             {[
-              { icon: '📸', coins: '+10', label: 'Photo' },
-              { icon: '✅', coins: '+5', label: 'Visit' },
-              { icon: '🏆', coins: '+100', label: 'Journey' },
-              { icon: '⭐', coins: '+20', label: 'Review' },
+              { icon: '📸', coins: '+10', label: 'ถ่ายรูป' },
+              { icon: '✅', coins: '+5', label: 'เยี่ยมชม' },
+              { icon: '🏆', coins: '+100', label: 'ทริปสำเร็จ' },
+              { icon: '⭐', coins: '+20', label: 'รีวิว' },
             ].map((item, idx) => (
               <div key={idx} className="text-center p-2 bg-amber-50 rounded-xl">
                 <div className="text-xl mb-1">{item.icon}</div>
@@ -96,7 +96,7 @@ const CoinRewardsPage: React.FC = () => {
                   : 'bg-white text-gray-600 shadow-sm border border-gray-100'
               }`}
             >
-              {category === 'all' ? '🎉 All' : `${categoryIcons[category]} ${category.charAt(0).toUpperCase() + category.slice(1)}`}
+              {category === 'all' ? '🎉 ทั้งหมด' : category === 'food' ? `${categoryIcons[category]} อาหาร` : category === 'experience' ? `${categoryIcons[category]} ประสบการณ์` : `${categoryIcons[category]} ของที่ระลึก`}
             </button>
           ))}
         </div>
@@ -147,7 +147,7 @@ const CoinRewardsPage: React.FC = () => {
                       : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   }`}
                 >
-                  {userCoins >= reward.coinCost ? '🎁 Redeem Now' : `Need ${reward.coinCost - userCoins} more`}
+                  {userCoins >= reward.coinCost ? '🎁 แลกเลย' : `ต้องการอีก ${reward.coinCost - userCoins} เหรียญ`}
                 </button>
               </div>
             </div>
@@ -160,11 +160,11 @@ const CoinRewardsPage: React.FC = () => {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="bg-white rounded-2xl max-w-sm w-full p-6 text-center animate-scale-in">
             <div className="text-6xl mb-4 animate-bounce-slow">🎉</div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Congratulations!</h3>
-            <p className="text-gray-600 mb-4">You've redeemed: {redeemedReward.name}</p>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">ยินดีด้วย!</h3>
+            <p className="text-gray-600 mb-4">คุณได้แลก: {redeemedReward.name}</p>
             
             <div className="bg-gradient-to-r from-amber-100 to-orange-100 rounded-xl p-4 mb-4">
-              <p className="text-sm text-gray-600 mb-2">Your discount code:</p>
+              <p className="text-sm text-gray-600 mb-2">รหัสส่วนลดของคุณ:</p>
               <div className="flex items-center justify-center gap-2">
                 <code className="bg-white px-4 py-2 rounded-lg font-mono font-bold text-lg text-orange-600 border-2 border-dashed border-orange-300">
                   {redeemedReward.discountCode}
@@ -181,15 +181,15 @@ const CoinRewardsPage: React.FC = () => {
             </div>
             
             <p className="text-xs text-gray-500 mb-4">
-              Valid until: {redeemedReward.validUntil}<br/>
-              Location: {redeemedReward.location}
+              ใช้ได้ถึง: {redeemedReward.validUntil}<br/>
+              สถานที่: {redeemedReward.location}
             </p>
             
             <button
               onClick={() => setShowModal(false)}
               className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-3 rounded-xl font-semibold active:scale-95 transition-all"
             >
-              Awesome! 🙌
+              เยี่ยมมาก! 🙌
             </button>
           </div>
         </div>
