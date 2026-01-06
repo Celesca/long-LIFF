@@ -116,7 +116,7 @@ const TinderPage: React.FC = () => {
   // Loading state
   if (loading) {
     return (
-      <Layout hideNavbar>
+      <Layout hideNavbar backgroundVariant="gradient">
         <div className="min-h-screen flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-4">
             <div className="relative w-20 h-20 mx-auto">
@@ -137,7 +137,7 @@ const TinderPage: React.FC = () => {
   // Error state with retry
   if (error && places.length === 0) {
     return (
-      <Layout showHeader showBackButton headerTitle="สำรวจ">
+      <Layout showHeader showBackButton headerTitle="สำรวจ" backgroundVariant="gradient">
         <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-4 max-w-md">
             <div className="w-20 h-20 mx-auto bg-red-100 rounded-2xl flex items-center justify-center">
@@ -176,7 +176,7 @@ const TinderPage: React.FC = () => {
   // Finished state
   if (isFinished) {
     return (
-      <Layout showHeader headerTitle="เสร็จสิ้น!" showCoinCounter>
+      <Layout showHeader headerTitle="เสร็จสิ้น!" showCoinCounter backgroundVariant="travel">
         <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-6 max-w-md">
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-purple-400 to-pink-500 rounded-3xl flex items-center justify-center shadow-lg animate-bounce-slow">
@@ -240,7 +240,7 @@ const TinderPage: React.FC = () => {
   }
 
   return (
-    <Layout hideNavbar>
+    <Layout hideNavbar backgroundVariant="gradient">
       <div className="min-h-screen flex flex-col pb-24">
         {/* Compact Header */}
         <div className="flex items-center justify-between px-4 py-3 bg-white/80 backdrop-blur-lg border-b border-gray-100 sticky top-0 z-30">

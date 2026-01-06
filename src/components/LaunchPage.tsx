@@ -101,7 +101,7 @@ const LaunchPage: React.FC = () => {
   }, []);
 
   return (
-    <Layout showHeader showCoinCounter>
+    <Layout showHeader showCoinCounter backgroundVariant="travel" backgroundIntensity="medium">
       <div className="px-4 py-4 max-w-lg mx-auto">
         {/* Welcome Section - Modern & Clean */}
         <div className="mb-6 animate-fade-in">
