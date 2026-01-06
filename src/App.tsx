@@ -10,6 +10,7 @@ import RoutingPage from "./components/RoutingPage.js";
 import CoinRewardsPage from "./components/CoinRewardsPage.js";
 import TravelCompanion from "./components/TravelCompanion.js";
 import HistoryPage from "./components/HistoryPage.js";
+import AboutPage from "./components/AboutPage.js";
 import { mockApi } from "./services/mockApi";
 
 // Development mode - bypass LIFF authentication
@@ -97,7 +98,7 @@ function App() {
               setUserId(profile.userId);
               setDisplayName(profile.displayName);
               setPictureUrl(profile.pictureUrl || null);
-              
+
               // Store userId in localStorage for persistence
               localStorage.setItem("liff_userId", profile.userId);
               localStorage.setItem("liff_displayName", profile.displayName);
@@ -139,7 +140,7 @@ function App() {
         <div className="text-center space-y-4">
           <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center animate-pulse">
             <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
             </svg>
           </div>
           <h2 className="text-xl font-bold text-purple-800">Loading...</h2>
@@ -189,6 +190,7 @@ function App() {
           <Route path="/rewards" element={<CoinRewardsPage />} />
           <Route path="/travel-companion" element={<TravelCompanion />} />
           <Route path="/history" element={<HistoryPage />} />
+          <Route path="/about" element={<AboutPage />} />
         </Routes>
       </Router>
     </LiffContext.Provider>
