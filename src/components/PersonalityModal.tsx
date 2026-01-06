@@ -41,13 +41,13 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
   const personalities = [
     {
       id: 'introvert mode',
-      name: 'โหมดสงบ',
+      name: 'โหมดสงบ Introvert',
       description: 'สถานที่สงบ ไม่แออัด เช่น วัดและธรรมชาติ',
       icon: '🧘‍♀️'
     },
     {
       id: 'extrovert mode',
-      name: 'โหมดสังสรรค์', 
+      name: 'โหมดสังสรรค์ Extrovert',
       description: 'ตลาดคึกคัก จุดสังสรรค์ และสถานที่มีชีวิตชีวา',
       icon: '🎉'
     },
@@ -68,7 +68,7 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
     },
     {
       id: '2 วัน 1 คืน',
-      name: '2 วัน 1 คืน', 
+      name: '2 วัน 1 คืน',
       description: 'ทริปสั้นๆ - สูงสุด 6 สถานที่ (เลือกอย่างเหมาะ)',
       icon: '🌙'
     },
@@ -117,11 +117,10 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
                 <button
                   key={city.id}
                   onClick={() => setSelectedCity(city.id)}
-                  className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:cursor-pointer hover:shadow-md ${
-                    selectedCity === city.id
+                  className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:cursor-pointer hover:shadow-md ${selectedCity === city.id
                       ? 'border-purple-500 bg-purple-50'
                       : 'border-gray-200 hover:border-purple-300'
-                  }`}
+                    }`}
                 >
                   <div className="flex flex-col items-center text-center space-y-2">
                     <span className="text-3xl">{city.icon}</span>
@@ -132,7 +131,7 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
                     {selectedCity === city.id && (
                       <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
                         <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                         </svg>
                       </div>
                     )}
@@ -150,11 +149,10 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
                 <button
                   key={personality.id}
                   onClick={() => setSelectedPersonality(personality.id)}
-                  className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:cursor-pointer hover:shadow-md ${
-                    selectedPersonality === personality.id
+                  className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:cursor-pointer hover:shadow-md ${selectedPersonality === personality.id
                       ? 'border-purple-500 bg-purple-50'
                       : 'border-gray-200 hover:border-purple-300'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-start space-x-4">
                     <span className="text-2xl">{personality.icon}</span>
@@ -166,7 +164,7 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
                       <div className="ml-auto">
                         <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
                           <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                           </svg>
                         </div>
                       </div>
@@ -185,11 +183,10 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
                 <button
                   key={duration.id}
                   onClick={() => setSelectedDuration(duration.id)}
-                  className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:cursor-pointer hover:shadow-md ${
-                    selectedDuration === duration.id
+                  className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:cursor-pointer hover:shadow-md ${selectedDuration === duration.id
                       ? 'border-purple-500 bg-purple-50'
                       : 'border-gray-200 hover:border-purple-300'
-                  }`}
+                    }`}
                 >
                   <div className="flex items-start space-x-4">
                     <span className="text-2xl">{duration.icon}</span>
@@ -201,7 +198,7 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
                       <div className="ml-auto">
                         <div className="w-6 h-6 bg-purple-500 rounded-full flex items-center justify-center">
                           <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                           </svg>
                         </div>
                       </div>
@@ -223,11 +220,10 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
             <button
               onClick={handleConfirm}
               disabled={!selectedPersonality || !selectedDuration || !selectedCity}
-              className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${
-                selectedPersonality && selectedDuration && selectedCity
+              className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${selectedPersonality && selectedDuration && selectedCity
                   ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white hover:from-purple-600 hover:to-purple-700 transform hover:scale-105'
                   : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-              }`}
+                }`}
             >
               สร้างเส้นทาง
             </button>
