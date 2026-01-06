@@ -2,6 +2,7 @@ import React from 'react';
 import BottomNavbar from './BottomNavbar';
 import { useLiff } from '../hooks/useLiff';
 import CoinCounter from './CoinCounter';
+import AnimatedBackground from './AnimatedBackground';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -13,6 +14,8 @@ interface LayoutProps {
   rightAction?: React.ReactNode;
   hideNavbar?: boolean;
   transparentHeader?: boolean;
+  backgroundVariant?: 'default' | 'travel' | 'minimal' | 'gradient' | 'none';
+  backgroundIntensity?: 'low' | 'medium' | 'high';
 }
 
 const Layout: React.FC<LayoutProps> = ({
@@ -25,6 +28,8 @@ const Layout: React.FC<LayoutProps> = ({
   rightAction,
   hideNavbar = false,
   transparentHeader = false,
+  backgroundVariant = 'default',
+  backgroundIntensity = 'medium',
 }) => {
   const { displayName, pictureUrl, isLoggedIn } = useLiff();
 
@@ -37,15 +42,18 @@ const Layout: React.FC<LayoutProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 relative overflow-hidden">
+      {/* Animated Background */}
+      {backgroundVariant !== 'none' && (
+        <AnimatedBackground variant={backgroundVariant} intensity={backgroundIntensity} />
+      )}
       {/* Header */}
       {showHeader && (
         <header
-          className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${
-            transparentHeader
+          className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${transparentHeader
               ? 'bg-transparent'
               : 'bg-white/90 backdrop-blur-lg border-b border-gray-100 shadow-sm'
-          }`}
+            }`}
         >
           <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
             {/* Left Section */}

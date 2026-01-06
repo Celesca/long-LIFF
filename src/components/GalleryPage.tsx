@@ -67,7 +67,7 @@ const GalleryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Layout showHeader headerTitle="ที่บันทึก" showCoinCounter>
+      <Layout showHeader headerTitle="ที่บันทึก" showCoinCounter backgroundVariant="minimal">
         <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-4">
             <div className="w-16 h-16 mx-auto border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
@@ -93,6 +93,7 @@ const GalleryPage: React.FC = () => {
           </button>
         ) : null
       }
+      backgroundVariant="minimal"
     >
       <div className="px-4 py-4 max-w-lg mx-auto">
         {likedPlaces.length === 0 ? (
