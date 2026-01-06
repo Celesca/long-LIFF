@@ -1,6 +1,7 @@
 /**
  * Seed Data - Complete travel places and rewards for the LIFF app
  * Converted from backend/seed_data.py for frontend-only deployment
+ * Updated: Thai language translations for all travel places
  */
 
 import type { TravelPlace } from '../types/TravelPlace';
@@ -19,488 +20,488 @@ export interface Reward {
 }
 
 // ============================================
-// CHIANG MAI PLACES - Including Hidden Gems
+// CHIANG MAI PLACES - รวมสถานที่ลับ
 // ============================================
 export const chiangMaiPlaces: TravelPlace[] = [
   {
     id: 'cm_1',
-    name: 'Wat Umong',
+    name: 'วัดอุโมงค์',
     lat: 18.783636,
     long: 98.953588,
     image: 'https://www.pattayafans.de/chiangmai/bilder/wat-umong-4.jpg',
-    description: 'A peaceful forest temple famous for its ancient tunnels filled with Buddha images. Walk through moss-covered passages, meditate in serene gardens, and experience authentic Buddhist spirituality away from tourist crowds.',
+    description: 'วัดป่าที่สงบเงียบ มีชื่อเสียงเรื่องอุโมงค์โบราณที่เต็มไปด้วยพระพุทธรูป เดินผ่านทางเดินที่ปกคลุมด้วยมอส นั่งสมาธิในสวนอันสงบ และสัมผัสความศรัทธาทางพุทธศาสนาอย่างแท้จริง ห่างไกลจากฝูงชนนักท่องเที่ยว',
     city: 'Chiang Mai',
     country: 'Thailand',
     rating: 4.6,
-    distance: '~3.2km',
-    tags: ['Culture', 'Green', 'PM2.5 free']
+    distance: '~3.2 กม.',
+    tags: ['วัฒนธรรม', 'ธรรมชาติ', 'อากาศดี']
   },
   {
     id: 'cm_2',
-    name: 'Ang Kaew Reservoir',
+    name: 'อ่างแก้ว',
     lat: 18.8020,
     long: 98.9446,
     image: 'https://img.wongnai.com/p/400x0/2018/10/20/05895251d10049ffb2af523f5ac289f9.jpg',
-    description: 'A picturesque reservoir within Chiang Mai University featuring walking trails, scenic mountain views, and peaceful lawns perfect for sunset picnics. Popular with locals for jogging and relaxation.',
+    description: 'อ่างเก็บน้ำสวยงามภายในมหาวิทยาลัยเชียงใหม่ มีทางเดินเลียบริมน้ำ วิวภูเขาสวยงาม และสนามหญ้ากว้างเหมาะสำหรับปิกนิกยามเย็น เป็นที่นิยมของคนท้องถิ่นสำหรับวิ่งจ็อกกิ้งและพักผ่อน',
     city: 'Chiang Mai',
     country: 'Thailand',
     rating: 4.7,
-    distance: '~3.4km',
-    tags: ['Green', 'PM2.5 free']
+    distance: '~3.4 กม.',
+    tags: ['ธรรมชาติ', 'อากาศดี']
   },
   {
     id: 'cm_3',
-    name: 'Hor Kham Luang',
+    name: 'หอคำหลวง',
     lat: 18.752879,
     long: 98.922341,
     image: 'https://img.freepik.com/free-photo/ho-kham-luang-northern-thai-style-building-thailand_100801-487.jpg?size=626&ext=jpg',
-    description: 'An elegant Lanna-style royal pavilion set amidst 470 rai of beautifully landscaped gardens at the Royal Agricultural Research Center. Features traditional northern Thai architecture and seasonal flower displays.',
+    description: 'หอพระราชพิธีสไตล์ล้านนาอันงดงาม ตั้งอยู่ท่ามกลางสวนภูมิทัศน์ 470 ไร่ ณ ศูนย์วิจัยเกษตรหลวง มีสถาปัตยกรรมไทยเหนือแบบดั้งเดิม และการจัดแสดงดอกไม้ตามฤดูกาล',
     city: 'Chiang Mai',
     country: 'Thailand',
     rating: 4.7,
-    distance: '~10.7km',
-    tags: ['Culture', 'Green', 'PM2.5 free']
+    distance: '~10.7 กม.',
+    tags: ['วัฒนธรรม', 'ธรรมชาติ', 'อากาศดี']
   },
   {
     id: 'cm_4',
-    name: 'Wat Lok Molee',
+    name: 'วัดโลกโมฬี',
     lat: 18.7962,
     long: 98.9826,
     image: 'https://ik.imagekit.io/tvlk/blog/2020/07/shutterstock_1219520572.jpg?tr=dpr-2,w-675',
-    description: 'A hidden gem temple dating back to 1367 with stunning Lanna architecture. Features beautifully sculptured nagas, an ancient bare-brick chedi, and peaceful grounds away from tourist crowds. One of Chiang Mai\'s best-kept secrets.',
+    description: 'วัดซ่อนเร้นที่มีประวัติย้อนไปถึง พ.ศ. 1910 มีสถาปัตยกรรมล้านนาอันงดงาม พญานาคแกะสลักอย่างวิจิตร เจดีย์อิฐเก่าแก่ และลานวัดอันสงบ ห่างไกลจากนักท่องเที่ยว หนึ่งในความลับที่ดีที่สุดของเชียงใหม่',
     city: 'Chiang Mai',
     country: 'Thailand',
     rating: 4.8,
-    distance: '~1.5km',
-    tags: ['Culture', 'Green']
+    distance: '~1.5 กม.',
+    tags: ['วัฒนธรรม', 'ธรรมชาติ']
   },
   {
     id: 'cm_5',
-    name: 'Wat Chedi Luang',
+    name: 'วัดเจดีย์หลวง',
     lat: 18.7869,
     long: 98.9864,
     image: 'https://tse3.mm.bing.net/th/id/OIP.-atZV5v5UMNfkgyfz6N8ZAHaE8?rs=1&pid=ImgDetMain&o=7&rm=3',
-    description: 'A magnificent 14th-century temple with a massive ruined chedi that once stood 82 meters tall. The Emerald Buddha was housed here before being moved to Bangkok. Features daily monk chats with visitors.',
+    description: 'วัดมหัศจรรย์จากศตวรรษที่ 14 มีเจดีย์ขนาดใหญ่ที่เคยสูงถึง 82 เมตร พระแก้วมรกตเคยประดิษฐานที่นี่ก่อนย้ายไปกรุงเทพฯ มีกิจกรรม Monk Chat ให้พูดคุยกับพระภิกษุทุกวัน',
     city: 'Chiang Mai',
     country: 'Thailand',
     rating: 4.8,
-    distance: '~800m',
-    tags: ['Culture']
+    distance: '~800 ม.',
+    tags: ['วัฒนธรรม']
   },
   {
     id: 'cm_6',
-    name: 'Wiang Kum Kam',
+    name: 'เวียงกุมกาม',
     lat: 18.7536,
     long: 98.9955,
     image: 'https://media.tacdn.com/media/attractions-content--1x-1/0b/27/b0/4d.jpg',
-    description: 'An ancient buried city built by King Mangrai in the 13th century before Chiang Mai was founded. Explore over 20 archaeological temple ruins by horse cart or bicycle. A fascinating journey through forgotten history.',
+    description: 'เมืองโบราณที่ถูกฝังอยู่ใต้ดิน สร้างโดยพญามังรายในศตวรรษที่ 13 ก่อนสร้างเชียงใหม่ สำรวจซากวัดโบราณกว่า 20 แห่งโดยรถม้าหรือจักรยาน การเดินทางผ่านประวัติศาสตร์ที่ถูกลืม',
     city: 'Chiang Mai',
     country: 'Thailand',
     rating: 4.5,
-    distance: '~5km',
-    tags: ['Culture', 'Green']
+    distance: '~5 กม.',
+    tags: ['วัฒนธรรม', 'ธรรมชาติ']
   },
   {
     id: 'cm_7',
-    name: 'Doi Inthanon National Park',
+    name: 'อุทยานแห่งชาติดอยอินทนนท์',
     lat: 18.5875,
     long: 98.4867,
     image: 'https://www.thailandtravel.or.jp/wp-content/uploads/2020/05/Chiang-Mai-001683re.jpg',
-    description: 'Thailand\'s highest peak at 2,565 meters featuring twin royal pagodas, stunning waterfalls, and cloud forests. Experience cool temperatures, rare birds, and breathtaking sunrise views above the clouds.',
+    description: 'ยอดเขาที่สูงที่สุดในประเทศไทย 2,565 เมตร มีพระมหาธาตุนภเมทนีดลและนภพลภูมิสิริ น้ำตกสวยงาม และป่าเมฆ สัมผัสอากาศเย็นสบาย นกหายาก และวิวพระอาทิตย์ขึ้นเหนือทะเลหมอก',
     city: 'Chiang Mai',
     country: 'Thailand',
     rating: 4.9,
-    distance: '~90km',
-    tags: ['Green', 'PM2.5 free', 'Culture']
+    distance: '~90 กม.',
+    tags: ['ธรรมชาติ', 'อากาศดี', 'วัฒนธรรม']
   },
   {
     id: 'cm_8',
-    name: 'Mae Kampong Village',
+    name: 'หมู่บ้านแม่กำปอง',
     lat: 18.8655,
     long: 99.3510,
     image: 'https://royalvacationdmc.com/wp-content/uploads/2023/11/Mae-kampong.jpg',
-    description: 'A charming mountain village at 1,300m elevation offering authentic homestay experiences. Known for traditional tea leaf fermentation, coffee cultivation, and a beautiful temple built over a pond. Perfect for eco-tourism.',
+    description: 'หมู่บ้านบนภูเขาที่สูง 1,300 เมตร มีประสบการณ์โฮมสเตย์แท้จริง มีชื่อเสียงเรื่องการหมักใบชา การปลูกกาแฟ และวัดสวยงามสร้างเหนือสระน้ำ เหมาะสำหรับท่องเที่ยวเชิงนิเวศ',
     city: 'Chiang Mai',
     country: 'Thailand',
     rating: 4.7,
-    distance: '~50km',
-    tags: ['Green', 'Culture', 'PM2.5 free']
+    distance: '~50 กม.',
+    tags: ['ธรรมชาติ', 'วัฒนธรรม', 'อากาศดี']
   },
   {
     id: 'cm_9',
-    name: 'Bua Thong Sticky Waterfalls',
+    name: 'น้ำตกบัวตอง (น้ำตกเหนียว)',
     lat: 19.1169,
     long: 99.1136,
     image: 'https://thethaiger.com/wp-content/uploads/2024/08/sticky-waterfall-1.jpg',
-    description: 'Unique limestone waterfalls where you can actually climb UP the cascading water! The mineral deposits create a non-slip surface. A hidden adventure spot perfect for families and thrill-seekers alike.',
+    description: 'น้ำตกหินปูนพิเศษที่สามารถเดินขึ้นไปบนน้ำตกได้! แร่ธาตุที่สะสมทำให้พื้นผิวไม่ลื่น สถานที่ผจญภัยลับเหมาะสำหรับครอบครัวและผู้ชื่นชอบความตื่นเต้น',
     city: 'Chiang Mai',
     country: 'Thailand',
     rating: 4.6,
-    distance: '~60km',
-    tags: ['Green', 'PM2.5 free']
+    distance: '~60 กม.',
+    tags: ['ธรรมชาติ', 'อากาศดี']
   },
   {
     id: 'cm_10',
-    name: 'Baan Kang Wat',
+    name: 'บ้านข้างวัด',
     lat: 18.7892,
     long: 98.9538,
     image: 'https://tluxe-aws.hmgcdn.com/public/article/2017/atl_20230621172059_166.jpg',
-    description: 'A charming artist village with handcrafted studios, artisan cafes, and creative workshops. Browse unique handmade goods, enjoy specialty coffee, and meet local artists in this peaceful creative community.',
+    description: 'หมู่บ้านศิลปินมีเสน่ห์ มีสตูดิโอทำมือ คาเฟ่ช่างฝีมือ และเวิร์กช็อปสร้างสรรค์ เลือกซื้อสินค้าทำมือ ดื่มกาแฟพิเศษ และพบปะศิลปินท้องถิ่นในชุมชนสร้างสรรค์ที่สงบ',
     city: 'Chiang Mai',
     country: 'Thailand',
     rating: 4.5,
-    distance: '~4km',
-    tags: ['Culture', 'Street']
+    distance: '~4 กม.',
+    tags: ['วัฒนธรรม', 'ตลาด']
   },
   {
     id: 'cm_11',
-    name: 'Khao Soi Mae Sai',
+    name: 'ข้าวซอยแม่ไสย',
     lat: 18.7997,
     long: 98.9751,
     image: 'https://img.wongnai.com/p/1600x0/2024/05/08/a9983bc62f9646038b1d434f671ea67f.jpg',
-    description: 'Legendary Khao Soi restaurant serving the iconic Northern Thai curry noodle soup for decades. Rich coconut curry broth, tender chicken, and crispy egg noodles - authentic Lanna cuisine at its finest.',
+    description: 'ร้านข้าวซอยตำนานที่เสิร์ฟก๋วยเตี๋ยวแกงกะทิเหนือมาหลายสิบปี น้ำแกงกะทิเข้มข้น ไก่นุ่ม และบะหมี่ไข่กรอบ อาหารล้านนาแท้ที่ดีที่สุด',
     city: 'Chiang Mai',
     country: 'Thailand',
     rating: 4.7,
-    distance: '~500m',
-    tags: ['Street', 'Culture']
+    distance: '~500 ม.',
+    tags: ['ตลาด', 'วัฒนธรรม']
   },
   {
     id: 'cm_12',
-    name: 'One Nimman',
+    name: 'วัน นิมมาน',
     lat: 18.8002,
     long: 98.9676,
     image: 'https://chiangmaijourney.com/wp-content/uploads/2023/10/One-Nimman-2.jpeg',
-    description: 'A vibrant lifestyle complex in the trendy Nimman area featuring Thai designer boutiques, artisan cafes, and local craft shops. Perfect for unique souvenirs and experiencing modern Chiang Mai culture.',
+    description: 'คอมเพล็กซ์ไลฟ์สไตล์ในย่านนิมมานแสนเก๋ มีบูติกดีไซเนอร์ไทย คาเฟ่ช่างฝีมือ และร้านงานฝีมือท้องถิ่น เหมาะสำหรับของฝากเก๋ๆ และสัมผัสวัฒนธรรมเชียงใหม่ยุคใหม่',
     city: 'Chiang Mai',
     country: 'Thailand',
     rating: 4.5,
-    distance: '~750m',
-    tags: ['Street', 'Culture']
+    distance: '~750 ม.',
+    tags: ['ตลาด', 'วัฒนธรรม']
   }
 ];
 
 // ============================================
-// BANGKOK PLACES - Including Hidden Gems
+// BANGKOK PLACES - รวมสถานที่ลับ
 // ============================================
 export const bangkokPlaces: TravelPlace[] = [
   {
     id: 'bkk_1',
-    name: 'Wat Arun',
+    name: 'วัดอรุณราชวราราม',
     lat: 13.7437,
     long: 100.4888,
     image: 'https://lp-cms-production.s3.amazonaws.com/public/2021-06/shutterstockRF_517093306.jpg',
-    description: 'The Temple of Dawn with its iconic 82-meter spire decorated with colorful porcelain. Climb the steep steps for panoramic river views, especially magical at sunset when the spire glows golden.',
+    description: 'วัดแจ้ง มียอดปรางค์สูง 82 เมตร ประดับด้วยเครื่องกระเบื้องสีสันสดใส ปีนขั้นบันไดชันเพื่อชมวิวแม่น้ำ งดงามเป็นพิเศษยามพระอาทิตย์ตกเมื่อยอดปรางค์เปล่งประกายสีทอง',
     city: 'Bangkok',
     country: 'Thailand',
     rating: 4.8,
-    distance: '~5km',
-    tags: ['Culture']
+    distance: '~5 กม.',
+    tags: ['วัฒนธรรม']
   },
   {
     id: 'bkk_2',
-    name: 'Grand Palace',
+    name: 'พระบรมมหาราชวัง',
     lat: 13.7500,
     long: 100.4913,
     image: 'https://www.agoda.com/wp-content/uploads/2024/03/Featured-image-Wat-Arun-Bangkok-Thailand.jpg',
-    description: 'The official residence of Thai Kings since 1782, featuring intricate architecture, the sacred Emerald Buddha, and over 100 buildings spanning 200 years of royal history.',
+    description: 'ที่ประทับอย่างเป็นทางการของพระมหากษัตริย์ไทยตั้งแต่ พ.ศ. 2325 มีสถาปัตยกรรมวิจิตร พระแก้วมรกตศักดิ์สิทธิ์ และอาคารกว่า 100 หลังที่ครอบคลุมประวัติศาสตร์ราชวงศ์กว่า 200 ปี',
     city: 'Bangkok',
     country: 'Thailand',
     rating: 4.7,
-    distance: '~4km',
-    tags: ['Culture']
+    distance: '~4 กม.',
+    tags: ['วัฒนธรรม']
   },
   {
     id: 'bkk_3',
-    name: 'Wat Pho',
+    name: 'วัดพระเชตุพนวิมลมังคลาราม (วัดโพธิ์)',
     lat: 13.7465,
     long: 100.4930,
     image: 'https://cdn.forevervacation.com/uploads/attraction/wat-pho-3743.jpg',
-    description: 'Home to the spectacular 46-meter Reclining Buddha covered in gold leaf. Also the birthplace of traditional Thai massage - get an authentic massage at the temple\'s famous school.',
+    description: 'ประดิษฐานพระพุทธไสยาสน์ยาว 46 เมตร ปิดทองคำเปลว เป็นต้นกำเนิดของนวดแผนไทย รับบริการนวดแท้จากโรงเรียนนวดแผนไทยที่มีชื่อเสียง',
     city: 'Bangkok',
     country: 'Thailand',
     rating: 4.7,
-    distance: '~4.2km',
-    tags: ['Culture', 'Green']
+    distance: '~4.2 กม.',
+    tags: ['วัฒนธรรม', 'ธรรมชาติ']
   },
   {
     id: 'bkk_4',
-    name: 'Wat Paknam Bhasicharoen',
+    name: 'วัดปากน้ำภาษีเจริญ',
     lat: 13.7217,
     long: 100.4703,
     image: 'https://www.thailandee.com/img/villes/bangkok/wat-paknam-phasi-charoen-buddha-bangkok.jpg',
-    description: 'A stunning hidden temple featuring an 80-meter stupa with a mesmerizing emerald glass ceiling depicting Buddhist cosmology. The giant bronze Buddha statue is visible from across the city. Less crowded than major temples.',
+    description: 'วัดซ่อนเร้นอันงดงาม มีพระมหาเจดีย์สูง 80 เมตร เพดานกระจกสีเขียวมรกตวาดภาพจักรวาลในพุทธศาสนา พระพุทธรูปสำริดขนาดใหญ่เห็นได้จากทั่วเมือง ผู้คนน้อยกว่าวัดหลักๆ',
     city: 'Bangkok',
     country: 'Thailand',
     rating: 4.8,
-    distance: '~10km',
-    tags: ['Culture', 'Green']
+    distance: '~10 กม.',
+    tags: ['วัฒนธรรม', 'ธรรมชาติ']
   },
   {
     id: 'bkk_5',
-    name: 'Talat Noi',
+    name: 'ตลาดน้อย',
     lat: 13.7333,
     long: 100.5139,
     image: 'https://d1ef7ke0x2i9g8.cloudfront.net/hong-kong/_1200x630_fit_center-center_82_none/20230111-Talat-Noi-PIC02.png?mtime=1724145861',
-    description: 'Bangkok\'s hidden creative quarter with stunning street art, historic Sino-Portuguese architecture, and authentic Chinese-Thai culture. Explore vintage cafes, antique shops, and the beautiful Holy Rosary Church.',
+    description: 'ย่านสร้างสรรค์ซ่อนเร้นของกรุงเทพฯ มีสตรีทอาร์ตสวยงาม สถาปัตยกรรมชิโน-โปรตุกีสเก่าแก่ และวัฒนธรรมจีน-ไทยแท้จริง สำรวจคาเฟ่วินเทจ ร้านของเก่า และโบสถ์กาลหว่าร์อันงดงาม',
     city: 'Bangkok',
     country: 'Thailand',
     rating: 4.6,
-    distance: '~3km',
-    tags: ['Culture', 'Street']
+    distance: '~3 กม.',
+    tags: ['วัฒนธรรม', 'ตลาด']
   },
   {
     id: 'bkk_6',
-    name: 'Bang Krachao',
+    name: 'บางกะเจ้า',
     lat: 13.6850,
     long: 100.5550,
     image: 'https://www.thelostpassport.com/wp-content/uploads/2016/06/Bangkok-treehouse-Bang-Krachao.jpg',
-    description: 'The \'Green Lung of Bangkok\' - a car-free island jungle in the middle of the city! Rent a bike, cycle through mangrove forests, visit floating markets, and escape the urban chaos. A local secret paradise.',
+    description: '"ปอดของกรุงเทพฯ" เกาะป่าไร้รถยนต์กลางเมือง! เช่าจักรยาน ปั่นผ่านป่าชายเลน เที่ยวตลาดน้ำ และหนีความวุ่นวายในเมือง สวรรค์ลับของคนท้องถิ่น',
     city: 'Bangkok',
     country: 'Thailand',
     rating: 4.7,
-    distance: '~12km',
-    tags: ['Green', 'PM2.5 free', 'Culture']
+    distance: '~12 กม.',
+    tags: ['ธรรมชาติ', 'อากาศดี', 'วัฒนธรรม']
   },
   {
     id: 'bkk_7',
-    name: 'Wat Saket (Golden Mount)',
+    name: 'วัดสระเกศ (ภูเขาทอง)',
     lat: 13.7536,
     long: 100.5069,
     image: 'https://images.squarespace-cdn.com/content/v1/62f1cb15a2cb083186ccd6d1/ab21e971-78a1-4bbd-82cc-f2df2403b6d0/Untitled+design.png',
-    description: 'Climb 318 steps to this hilltop temple for 360-degree views of old Bangkok. The golden chedi dates back 200 years and offers a peaceful escape with fewer tourists than other major temples.',
+    description: 'ปีนบันได 318 ขั้นสู่วัดบนยอดเขา ชมวิว 360 องศาของกรุงเทพฯ เก่า เจดีย์ทองมีอายุกว่า 200 ปี เป็นที่พักผ่อนสงบ นักท่องเที่ยวน้อยกว่าวัดหลักอื่นๆ',
     city: 'Bangkok',
     country: 'Thailand',
     rating: 4.6,
-    distance: '~3.5km',
-    tags: ['Culture']
+    distance: '~3.5 กม.',
+    tags: ['วัฒนธรรม']
   },
   {
     id: 'bkk_8',
-    name: 'Lumphini Park',
+    name: 'สวนลุมพินี',
     lat: 13.7315,
     long: 100.5418,
     image: 'https://upload.wikimedia.org/wikipedia/commons/3/3e/Aerial_view_of_Lumphini_Park.jpg',
-    description: 'Bangkok\'s largest central park offering a green oasis with lakes, paddle boats, and resident monitor lizards! Perfect for morning tai chi, evening jogs, or peaceful picnics away from the urban heat.',
+    description: 'สวนสาธารณะที่ใหญ่ที่สุดใจกลางกรุงเทพฯ โอเอซิสสีเขียวมีทะเลสาบ เรือถีบ และตัวเหี้ย! เหมาะสำหรับไทเก็กตอนเช้า วิ่งจ๊อกกิ้งตอนเย็น หรือปิกนิกสงบห่างจากความร้อนในเมือง',
     city: 'Bangkok',
     country: 'Thailand',
     rating: 4.6,
-    distance: '~3km',
-    tags: ['Green', 'PM2.5 free']
+    distance: '~3 กม.',
+    tags: ['ธรรมชาติ', 'อากาศดี']
   },
   {
     id: 'bkk_9',
-    name: 'Chatuchak Weekend Market',
+    name: 'ตลาดนัดจตุจักร',
     lat: 13.7999,
     long: 100.5498,
     image: 'https://res.cloudinary.com/pillarshotels/image/upload/f_auto/web/cms/resources/attractions/chatuchak-w1800h1360.jpg',
-    description: 'The world\'s largest outdoor market with over 15,000 stalls across 35 acres. From vintage clothes to exotic pets, antiques to street food - get lost in this legendary shopping maze.',
+    description: 'ตลาดกลางแจ้งที่ใหญ่ที่สุดในโลก มีร้านค้ากว่า 15,000 ร้านบนพื้นที่ 35 เอเคอร์ ตั้งแต่เสื้อผ้าวินเทจถึงสัตว์เลี้ยง ของเก่าถึงอาหารริมทาง หลงทางในเขาวงกตช้อปปิ้งตำนาน',
     city: 'Bangkok',
     country: 'Thailand',
     rating: 4.5,
-    distance: '~10km',
-    tags: ['Street', 'Culture']
+    distance: '~10 กม.',
+    tags: ['ตลาด', 'วัฒนธรรม']
   },
   {
     id: 'bkk_10',
-    name: 'ICONSIAM',
+    name: 'ไอคอนสยาม',
     lat: 13.7262,
     long: 100.5107,
     image: 'https://www.airportels.asia/wp-content/uploads/2023/08/shutterstock_1416988205-edited.jpg',
-    description: 'A stunning riverside mega-mall featuring an indoor floating market, luxury brands, and incredible river views. Experience Thai heritage and modern luxury in one spectacular destination.',
+    description: 'ห้างสรรพสินค้าริมแม่น้ำอันงดงาม มีตลาดน้ำในร่ม แบรนด์หรู และวิวแม่น้ำสุดประทับใจ สัมผัสมรดกไทยและความหรูหราทันสมัยในจุดหมายเดียว',
     city: 'Bangkok',
     country: 'Thailand',
     rating: 4.7,
-    distance: '~5km',
-    tags: ['Street', 'Culture']
+    distance: '~5 กม.',
+    tags: ['ตลาด', 'วัฒนธรรม']
   },
   {
     id: 'bkk_11',
-    name: 'Lhong 1919',
+    name: 'ล้ง 1919',
     lat: 13.7267,
     long: 100.5033,
     image: 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/11/6d/55/86/lhong-1919.jpg?w=1200&h=-1&s=1',
-    description: 'A beautifully restored 19th-century Chinese mansion and pier with stunning murals, artisan shops, and riverside dining. This hidden heritage site offers a glimpse into Bangkok\'s trading past.',
+    description: 'คฤหาสน์และท่าเรือจีนศตวรรษที่ 19 ที่ได้รับการบูรณะอย่างสวยงาม มีจิตรกรรมฝาผนัง ร้านงานฝีมือ และร้านอาหารริมแม่น้ำ แหล่งมรดกซ่อนเร้นที่ให้เห็นอดีตการค้าของกรุงเทพฯ',
     city: 'Bangkok',
     country: 'Thailand',
     rating: 4.5,
-    distance: '~5.5km',
-    tags: ['Culture', 'Street']
+    distance: '~5.5 กม.',
+    tags: ['วัฒนธรรม', 'ตลาด']
   },
   {
     id: 'bkk_12',
-    name: 'Yaowarat (Chinatown)',
+    name: 'เยาวราช (ไชน่าทาวน์)',
     lat: 13.7407,
     long: 100.5100,
     image: 'https://www.siamguides.com/wp-content/uploads/2024/05/yaowarat-road-chinatown-bangkok-thailand-2.jpg',
-    description: 'Bangkok\'s vibrant Chinatown comes alive at night with legendary street food stalls. Sample bird\'s nest soup, roasted duck, and fresh seafood while exploring golden dragon gates and historic shophouses.',
+    description: 'ไชน่าทาวน์กรุงเทพฯ มีชีวิตชีวายามค่ำด้วยร้านอาหารริมทางตำนาน ลองซุปรังนก เป็ดย่าง และอาหารทะเลสด สำรวจประตูมังกรทองและตึกแถวเก่าแก่',
     city: 'Bangkok',
     country: 'Thailand',
     rating: 4.6,
-    distance: '~4km',
-    tags: ['Street', 'Culture']
+    distance: '~4 กม.',
+    tags: ['ตลาด', 'วัฒนธรรม']
   }
 ];
 
 // ============================================
-// PHUKET PLACES - Hidden Gems & Beaches
+// PHUKET PLACES - สถานที่ลับ & ชายหาด
 // ============================================
 export const phuketPlaces: TravelPlace[] = [
   {
     id: 'pkt_1',
-    name: 'Phuket Old Town',
+    name: 'เมืองเก่าภูเก็ต',
     lat: 7.8857,
     long: 98.3876,
     image: 'https://phuket.intercontinental.com/sites/phuket/files/styles/hero_banner_1920_810/public/2025-05/shutterstock_1283102005%20%281%29.jpg.webp?itok=thnxpXhU',
-    description: 'Charming Sino-Portuguese heritage district with colorful shophouses, hip cafes, street art, and boutique hotels. Explore Thalang Road\'s architecture dating back to the tin mining era.',
+    description: 'ย่านมรดกชิโน-โปรตุกีสมีเสน่ห์ มีตึกแถวสีสันสดใส คาเฟ่เก๋ สตรีทอาร์ต และโรงแรมบูติก สำรวจสถาปัตยกรรมถนนถลางที่ย้อนไปถึงยุคเหมืองแร่ดีบุก',
     city: 'Phuket',
     country: 'Thailand',
     rating: 4.7,
-    distance: '~3km',
-    tags: ['Culture', 'Street']
+    distance: '~3 กม.',
+    tags: ['วัฒนธรรม', 'ตลาด']
   },
   {
     id: 'pkt_2',
-    name: 'Wat Chalong',
+    name: 'วัดไชยธาราราม (วัดฉลอง)',
     lat: 7.8467,
     long: 98.3367,
     image: 'https://blog.bangkokair.com/wp-content/uploads/2025/05/Cover_wat-chalong-temple-phuket.jpg',
-    description: 'Phuket\'s most important Buddhist temple featuring a three-story grand pagoda housing Buddha relics. Beautifully decorated halls with intricate murals depicting Buddha\'s life.',
+    description: 'วัดพุทธที่สำคัญที่สุดของภูเก็ต มีพระมหาธาตุสามชั้นประดิษฐานพระบรมสารีริกธาตุ วิหารตกแต่งสวยงามด้วยจิตรกรรมฝาผนังเล่าเรื่องพระพุทธประวัติ',
     city: 'Phuket',
     country: 'Thailand',
     rating: 4.6,
-    distance: '~8km',
-    tags: ['Culture']
+    distance: '~8 กม.',
+    tags: ['วัฒนธรรม']
   },
   {
     id: 'pkt_3',
-    name: 'Big Buddha Phuket',
+    name: 'พระใหญ่ภูเก็ต',
     lat: 7.8275,
     long: 98.3131,
     image: 'https://d2e5ushqwiltxm.cloudfront.net/wp-content/uploads/sites/292/2025/04/17025402/Big-Buddha-Phuket.jpg',
-    description: 'A 45-meter white marble Buddha statue atop Nakkerd Hill offering 360-degree panoramic views of the island. Wind chimes create a peaceful atmosphere at this iconic landmark.',
+    description: 'พระพุทธรูปหินอ่อนขาวสูง 45 เมตรบนยอดเขานาคเกิด ชมวิวพาโนรามา 360 องศาของเกาะ กระดิ่งลมสร้างบรรยากาศสงบที่สถานที่สำคัญนี้',
     city: 'Phuket',
     country: 'Thailand',
     rating: 4.8,
-    distance: '~12km',
-    tags: ['Culture', 'Green']
+    distance: '~12 กม.',
+    tags: ['วัฒนธรรม', 'ธรรมชาติ']
   },
   {
     id: 'pkt_4',
-    name: 'Promthep Cape',
+    name: 'แหลมพรหมเทพ',
     lat: 7.7589,
     long: 98.3035,
     image: 'https://cdn.sanity.io/images/nxpteyfv/goguides/ce4d3310ef916e2be7cdf0884f4d81e58619fc9f-1600x1066.jpg',
-    description: 'Phuket\'s most famous sunset viewpoint at the island\'s southern tip. Watch the sun sink into the Andaman Sea from dramatic cliffs with lighthouse and shrine.',
+    description: 'จุดชมพระอาทิตย์ตกที่โด่งดังที่สุดของภูเก็ตที่ปลายเกาะทางใต้ ชมดวงอาทิตย์จมลงสู่ทะเลอันดามันจากหน้าผาสูงชัน มีประภาคารและศาลเจ้า',
     city: 'Phuket',
     country: 'Thailand',
     rating: 4.7,
-    distance: '~20km',
-    tags: ['Green', 'Culture']
+    distance: '~20 กม.',
+    tags: ['ธรรมชาติ', 'วัฒนธรรม']
   },
   {
     id: 'pkt_5',
-    name: 'Nai Harn Beach',
+    name: 'หาดในหาน',
     lat: 7.7700,
     long: 98.3033,
     image: 'https://cdn.prod.website-files.com/650bafc1a2425df702884d05/65e6cea3a13348b5f81718d4_nai-harn-beach.png',
-    description: 'A local favorite beach with crystal-clear water and fewer tourists. Surrounded by hills with a tranquil lagoon behind. Perfect for swimming and authentic Thai beach vibes.',
+    description: 'หาดโปรดของคนท้องถิ่น น้ำใสแจ๋ว นักท่องเที่ยวน้อยกว่า ล้อมรอบด้วยเนินเขา มีลากูนเงียบสงบด้านหลัง เหมาะสำหรับว่ายน้ำและบรรยากาศชายหาดไทยแท้',
     city: 'Phuket',
     country: 'Thailand',
     rating: 4.6,
-    distance: '~18km',
-    tags: ['Green', 'PM2.5 free']
+    distance: '~18 กม.',
+    tags: ['ธรรมชาติ', 'อากาศดี']
   },
   {
     id: 'pkt_6',
-    name: 'Freedom Beach',
+    name: 'หาดฟรีดอม',
     lat: 7.8958,
     long: 98.2722,
     image: 'https://content.phuket101.net/wp-content/uploads/20250121213902/freedom-beach-Phuket-1.jpg',
-    description: 'A hidden paradise accessible only by longtail boat or jungle trek. Pristine white sand, turquoise water, and jungle-covered cliffs create an unspoiled tropical escape.',
+    description: 'สวรรค์ซ่อนเร้นไปได้โดยเรือหางยาวหรือเดินป่าเท่านั้น หาดทรายขาวบริสุทธิ์ น้ำสีฟ้าเทอควอยซ์ และหน้าผาปกคลุมด้วยป่า สร้างการหลบหนีสู่เขตร้อนที่ไม่ถูกแตะต้อง',
     city: 'Phuket',
     country: 'Thailand',
     rating: 4.8,
-    distance: '~15km',
-    tags: ['Green', 'PM2.5 free']
+    distance: '~15 กม.',
+    tags: ['ธรรมชาติ', 'อากาศดี']
   },
   {
     id: 'pkt_7',
-    name: 'Banana Beach',
+    name: 'หาดบานาน่า',
     lat: 7.9803,
     long: 98.2847,
     image: 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/08/c0/a3/79/banana-beach.jpg?w=1200&h=-1&s=1',
-    description: 'A secret cove reached by steep jungle path. Rewards adventurous visitors with untouched sand, clear snorkeling waters, and beach restaurants serving fresh seafood.',
+    description: 'อ่าวลับไปถึงโดยทางเดินป่าชัน ตอบแทนนักผจญภัยด้วยหาดทรายบริสุทธิ์ น้ำดำน้ำดูปะการังใส และร้านอาหารริมหาดเสิร์ฟอาหารทะเลสด',
     city: 'Phuket',
     country: 'Thailand',
     rating: 4.5,
-    distance: '~22km',
-    tags: ['Green', 'PM2.5 free']
+    distance: '~22 กม.',
+    tags: ['ธรรมชาติ', 'อากาศดี']
   },
   {
     id: 'pkt_8',
-    name: 'Karon Viewpoint',
+    name: 'จุดชมวิวกะรน',
     lat: 7.8167,
     long: 98.3000,
     image: 'https://cdn.sanity.io/images/nxpteyfv/goguides/72fe06a765513c2d68642a38ff72aafb2488092c-1600x1066.jpg',
-    description: 'Stunning viewpoint overlooking three bays - Kata Noi, Kata, and Karon beaches. One of Phuket\'s most photographed locations with dramatic coastal scenery.',
+    description: 'จุดชมวิวสวยงามมองเห็นสามอ่าว - กะตะน้อย กะตะ และกะรน หนึ่งในสถานที่ถ่ายรูปมากที่สุดของภูเก็ต มีทิวทัศน์ชายฝั่งดราม่า',
     city: 'Phuket',
     country: 'Thailand',
     rating: 4.6,
-    distance: '~16km',
-    tags: ['Green']
+    distance: '~16 กม.',
+    tags: ['ธรรมชาติ']
   },
   {
     id: 'pkt_9',
-    name: 'Phang Nga Bay',
+    name: 'อ่าวพังงา',
     lat: 8.2750,
     long: 98.5000,
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Ko_Tapu_Phang_Nga_Bay.jpg/1280px-Ko_Tapu_Phang_Nga_Bay.jpg',
-    description: 'Spectacular bay famous for dramatic limestone karsts rising from emerald waters. Explore sea caves by kayak, visit James Bond Island, and discover hidden lagoons.',
+    description: 'อ่าวสุดอลังการ มีชื่อเสียงจากเขาหินปูนดราม่าที่โผล่จากน้ำสีมรกต สำรวจถ้ำทะเลด้วยเรือคายัค เยือนเกาะเจมส์ บอนด์ และค้นพบลากูนซ่อนเร้น',
     city: 'Phuket',
     country: 'Thailand',
     rating: 4.9,
-    distance: '~25km',
-    tags: ['Green', 'PM2.5 free']
+    distance: '~25 กม.',
+    tags: ['ธรรมชาติ', 'อากาศดี']
   },
   {
     id: 'pkt_10',
-    name: 'Phuket Weekend Market',
+    name: 'ตลาดนัดภูเก็ต',
     lat: 7.8842,
     long: 98.3917,
     image: 'https://www.aleenta.com/wp-content/uploads/2022/03/Why_is_Phang_Nga_Bay_Famous.jpg',
-    description: 'Authentic local night market with Thai street food, live music, and bargain shopping. Experience real Phuket culture away from tourist areas every Saturday and Sunday.',
+    description: 'ตลาดกลางคืนท้องถิ่นแท้จริง มีอาหารริมทางไทย ดนตรีสด และช้อปปิ้งราคาถูก สัมผัสวัฒนธรรมภูเก็ตจริงๆ ห่างจากพื้นที่นักท่องเที่ยว ทุกวันเสาร์และอาทิตย์',
     city: 'Phuket',
     country: 'Thailand',
     rating: 4.4,
-    distance: '~5km',
-    tags: ['Street', 'Culture']
+    distance: '~5 กม.',
+    tags: ['ตลาด', 'วัฒนธรรม']
   },
   {
     id: 'pkt_11',
-    name: 'Rawai Seafood Market',
+    name: 'ตลาดอาหารทะเลราไวย์',
     lat: 7.7767,
     long: 98.3278,
     image: 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/09/60/7c/0e/caption.jpg?w=900&h=500&s=1',
-    description: 'Fresh-from-the-boat seafood market where locals buy their catch. Select your fish, prawns, or lobster and have it cooked at adjacent restaurants. Authentic and affordable!',
+    description: 'ตลาดอาหารทะเลสดจากเรือ ที่คนท้องถิ่นซื้อปลา เลือกปลา กุ้ง หรือกุ้งมังกร แล้วให้ร้านอาหารข้างๆ ทำให้ แท้จริงและราคาย่อมเยา!',
     city: 'Phuket',
     country: 'Thailand',
     rating: 4.5,
-    distance: '~17km',
-    tags: ['Street', 'Culture']
+    distance: '~17 กม.',
+    tags: ['ตลาด', 'วัฒนธรรม']
   },
   {
     id: 'pkt_12',
-    name: 'Sirinat National Park',
+    name: 'อุทยานแห่งชาติสิรินาถ',
     lat: 8.1167,
     long: 98.3000,
     image: 'https://www.thainationalparks.com/img/poi/2019/10/04/384098/sirinat-national-park-beach-w-900.jpg',
-    description: 'Protected marine park with pristine beaches, mangrove forests, and sea turtle nesting sites. Watch planes land dramatically close at Mai Khao Beach. A nature lover\'s paradise.',
+    description: 'อุทยานทางทะเลที่มีชายหาดบริสุทธิ์ ป่าชายเลน และแหล่งวางไข่เต่าทะเล ดูเครื่องบินลงจอดใกล้มากที่หาดไม้ขาว สวรรค์ของคนรักธรรมชาติ',
     city: 'Phuket',
     country: 'Thailand',
     rating: 4.6,
-    distance: '~30km',
-    tags: ['Green', 'PM2.5 free']
+    distance: '~30 กม.',
+    tags: ['ธรรมชาติ', 'อากาศดี']
   }
 ];
 
@@ -514,214 +515,214 @@ export const allPlaces: TravelPlace[] = [
 ];
 
 // ============================================
-// REWARDS
+// REWARDS (keeping in Thai context)
 // ============================================
 export const rewards: Reward[] = [
   // Chiang Mai Rewards
   {
     id: 'rw_1',
-    name: '20% Off at Khao Soi Mae Sai',
-    description: 'Enjoy authentic Northern Thai cuisine with 20% off your entire bill',
+    name: 'ลด 20% ที่ข้าวซอยแม่ไสย',
+    description: 'ลิ้มรสอาหารเหนือแท้ๆ พร้อมส่วนลด 20% ทั้งบิล',
     image: 'https://www.mytravelbuzzg.com/wp-content/uploads/Khao-Soi-Mae-Sai-Restaurant-e1693473350860.jpg',
     coinCost: 50,
     category: 'food',
     discountCode: 'YEEP20KHAO',
     validUntil: '2026-12-31',
-    location: 'Nimman Road, Chiang Mai',
-    originalPrice: '150 THB'
+    location: 'ถนนนิมมานเหมินท์, เชียงใหม่',
+    originalPrice: '150 บาท'
   },
   {
     id: 'rw_2',
-    name: 'Free Coffee at One Nimman',
-    description: 'Redeem a free specialty coffee at any participating café in One Nimman',
+    name: 'กาแฟฟรีที่วัน นิมมาน',
+    description: 'แลกรับกาแฟพิเศษฟรีที่คาเฟ่ที่ร่วมรายการใน One Nimman',
     image: 'https://res.cloudinary.com/pillarshotels/image/upload/f_auto/web/cms/resources/attractions/on-03-1500x1000-w1800h1360.jpeg',
     coinCost: 30,
     category: 'food',
     discountCode: 'YEEPFREE',
     validUntil: '2026-12-31',
-    location: 'One Nimman, Chiang Mai'
+    location: 'วัน นิมมาน, เชียงใหม่'
   },
   {
     id: 'rw_3',
-    name: 'Ginger Farm Tour',
-    description: 'Get 50% off organic farm tour including lunch and activities',
+    name: 'ทัวร์ฟาร์มจินเจอร์',
+    description: 'ลด 50% ทัวร์ฟาร์มออร์แกนิก รวมอาหารกลางวันและกิจกรรม',
     image: 'https://images.squarespace-cdn.com/content/v1/5dcac1b37b75f56509c0a367/c96597eb-4afc-4346-b33c-1669a5281cd4/DSC00016.jpg',
     coinCost: 100,
     category: 'experience',
     discountCode: 'YEEPFARM50',
     validUntil: '2026-12-31',
-    location: 'Ginger Farm, Mae Wang',
-    originalPrice: '800 THB'
+    location: 'Ginger Farm, แม่วาง',
+    originalPrice: '800 บาท'
   },
   {
     id: 'rw_4',
-    name: 'Wat Umong Meditation Session',
-    description: 'Free guided meditation session at the ancient temple tunnels',
+    name: 'คลาสนั่งสมาธิวัดอุโมงค์',
+    description: 'คลาสนั่งสมาธิพร้อมผู้นำฟรีที่อุโมงค์วัดโบราณ',
     image: 'https://cms.dmpcdn.com/travel/2020/11/03/9d45da30-1dbc-11eb-9275-d9e61fe8653e_original.jpg',
     coinCost: 80,
     category: 'experience',
     discountCode: 'YEEPZEN',
     validUntil: '2026-12-31',
-    location: 'Wat Umong, Suthep'
+    location: 'วัดอุโมงค์, สุเทพ'
   },
   {
     id: 'rw_5',
-    name: 'Think Park Night Market Voucher',
-    description: '100 THB shopping voucher for handmade crafts and local goods',
+    name: 'คูปองตลาดกลางคืน Think Park',
+    description: 'บัตรกำนัลช้อปปิ้ง 100 บาท สำหรับงานฝีมือและสินค้าท้องถิ่น',
     image: 'https://changpuakmagazine.com/images/article/182925ArticleThumpnai_September2018-07-07_resize.jpg',
     coinCost: 40,
     category: 'souvenir',
     discountCode: 'YEEPCRAFT',
     validUntil: '2026-12-31',
-    location: 'Think Park, Nimman'
+    location: 'Think Park, นิมมาน'
   },
   {
     id: 'rw_6',
-    name: 'Royal Park Bike Rental',
-    description: 'Free 2-hour bicycle rental at Hor Kham Luang Royal Park',
+    name: 'เช่าจักรยานราชพฤกษ์',
+    description: 'เช่าจักรยานฟรี 2 ชั่วโมงที่อุทยานหลวงราชพฤกษ์',
     image: 'https://upload.wikimedia.org/wikipedia/commons/0/0f/Ho_Kum_Luang_%28I%29.jpg',
     coinCost: 25,
     category: 'experience',
     discountCode: 'YEEPBIKE',
     validUntil: '2026-12-31',
-    location: 'Royal Agricultural Research Center'
+    location: 'ศูนย์วิจัยเกษตรหลวง'
   },
   {
     id: 'rw_7',
-    name: 'Suki Chang Phueak Special',
-    description: 'Free extra meat topping with any suki order',
+    name: 'สุกี้ช้างเผือกพิเศษ',
+    description: 'ท็อปปิ้งเนื้อฟรีเมื่อสั่งสุกี้',
     image: 'https://d13q9rhbndrrl0.cloudfront.net/posts/none/2021/8/1640512803955-655157687290318600.jpeg',
     coinCost: 20,
     category: 'food',
     discountCode: 'YEEPSUKI',
     validUntil: '2026-12-31',
-    location: 'Chang Phueak Night Market'
+    location: 'ตลาดช้างเผือก'
   },
   {
     id: 'rw_8',
-    name: 'Ang Kaew Sunset Picnic Set',
-    description: 'Picnic basket rental with local snacks for sunset viewing',
+    name: 'เซ็ตปิกนิกอ่างแก้วยามเย็น',
+    description: 'เช่าตะกร้าปิกนิกพร้อมขนมท้องถิ่นสำหรับชมพระอาทิตย์ตก',
     image: 'https://media.readthecloud.co/wp-content/uploads/2021/12/29133520/angkaew-11-750x500.jpg',
     coinCost: 60,
     category: 'experience',
     discountCode: 'YEEPPICNIC',
     validUntil: '2026-12-31',
-    location: 'Ang Kaew Reservoir, CMU'
+    location: 'อ่างแก้ว, มช.'
   },
   // Bangkok Rewards
   {
     id: 'rw_9',
-    name: 'Wat Arun Sunset Cruise',
-    description: '50% off riverside dinner cruise with stunning Temple of Dawn views',
+    name: 'ล่องเรือชมพระอาทิตย์ตกวัดอรุณ',
+    description: 'ลด 50% ล่องเรือดินเนอร์ริมแม่น้ำชมวิววัดอรุณสวยงาม',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Wat_Arun%2C_Bangkok%2C_Thailand_%28I%29.jpg/1280px-Wat_Arun%2C_Bangkok%2C_Thailand_%28I%29.jpg',
     coinCost: 120,
     category: 'experience',
     discountCode: 'YEEPSUNSET',
     validUntil: '2026-12-31',
-    location: 'Chao Phraya River, Bangkok',
-    originalPrice: '1,500 THB'
+    location: 'แม่น้ำเจ้าพระยา, กรุงเทพฯ',
+    originalPrice: '1,500 บาท'
   },
   {
     id: 'rw_10',
-    name: 'Chatuchak Market Tour',
-    description: 'Free guided walking tour of Bangkok\'s legendary weekend market',
+    name: 'ทัวร์ตลาดจตุจักร',
+    description: 'ทัวร์เดินชมตลาดสุดสัปดาห์ตำนานกรุงเทพฯ ฟรี',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/20/Chatuchak_Weekend_Market_overview.jpg/1280px-Chatuchak_Weekend_Market_overview.jpg',
     coinCost: 75,
     category: 'experience',
     discountCode: 'YEEPJJ',
     validUntil: '2026-12-31',
-    location: 'Chatuchak Weekend Market, Bangkok'
+    location: 'ตลาดนัดจตุจักร, กรุงเทพฯ'
   },
   {
     id: 'rw_11',
-    name: 'Yaowarat Street Food Trail',
-    description: '100 THB voucher for Chinatown\'s best street food stalls',
+    name: 'ทริปอาหารริมทางเยาวราช',
+    description: 'บัตรกำนัล 100 บาท สำหรับร้านอาหารริมทางที่ดีที่สุดในไชน่าทาวน์',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Bangkok_Yaowarat_Road.jpg/1280px-Bangkok_Yaowarat_Road.jpg',
     coinCost: 45,
     category: 'food',
     discountCode: 'YEEPCHINATOWN',
     validUntil: '2026-12-31',
-    location: 'Yaowarat Road, Bangkok'
+    location: 'ถนนเยาวราช, กรุงเทพฯ'
   },
   {
     id: 'rw_12',
-    name: 'Lumphini Park Pedal Boat',
-    description: 'Free 1-hour swan pedal boat rental at Lumphini Park',
+    name: 'เรือถีบสวนลุมพินี',
+    description: 'เช่าเรือถีบหงส์ฟรี 1 ชั่วโมงที่สวนลุมพินี',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Lumpini_Park_Bangkok.jpg/1280px-Lumpini_Park_Bangkok.jpg',
     coinCost: 35,
     category: 'experience',
     discountCode: 'YEEPPEDAL',
     validUntil: '2026-12-31',
-    location: 'Lumphini Park, Bangkok'
+    location: 'สวนลุมพินี, กรุงเทพฯ'
   },
   {
     id: 'rw_13',
-    name: 'Bang Krachao Bike Adventure',
-    description: 'Half-day bike rental with guided map of the Green Lung',
+    name: 'ผจญภัยจักรยานบางกะเจ้า',
+    description: 'เช่าจักรยานครึ่งวันพร้อมแผนที่นำทางปอดกรุงเทพฯ',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cd/Bang_Krachao_aerial_view.jpg/1280px-Bang_Krachao_aerial_view.jpg',
     coinCost: 50,
     category: 'experience',
     discountCode: 'YEEPGREEN',
     validUntil: '2026-12-31',
-    location: 'Bang Krachao, Bangkok'
+    location: 'บางกะเจ้า, กรุงเทพฯ'
   },
   // Phuket Rewards
   {
     id: 'rw_14',
-    name: 'Phuket Old Town Walking Tour',
-    description: 'Free 2-hour heritage walking tour with local guide',
+    name: 'ทัวร์เดินเมืองเก่าภูเก็ต',
+    description: 'ทัวร์เดินมรดก 2 ชั่วโมงพร้อมไกด์ท้องถิ่น ฟรี',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/Soi_Rommanee%2C_Phuket_Town.jpg/1280px-Soi_Rommanee%2C_Phuket_Town.jpg',
     coinCost: 65,
     category: 'experience',
     discountCode: 'YEEPOLDTOWN',
     validUntil: '2026-12-31',
-    location: 'Thalang Road, Phuket Old Town'
+    location: 'ถนนถลาง, เมืองเก่าภูเก็ต'
   },
   {
     id: 'rw_15',
-    name: 'Promthep Cape Sunset Dinner',
-    description: '20% off seafood dinner at cliff-top restaurant',
+    name: 'ดินเนอร์พระอาทิตย์ตกแหลมพรหมเทพ',
+    description: 'ลด 20% ดินเนอร์อาหารทะเลที่ร้านบนหน้าผา',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/64/Promthep_Cape.jpg/1280px-Promthep_Cape.jpg',
     coinCost: 80,
     category: 'food',
     discountCode: 'YEEPCLIFF',
     validUntil: '2026-12-31',
-    location: 'Promthep Cape, Phuket',
-    originalPrice: '800 THB'
+    location: 'แหลมพรหมเทพ, ภูเก็ต',
+    originalPrice: '800 บาท'
   },
   {
     id: 'rw_16',
-    name: 'Phang Nga Bay Kayak Tour',
-    description: '25% off full-day kayaking adventure through limestone caves',
+    name: 'ทัวร์พายเรืออ่าวพังงา',
+    description: 'ลด 25% ทัวร์พายเรือคายัคเต็มวันผ่านถ้ำหินปูน',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/Ko_Tapu_Phang_Nga_Bay.jpg/1280px-Ko_Tapu_Phang_Nga_Bay.jpg',
     coinCost: 150,
     category: 'experience',
     discountCode: 'YEEPKAYAK',
     validUntil: '2026-12-31',
-    location: 'Phang Nga Bay',
-    originalPrice: '2,500 THB'
+    location: 'อ่าวพังงา',
+    originalPrice: '2,500 บาท'
   },
   {
     id: 'rw_17',
-    name: 'Rawai Seafood Feast',
-    description: 'Free lobster upgrade with any seafood platter order',
+    name: 'ปาร์ตี้อาหารทะเลราไวย์',
+    description: 'อัพเกรดกุ้งมังกรฟรีเมื่อสั่งเซ็ตอาหารทะเล',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4b/Rawai_Beach.jpg/1280px-Rawai_Beach.jpg',
     coinCost: 70,
     category: 'food',
     discountCode: 'YEEPLOBSTER',
     validUntil: '2026-12-31',
-    location: 'Rawai Seafood Market, Phuket'
+    location: 'ตลาดอาหารทะเลราไวย์, ภูเก็ต'
   },
   {
     id: 'rw_18',
-    name: 'Big Buddha Meditation Class',
-    description: 'Free morning meditation session with panoramic views',
+    name: 'คลาสนั่งสมาธิพระใหญ่',
+    description: 'คลาสนั่งสมาธิตอนเช้าฟรี พร้อมวิวพาโนรามา',
     image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/9b/Big_Buddha_Phuket.jpg/1280px-Big_Buddha_Phuket.jpg',
     coinCost: 55,
     category: 'experience',
     discountCode: 'YEEPBUDDHA',
     validUntil: '2026-12-31',
-    location: 'Big Buddha, Nakkerd Hill, Phuket'
+    location: 'พระใหญ่, เขานาคเกิด, ภูเก็ต'
   }
 ];
 
