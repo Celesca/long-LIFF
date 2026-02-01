@@ -18,6 +18,7 @@ const EventPage: React.FC = () => {
   const [showGallery, setShowGallery] = useState(false);
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
   const [flashEffect, setFlashEffect] = useState(false);
+  const [selectedPhoto, setSelectedPhoto] = useState<CapturedPhoto | null>(null);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -385,7 +386,11 @@ const EventPage: React.FC = () => {
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 {photos.map((photo) => (
-                  <div key={photo.id} className="relative group rounded-2xl overflow-hidden shadow-lg bg-white">
+                  <div 
+                    key={photo.id} 
+                    className="relative group rounded-2xl overflow-hidden shadow-lg bg-white cursor-pointer"
+                    onClick={() => setSelectedPhoto(photo)}
+                  >
                     <img 
                       src={photo.dataUrl} 
                       alt="Event Photo"
@@ -395,7 +400,10 @@ const EventPage: React.FC = () => {
                     
                     {/* Delete Button */}
                     <button
-                      onClick={() => deletePhoto(photo.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deletePhoto(photo.id);
+                      }}
                       className="absolute top-2 right-2 w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity active:scale-95"
                     >
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -433,6 +441,105 @@ const EventPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Photo Preview Modal */}
+      {selectedPhoto && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center"
+          onClick={() => setSelectedPhoto(null)}
+        >
+          {/* Close Button */}
+          <button
+            onClick={() => setSelectedPhoto(null)}
+            className="absolute top-4 right-4 z-10 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 active:scale-95 transition-all"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          {/* Photo Container */}
+          <div 
+            className="relative max-w-full max-h-full p-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <img 
+              src={selectedPhoto.dataUrl} 
+              alt="Photo Preview"
+              className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+            />
+            
+            {/* Photo Info */}
+            <div className="absolute bottom-0 left-4 right-4 p-4 bg-gradient-to-t from-black/80 to-transparent rounded-b-2xl">
+              <p className="text-white font-semibold">{selectedPhoto.eventName}</p>
+              <p className="text-white/70 text-sm">{formatDate(selectedPhoto.timestamp)}</p>
+            </div>
+          </div>
+
+          {/* Bottom Actions */}
+          <div className="absolute bottom-6 left-0 right-0 flex justify-center gap-4">
+            {/* Download Button */}
+            <a
+              href={selectedPhoto.dataUrl}
+              download={`event-photo-${selectedPhoto.id}.jpg`}
+              onClick={(e) => e.stopPropagation()}
+              className="flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full text-white hover:bg-white/20 active:scale-95 transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+              </svg>
+              ดาวน์โหลด
+            </a>
+            
+            {/* Delete Button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                deletePhoto(selectedPhoto.id);
+                setSelectedPhoto(null);
+              }}
+              className="flex items-center gap-2 px-6 py-3 bg-red-500/80 backdrop-blur-sm rounded-full text-white hover:bg-red-500 active:scale-95 transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              ลบรูป
+            </button>
+          </div>
+
+          {/* Navigation Arrows (if more than 1 photo) */}
+          {photos.length > 1 && (
+            <>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const currentIndex = photos.findIndex(p => p.id === selectedPhoto.id);
+                  const prevIndex = currentIndex > 0 ? currentIndex - 1 : photos.length - 1;
+                  setSelectedPhoto(photos[prevIndex]);
+                }}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 active:scale-95 transition-all"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const currentIndex = photos.findIndex(p => p.id === selectedPhoto.id);
+                  const nextIndex = currentIndex < photos.length - 1 ? currentIndex + 1 : 0;
+                  setSelectedPhoto(photos[nextIndex]);
+                }}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-white hover:bg-white/20 active:scale-95 transition-all"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </Layout>
   );
 };
