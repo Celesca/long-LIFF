@@ -39,24 +39,50 @@ const EventPage: React.FC = () => {
   const startCamera = async () => {
     try {
       setError(null);
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { 
+      
+      // Check if mediaDevices is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError('เบราว์เซอร์ไม่รองรับการใช้งานกล้อง กรุณาใช้ Chrome หรือ Safari');
+        return;
+      }
+      
+      // Request camera permission with simpler constraints first
+      const constraints = {
+        video: {
           facingMode: facingMode,
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
         },
         audio: false
-      });
+      };
+      
+      console.log('Requesting camera with constraints:', constraints);
+      
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('Camera stream obtained:', mediaStream.getTracks());
       
       setStream(mediaStream);
       setIsCapturing(true);
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
-    } catch (err) {
+      // Wait for video element to be available
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play().catch(e => console.error('Video play error:', e));
+          };
+        }
+      }, 100);
+      
+    } catch (err: any) {
       console.error('Camera error:', err);
-      setError('ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้งานกล้อง');
+      if (err.name === 'NotAllowedError') {
+        setError('กรุณาอนุญาตการใช้งานกล้องในการตั้งค่าเบราว์เซอร์');
+      } else if (err.name === 'NotFoundError') {
+        setError('ไม่พบกล้องในอุปกรณ์นี้');
+      } else if (err.name === 'NotReadableError') {
+        setError('กล้องถูกใช้งานโดยแอปอื่นอยู่');
+      } else {
+        setError(`ไม่สามารถเข้าถึงกล้องได้: ${err.message || 'Unknown error'}`);
+      }
     }
   };
 
@@ -70,10 +96,30 @@ const EventPage: React.FC = () => {
   };
 
   // Switch camera
-  const switchCamera = async () => {
-    stopCamera();
-    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
-    setTimeout(() => startCamera(), 100);
+  const switchCamera = () => {
+    const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(newFacingMode);
+    
+    // Stop current stream and restart with new facing mode
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    
+    // Restart camera with new facing mode
+    setTimeout(async () => {
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: newFacingMode },
+          audio: false
+        });
+        setStream(mediaStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      } catch (err) {
+        console.error('Switch camera error:', err);
+      }
+    }, 200);
   };
 
   // Capture photo and save to localStorage
@@ -189,7 +235,7 @@ const EventPage: React.FC = () => {
                 📍 Thailand
               </span>
             </div>
-            <h2 className="text-white font-bold text-xl">LONG Thailand Event 2026</h2>
+            <h2 className="text-white font-bold text-xl">วันนักประดิษฐ์ 2569</h2>
             <p className="text-white/80 text-sm">ถ่ายรูปร่วมกิจกรรมเพื่อรับรางวัลพิเศษ!</p>
           </div>
         </div>
