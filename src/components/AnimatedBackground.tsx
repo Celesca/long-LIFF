@@ -2,7 +2,6 @@ import React from 'react';
 
 interface AnimatedBackgroundProps {
     variant?: 'default' | 'travel' | 'minimal' | 'gradient' | 'thailand' | 'tinder';
-    intensity?: 'low' | 'medium' | 'high';
 }
 
 // Optimized static background component - no animations for better performance
