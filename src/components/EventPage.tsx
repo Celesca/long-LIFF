@@ -99,7 +99,7 @@ const EventPage: React.FC = () => {
           id: Date.now().toString(),
           dataUrl,
           timestamp: Date.now(),
-          eventName: 'LONG Thailand Event 2026'
+          eventName: 'วันนักประดิษฐ์ไทย 2026'
         };
         
         setPhotos(prev => [newPhoto, ...prev]);
