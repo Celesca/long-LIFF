@@ -47,30 +47,47 @@ const EventPage: React.FC = () => {
         return;
       }
       
-      // Request camera permission with simpler constraints first
+      // Try with specific facingMode first
       const constraints = {
         video: {
-          facingMode: facingMode,
+          facingMode: { ideal: facingMode },
         },
         audio: false
       };
       
-      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      let mediaStream: MediaStream;
+      
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (err) {
+        // Fallback: try without facingMode constraint
+        console.warn('Camera constraint failed, trying without facingMode:', err);
+        mediaStream = await navigator.mediaDevices.getUserMedia({ 
+          video: true, 
+          audio: false 
+        });
+      }
       
       setStream(mediaStream);
       setIsCapturing(true);
       
-      // Attach stream to video element
+      // Attach stream to video element with better mobile support
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play().catch(e => {
+        
+        // Use play promise for better mobile compatibility
+        videoRef.current.play()
+          .then(() => {
+            console.log('Video stream playing successfully');
+          })
+          .catch((e: any) => {
+            console.error('Video play error:', e);
             setError('ไม่สามารถเล่นวิดีโอจากกล้องได้');
           });
-        };
       }
       
     } catch (err: any) {
+      console.error('Camera error:', err);
       if (err.name === 'NotAllowedError') {
         setError('กรุณาอนุญาตการใช้งานกล้องในการตั้งค่าเบราว์เซอร์');
       } else if (err.name === 'NotFoundError') {
@@ -112,25 +129,46 @@ const EventPage: React.FC = () => {
       }
       setIsCapturing(false);
       
-      // Start camera with new facing mode
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: newFacingMode },
+      // Try with specific facingMode first
+      const constraints = {
+        video: {
+          facingMode: { ideal: newFacingMode },
+        },
         audio: false
-      });
+      };
+      
+      let mediaStream: MediaStream;
+      
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      } catch (err) {
+        // Fallback: try without facingMode constraint
+        console.warn('Camera constraint failed, trying without facingMode:', err);
+        mediaStream = await navigator.mediaDevices.getUserMedia({ 
+          video: true, 
+          audio: false 
+        });
+      }
       
       setStream(mediaStream);
       setIsCapturing(true);
       setFacingMode(newFacingMode);
       
+      // Attach stream to video element
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
-        videoRef.current.onloadedmetadata = () => {
-          videoRef.current?.play().catch(e => {
+        
+        videoRef.current.play()
+          .then(() => {
+            console.log('Video stream playing successfully');
+          })
+          .catch((e: any) => {
+            console.error('Video play error:', e);
             setError('ไม่สามารถเล่นวิดีโอจากกล้องได้');
           });
-        };
       }
     } catch (err: any) {
+      console.error('Switch camera error:', err);
       if (err.name === 'NotAllowedError') {
         setError('กรุณาอนุญาตการใช้งานกล้องในการตั้งค่าเบราว์เซอร์');
       } else if (err.name === 'NotFoundError') {
@@ -140,7 +178,6 @@ const EventPage: React.FC = () => {
       } else {
         setError(`ไม่สามารถสลับกล้องได้: ${err.message || 'Unknown error'}`);
       }
-      // Restore capturing state if switching failed
       setIsCapturing(false);
     }
   };
@@ -337,6 +374,8 @@ const EventPage: React.FC = () => {
                   autoPlay
                   playsInline
                   muted
+                  width={1280}
+                  height={960}
                   className={`w-full aspect-[3/4] object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
                 />
                 
