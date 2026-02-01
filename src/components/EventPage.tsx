@@ -23,16 +23,17 @@ const EventPage: React.FC = () => {
 
   // Load photos from localStorage on mount
   useEffect(() => {
-    const savedPhotos = localStorage.getItem('eventPhotos');
-    if (savedPhotos) {
-      setPhotos(JSON.parse(savedPhotos));
+    try {
+      const savedPhotos = localStorage.getItem('eventPhotos');
+      if (savedPhotos) {
+        const parsedPhotos = JSON.parse(savedPhotos);
+        console.log('Loaded photos from localStorage:', parsedPhotos.length);
+        setPhotos(parsedPhotos);
+      }
+    } catch (e) {
+      console.error('Error loading from localStorage:', e);
     }
   }, []);
-
-  // Save photos to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('eventPhotos', JSON.stringify(photos));
-  }, [photos]);
 
   // Start camera
   const startCamera = async () => {
@@ -75,7 +76,7 @@ const EventPage: React.FC = () => {
     setTimeout(() => startCamera(), 100);
   };
 
-  // Capture photo
+  // Capture photo and save to localStorage
   const capturePhoto = () => {
     if (videoRef.current && canvasRef.current) {
       const video = videoRef.current;
@@ -93,16 +94,37 @@ const EventPage: React.FC = () => {
         }
         ctx.drawImage(video, 0, 0);
         
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+        // Get base64 string from canvas
+        const base64Image = canvas.toDataURL('image/jpeg', 0.8);
         
+        // Create new photo object
         const newPhoto: CapturedPhoto = {
           id: Date.now().toString(),
-          dataUrl,
+          dataUrl: base64Image,
           timestamp: Date.now(),
           eventName: 'วันนักประดิษฐ์ไทย 2026'
         };
         
-        setPhotos(prev => [newPhoto, ...prev]);
+        // Get existing photos from localStorage
+        const existingPhotosStr = localStorage.getItem('eventPhotos');
+        const existingPhotos: CapturedPhoto[] = existingPhotosStr 
+          ? JSON.parse(existingPhotosStr) 
+          : [];
+        
+        // Add new photo to the beginning
+        const updatedPhotos = [newPhoto, ...existingPhotos];
+        
+        // Save to localStorage immediately
+        try {
+          localStorage.setItem('eventPhotos', JSON.stringify(updatedPhotos));
+          console.log('Photo saved to localStorage:', newPhoto.id);
+        } catch (e) {
+          console.error('Error saving to localStorage:', e);
+          alert('ไม่สามารถบันทึกรูปภาพได้ พื้นที่จัดเก็บอาจเต็ม');
+        }
+        
+        // Update state
+        setPhotos(updatedPhotos);
         
         // Flash effect
         setFlashEffect(true);
@@ -111,9 +133,20 @@ const EventPage: React.FC = () => {
     }
   };
 
-  // Delete photo
+  // Delete photo from localStorage
   const deletePhoto = (id: string) => {
-    setPhotos(prev => prev.filter(p => p.id !== id));
+    const updatedPhotos = photos.filter(p => p.id !== id);
+    
+    // Save to localStorage immediately
+    try {
+      localStorage.setItem('eventPhotos', JSON.stringify(updatedPhotos));
+      console.log('Photo deleted from localStorage:', id);
+    } catch (e) {
+      console.error('Error updating localStorage:', e);
+    }
+    
+    // Update state
+    setPhotos(updatedPhotos);
   };
 
   // Cleanup on unmount
