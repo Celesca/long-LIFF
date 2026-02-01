@@ -115,7 +115,7 @@ const AboutPage: React.FC = () => {
     const profileImageUrl = 'https://media.licdn.com/dms/image/v2/D5603AQHQPqN2UBUixw/profile-displayphoto-scale_400_400/B56ZomPFwYHAAg-/0/1761578083313?e=2147483647&v=beta&t=Mm633FIpVKTsrw0rTUdbkJ7G3-TZ8fEBBYNHDT1Ct4E';
 
     return (
-        <Layout showHeader backgroundVariant="travel" backgroundIntensity="low">
+        <Layout showHeader backgroundVariant="thailand" backgroundIntensity="low">
             <div className="min-h-screen">
                 {/* Hero Section with Profile */}
                 <div className="relative overflow-hidden">

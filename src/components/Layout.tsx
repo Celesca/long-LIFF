@@ -14,7 +14,7 @@ interface LayoutProps {
   rightAction?: React.ReactNode;
   hideNavbar?: boolean;
   transparentHeader?: boolean;
-  backgroundVariant?: 'default' | 'travel' | 'minimal' | 'gradient' | 'none';
+  backgroundVariant?: 'default' | 'travel' | 'minimal' | 'gradient' | 'none' | 'thailand' | 'tinder';
   backgroundIntensity?: 'low' | 'medium' | 'high';
 }
 
@@ -42,7 +42,7 @@ const Layout: React.FC<LayoutProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-50 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-white to-amber-50/30 relative overflow-hidden">
       {/* Animated Background */}
       {backgroundVariant !== 'none' && (
         <AnimatedBackground variant={backgroundVariant} intensity={backgroundIntensity} />
@@ -52,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({
         <header
           className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${transparentHeader
               ? 'bg-transparent'
-              : 'bg-white/90 backdrop-blur-lg border-b border-gray-100 shadow-sm'
+              : 'bg-white/80 backdrop-blur-xl border-b border-gray-100/50 shadow-[0_2px_20px_rgba(0,0,0,0.04)]'
             }`}
         >
           <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
@@ -61,7 +61,7 @@ const Layout: React.FC<LayoutProps> = ({
               {showBackButton ? (
                 <button
                   onClick={handleBack}
-                  className="flex items-center space-x-1 text-gray-700 hover:text-purple-600 transition-colors -ml-2 p-2"
+                  className="flex items-center space-x-1 text-gray-600 hover:text-rose-500 transition-colors -ml-2 p-2 rounded-full hover:bg-rose-50"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -72,7 +72,7 @@ const Layout: React.FC<LayoutProps> = ({
                   <img
                     src={pictureUrl}
                     alt={displayName || 'User'}
-                    className="w-8 h-8 rounded-full border-2 border-purple-200"
+                    className="w-9 h-9 rounded-full border-2 border-rose-200 shadow-sm"
                   />
                 </div>
               ) : null}
@@ -83,9 +83,12 @@ const Layout: React.FC<LayoutProps> = ({
               {headerTitle ? (
                 <h1 className="text-lg font-bold text-gray-800 truncate">{headerTitle}</h1>
               ) : (
-                <div className="flex items-center justify-center space-x-2">
-                  <span className="text-xl font-bold bg-gradient-to-r from-purple-600 to-pink-500 bg-clip-text text-transparent">
+                <div className="flex items-center justify-center space-x-1.5">
+                  <span className="text-xl font-extrabold bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 bg-clip-text text-transparent tracking-tight">
                     LONG
+                  </span>
+                  <span className="text-xs bg-gradient-to-r from-amber-400 to-orange-400 text-white px-2 py-0.5 rounded-full font-semibold shadow-sm">
+                    TH
                   </span>
                 </div>
               )}

@@ -111,12 +111,16 @@ const TinderPage: React.FC = () => {
   };
 
   const remainingPlaces = places.slice(currentIndex, currentIndex + 2);
-  const isFinished = currentIndex >= places.length;
+  const isFinished = !loading && currentIndex >= places.length;
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-purple-600">Loading places...</div>;
+  }
 
   // Loading state
   if (loading) {
     return (
-      <Layout hideNavbar backgroundVariant="gradient">
+      <Layout hideNavbar backgroundVariant="tinder">
         <div className="min-h-screen flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-4">
             <div className="relative w-20 h-20 mx-auto">
@@ -137,7 +141,7 @@ const TinderPage: React.FC = () => {
   // Error state with retry
   if (error && places.length === 0) {
     return (
-      <Layout showHeader showBackButton headerTitle="สำรวจ" backgroundVariant="gradient">
+      <Layout showHeader showBackButton headerTitle="สำรวจ" backgroundVariant="tinder">
         <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-4 max-w-md">
             <div className="w-20 h-20 mx-auto bg-red-100 rounded-2xl flex items-center justify-center">
@@ -176,7 +180,7 @@ const TinderPage: React.FC = () => {
   // Finished state
   if (isFinished) {
     return (
-      <Layout showHeader headerTitle="เสร็จสิ้น!" showCoinCounter backgroundVariant="travel">
+      <Layout showHeader headerTitle="เสร็จสิ้น!" showCoinCounter backgroundVariant="tinder">
         <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-6 max-w-md">
             <div className="w-24 h-24 mx-auto bg-gradient-to-br from-purple-400 to-pink-500 rounded-3xl flex items-center justify-center shadow-lg animate-bounce-slow">
@@ -240,13 +244,13 @@ const TinderPage: React.FC = () => {
   }
 
   return (
-    <Layout hideNavbar backgroundVariant="gradient">
+    <Layout hideNavbar backgroundVariant="tinder">
       <div className="min-h-screen flex flex-col pb-24">
         {/* Compact Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-white/80 backdrop-blur-lg border-b border-gray-100 sticky top-0 z-30">
+        <div className="flex items-center justify-between px-4 py-3 bg-white/70 backdrop-blur-xl border-b border-rose-100/50 sticky top-0 z-30">
           <Link
             to="/"
-            className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 active:bg-gray-200 transition-colors"
+            className="flex items-center justify-center w-10 h-10 rounded-full bg-white/80 shadow-sm active:scale-95 transition-all"
           >
             <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -256,17 +260,17 @@ const TinderPage: React.FC = () => {
           {/* City Filter Chip */}
           <button
             onClick={() => setShowCityModal(true)}
-            className="flex items-center space-x-2 bg-purple-100 hover:bg-purple-200 px-4 py-2 rounded-full transition-colors active:scale-95"
+            className="flex items-center space-x-2 bg-gradient-to-r from-rose-100 to-pink-100 hover:from-rose-200 hover:to-pink-200 px-4 py-2 rounded-full transition-all active:scale-95 shadow-sm"
           >
             <span className="text-sm">📍</span>
-            <span className="font-medium text-purple-700 text-sm">
+            <span className="font-semibold text-rose-700 text-sm">
               {selectedCities.length === 0
                 ? 'ทุกเมือง'
                 : selectedCities.length === 1
                   ? selectedCities[0]
                   : `${selectedCities.length} เมือง`}
             </span>
-            <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
@@ -274,13 +278,13 @@ const TinderPage: React.FC = () => {
           {/* Gallery Link with Badge */}
           <Link
             to="/gallery"
-            className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 active:bg-gray-200 transition-colors"
+            className="relative flex items-center justify-center w-10 h-10 rounded-full bg-white/80 shadow-sm active:scale-95 transition-all"
           >
-            <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            <svg className="w-5 h-5 text-rose-500" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
             </svg>
             {likedPlaces.length > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-pink-500 text-white rounded-full text-xs flex items-center justify-center font-bold">
+              <span className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-rose-500 to-pink-500 text-white rounded-full text-xs flex items-center justify-center font-bold shadow-md">
                 {likedPlaces.length > 9 ? '9+' : likedPlaces.length}
               </span>
             )}
@@ -288,15 +292,15 @@ const TinderPage: React.FC = () => {
         </div>
 
         {/* Progress Indicator */}
-        <div className="px-4 py-3 bg-white/50">
+        <div className="px-4 py-3 bg-white/40 backdrop-blur-sm">
           <div className="flex items-center space-x-3">
-            <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+            <div className="flex-1 h-1.5 bg-rose-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
+                className="h-full bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(((currentIndex + 1) / places.length) * 100, 100)}%` }}
               />
             </div>
-            <span className="text-xs font-medium text-gray-500 whitespace-nowrap">
+            <span className="text-xs font-semibold text-rose-600 whitespace-nowrap bg-rose-50 px-2 py-0.5 rounded-full">
               {currentIndex + 1}/{places.length}
             </span>
           </div>
@@ -317,7 +321,7 @@ const TinderPage: React.FC = () => {
         </div>
 
         {/* Action Buttons - Fixed at Bottom */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 safe-area-bottom">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-rose-100/50 safe-area-bottom">
           <div className="flex items-center justify-center space-x-4 py-4 px-6 max-w-lg mx-auto">
             {/* Skip Button */}
             <button
