@@ -38,7 +38,7 @@ const HistoryPage: React.FC = () => {
   };
 
   return (
-    <Layout showHeader showCoinCounter>
+    <Layout showHeader showCoinCounter backgroundVariant="thailand">
       <div className="px-4 py-6 max-w-2xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">

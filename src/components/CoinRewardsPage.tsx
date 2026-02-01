@@ -55,6 +55,7 @@ const CoinRewardsPage: React.FC = () => {
     <Layout 
       showHeader 
       headerTitle="รางวัล"
+      backgroundVariant="thailand"
       rightAction={
         <div className="flex items-center space-x-1.5 bg-gradient-to-r from-amber-400 to-orange-500 px-3 py-1.5 rounded-full shadow-sm">
           <span className="text-lg">🪙</span>

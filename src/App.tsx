@@ -11,6 +11,7 @@ import CoinRewardsPage from "./components/CoinRewardsPage.js";
 import TravelCompanion from "./components/TravelCompanion.js";
 import HistoryPage from "./components/HistoryPage.js";
 import AboutPage from "./components/AboutPage.js";
+import EventPage from "./components/EventPage.js";
 import { mockApi } from "./services/mockApi";
 
 // Development mode - bypass LIFF authentication
@@ -191,6 +192,7 @@ function App() {
           <Route path="/travel-companion" element={<TravelCompanion />} />
           <Route path="/history" element={<HistoryPage />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/event" element={<EventPage />} />
         </Routes>
       </Router>
     </LiffContext.Provider>

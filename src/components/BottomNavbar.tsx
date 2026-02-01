@@ -78,27 +78,41 @@ const BottomNavbar: React.FC = () => {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-lg border-t border-gray-200 safe-area-bottom">
-      <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
+      {/* Glassmorphism background */}
+      <div className="absolute inset-0 bg-white/80 backdrop-blur-xl border-t border-gray-200/50 shadow-[0_-4px_30px_rgba(0,0,0,0.05)]" />
+      
+      <div className="relative flex items-center justify-around h-16 max-w-lg mx-auto px-2">
         {navItems.map((item) => {
           const active = isActive(item.path);
           return (
             <Link
               key={item.path}
               to={item.path}
-              className={`flex flex-col items-center justify-center w-full h-full transition-all duration-200 ${
+              className={`relative flex flex-col items-center justify-center w-full h-full transition-all duration-300 ${
                 active
-                  ? 'text-purple-600'
-                  : 'text-gray-500 hover:text-purple-500'
+                  ? 'text-rose-500'
+                  : 'text-gray-400 hover:text-rose-400'
               }`}
             >
-              <div className={`relative ${active ? 'scale-110' : ''} transition-transform duration-200`}>
-                {active ? item.activeIcon : item.icon}
+              {/* Active indicator pill */}
+              {active && (
+                <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-rose-400 to-pink-500 rounded-full shadow-lg shadow-rose-200" />
+              )}
+              
+              <div className={`relative transition-all duration-300 ${active ? 'scale-110 -translate-y-0.5' : ''}`}>
+                {/* Icon glow effect when active */}
                 {active && (
-                  <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-purple-600 rounded-full" />
+                  <div className="absolute inset-0 bg-rose-400/20 blur-xl rounded-full" />
                 )}
+                <div className="relative">
+                  {active ? item.activeIcon : item.icon}
+                </div>
               </div>
-              <span className={`text-xs mt-1 font-medium ${active ? 'text-purple-600' : ''}`}>
+              
+              <span className={`text-[10px] mt-1 font-semibold tracking-wide transition-all duration-300 ${
+                active ? 'text-rose-500' : 'text-gray-400'
+              }`}>
                 {item.label}
               </span>
             </Link>

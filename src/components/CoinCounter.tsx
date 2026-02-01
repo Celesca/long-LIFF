@@ -49,30 +49,21 @@ const CoinCounter: React.FC<CoinCounterProps> = ({ showAnimation = false, onCoin
   return (
     <Link 
       to="/rewards"
-      className="flex items-center space-x-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-yellow-900 px-4 py-2 rounded-full shadow-lg hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 transform hover:scale-105 animate-pulse-glow cursor-pointer"
+      className="group flex items-center space-x-1.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 text-white px-3 py-1.5 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer"
     >
       <div className="relative">
-        <span className="text-xl animate-bounce-slow">🪙</span>
+        <span className="text-base group-hover:animate-bounce">🪙</span>
         
         {animatingCoins > 0 && (
-          <div className="absolute -top-8 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full animate-bounce">
+          <div className="absolute -top-8 -right-2 bg-emerald-500 text-white text-xs px-2 py-1 rounded-full animate-bounce font-bold">
             +{animatingCoins}
           </div>
         )}
       </div>
       
-      <span className="font-bold text-lg">
+      <span className="font-bold text-sm drop-shadow-sm">
         {coins.toLocaleString()}
       </span>
-      
-      <span className="text-sm font-medium opacity-80">
-        Coins
-      </span>
-      
-      {/* Small arrow indicator */}
-      <svg className="w-4 h-4 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-      </svg>
     </Link>
   );
 };

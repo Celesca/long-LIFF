@@ -67,10 +67,10 @@ const GalleryPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Layout showHeader headerTitle="ที่บันทึก" showCoinCounter backgroundVariant="minimal">
+      <Layout showHeader headerTitle="ที่บันทึก" showCoinCounter backgroundVariant="tinder">
         <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-4">
-            <div className="w-16 h-16 mx-auto border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
+            <div className="w-16 h-16 mx-auto border-4 border-rose-200 border-t-rose-500 rounded-full animate-spin"></div>
             <h2 className="text-lg font-semibold text-gray-700">กำลังโหลดที่บันทึกของคุณ...</h2>
           </div>
         </div>
@@ -87,13 +87,13 @@ const GalleryPage: React.FC = () => {
         likedPlaces.length > 0 ? (
           <button
             onClick={() => setIsModalOpen(true)}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-1.5 rounded-full font-medium text-sm shadow-sm active:scale-95 transition-transform"
+            className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-4 py-1.5 rounded-full font-medium text-sm shadow-sm active:scale-95 transition-transform"
           >
             วางแผนทริป
           </button>
         ) : null
       }
-      backgroundVariant="minimal"
+      backgroundVariant="tinder"
     >
       <div className="px-4 py-4 max-w-lg mx-auto">
         {likedPlaces.length === 0 ? (

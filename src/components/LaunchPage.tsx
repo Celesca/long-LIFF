@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import Layout from './Layout';
 import { useLiff } from '../hooks/useLiff';
 import { CoinSystem, type ActiveJourney } from '../utils/coinSystem';
+import eventBanner from '../assets/event1.jpg';
 
 const featuredPlaces = [
   {
@@ -37,36 +38,36 @@ const featuredPlaces = [
   },
 ];
 
-// SVG Icons as components for professional look
+// Modern SVG Icons with filled style for better mobile visibility
 const ExploreIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
   </svg>
 );
 
 const SavedIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
   </svg>
 );
 
 const RewardsIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/>
   </svg>
 );
 
 const HistoryIcon = () => (
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+  <svg className="w-7 h-7" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>
   </svg>
 );
 
 const quickActions = [
-  { icon: ExploreIcon, label: 'สำรวจ', path: '/tinder', color: 'from-violet-500 to-purple-600', bgLight: 'bg-violet-50' },
-  { icon: SavedIcon, label: 'ที่บันทึก', path: '/gallery', color: 'from-rose-500 to-pink-600', bgLight: 'bg-rose-50' },
-  { icon: RewardsIcon, label: 'รางวัล', path: '/rewards', color: 'from-amber-500 to-orange-500', bgLight: 'bg-amber-50' },
-  { icon: HistoryIcon, label: 'ประวัติ', path: '/history', color: 'from-cyan-500 to-teal-600', bgLight: 'bg-cyan-50' },
+  { icon: ExploreIcon, label: 'สำรวจ', path: '/tinder', gradient: 'from-rose-500 via-pink-500 to-rose-400', shadow: 'shadow-rose-200' },
+  { icon: SavedIcon, label: 'ที่บันทึก', path: '/gallery', gradient: 'from-pink-500 via-fuchsia-500 to-pink-400', shadow: 'shadow-pink-200' },
+  { icon: RewardsIcon, label: 'รางวัล', path: '/rewards', gradient: 'from-amber-500 via-orange-500 to-amber-400', shadow: 'shadow-amber-200' },
+  { icon: HistoryIcon, label: 'ประวัติ', path: '/history', gradient: 'from-teal-500 via-emerald-500 to-teal-400', shadow: 'shadow-teal-200' },
 ];
 
 const LaunchPage: React.FC = () => {
@@ -101,7 +102,7 @@ const LaunchPage: React.FC = () => {
   }, []);
 
   return (
-    <Layout showHeader showCoinCounter backgroundVariant="travel" backgroundIntensity="medium">
+    <Layout showHeader showCoinCounter backgroundVariant="thailand" backgroundIntensity="medium">
       <div className="px-4 py-4 max-w-lg mx-auto">
         {/* Welcome Section - Modern & Clean */}
         <div className="mb-6 animate-fade-in">
@@ -129,20 +130,62 @@ const LaunchPage: React.FC = () => {
           <p className="text-gray-600">ค้นพบประสบการณ์การท่องเที่ยวที่ไม่เหมือนใคร</p>
         </div>
 
-        {/* Quick Actions Grid - Modern Card Design */}
-        <div className="grid grid-cols-4 gap-3 mb-6 animate-slide-up">
+        {/* Event Banner - Full Width */}
+        <Link 
+          to="/event" 
+          className="block mb-6 animate-fade-in group"
+        >
+          <div className="relative rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 group-active:scale-[0.98]">
+            <img 
+              src={eventBanner}
+              alt="Event Banner"
+              className="w-full h-44 sm:h-52 object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            {/* Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+            
+            {/* Animated Glow Border */}
+            <div className="absolute inset-0 rounded-3xl ring-2 ring-white/20 group-hover:ring-rose-400/50 transition-all duration-300" />
+            
+            {/* Content */}
+            <div className="absolute bottom-0 left-0 right-0 p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="bg-gradient-to-r from-rose-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg animate-pulse">
+                  🎉 NEW EVENT
+                </span>
+                <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-medium px-2.5 py-1 rounded-full">
+                  📸 ถ่ายรูป
+                </span>
+              </div>
+              <h3 className="text-white font-bold text-lg sm:text-xl mb-1">LONG Thailand Event 2026</h3>
+              <p className="text-white/80 text-sm flex items-center gap-1">
+                <span>แตะเพื่อร่วมกิจกรรมถ่ายรูป</span>
+                <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </p>
+            </div>
+
+            {/* Sparkle decorations */}
+            <div className="absolute top-4 right-4 text-2xl animate-bounce">✨</div>
+            <div className="absolute top-8 right-12 text-lg animate-pulse">🌟</div>
+          </div>
+        </Link>
+
+        {/* Quick Actions Grid - Modern Mobile-First Design */}
+        <div className="grid grid-cols-4 gap-2 sm:gap-3 mb-6 animate-slide-up">
           {quickActions.map((action, index) => {
             const IconComponent = action.icon;
             return (
               <Link
                 key={index}
                 to={action.path}
-                className="group flex flex-col items-center p-4 bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-transparent hover:-translate-y-1 transition-all duration-300 active:scale-95"
+                className="group flex flex-col items-center p-3 sm:p-4 bg-white/80 backdrop-blur-sm rounded-2xl sm:rounded-3xl shadow-sm border border-white/50 hover:shadow-xl hover:bg-white hover:-translate-y-1 transition-all duration-300 active:scale-95"
               >
-                <div className={`w-12 h-12 bg-gradient-to-br ${action.color} rounded-xl flex items-center justify-center text-white shadow-md mb-2.5 group-hover:scale-110 transition-transform duration-300`}>
+                <div className={`w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br ${action.gradient} rounded-xl sm:rounded-2xl flex items-center justify-center text-white shadow-lg ${action.shadow} mb-2 sm:mb-3 group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
                   <IconComponent />
                 </div>
-                <span className="text-xs font-semibold text-gray-700 group-hover:text-gray-900">{action.label}</span>
+                <span className="text-[10px] sm:text-xs font-bold text-gray-700 group-hover:text-gray-900 text-center leading-tight">{action.label}</span>
               </Link>
             );
           })}
@@ -267,18 +310,19 @@ const LaunchPage: React.FC = () => {
         </div>
 
         {/* Start Exploring CTA - Clean Design */}
-        <div className="bg-gradient-to-br from-violet-500 to-purple-600 rounded-2xl p-6 mb-6 shadow-lg animate-slide-up relative overflow-hidden" style={{ animationDelay: '0.2s' }}>
+        <div className="bg-gradient-to-br from-rose-500 via-pink-500 to-orange-400 rounded-3xl p-6 mb-6 shadow-xl animate-slide-up relative overflow-hidden" style={{ animationDelay: '0.2s' }}>
           {/* Decorative elements */}
           <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-white/5 rounded-full blur-xl" />
 
           <div className="relative flex items-center justify-between">
             <div className="flex-1 mr-4">
               <h3 className="text-white font-bold text-xl mb-2">พร้อมเที่ยวหรือยัง?</h3>
-              <p className="text-white/80 text-sm mb-4">ค้นพบสถานที่ท่องเที่ยวที่เหมาะกับคุณ</p>
+              <p className="text-white/85 text-sm mb-4">ค้นพบสถานที่ท่องเที่ยวที่เหมาะกับคุณ</p>
               <Link
                 to="/tinder"
-                className="inline-flex items-center px-5 py-2.5 bg-white text-purple-600 rounded-xl font-semibold text-sm shadow-md hover:shadow-lg transition-all duration-200 active:scale-95"
+                className="inline-flex items-center px-5 py-2.5 bg-white text-rose-600 rounded-xl font-bold text-sm shadow-lg hover:shadow-xl transition-all duration-200 active:scale-95"
               >
                 เริ่มสำรวจ
                 <svg className="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -286,10 +330,8 @@ const LaunchPage: React.FC = () => {
                 </svg>
               </Link>
             </div>
-            <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center">
-              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-              </svg>
+            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-inner">
+              <span className="text-3xl">🌴</span>
             </div>
           </div>
         </div>
@@ -304,8 +346,8 @@ const LaunchPage: React.FC = () => {
                 title: 'สำรวจสถานที่',
                 desc: 'ปัดขวาเพื่อบันทึกสถานที่ที่คุณชอบ',
                 iconPath: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z',
-                color: 'from-violet-500 to-purple-600',
-                bgLight: 'bg-violet-50'
+                color: 'from-rose-500 to-pink-600',
+                bgLight: 'bg-rose-50'
               },
               {
                 step: 2,
