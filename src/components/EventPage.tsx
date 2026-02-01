@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from './Layout';
-import eventBanner from '../assets/event1.jpg';
+import eventBanner from "../assets/event1.jpg";
 
 interface CapturedPhoto {
   id: string;
@@ -47,44 +47,31 @@ const EventPage: React.FC = () => {
         return;
       }
       
-      // Try with specific facingMode first
+      // Request camera permission with simpler constraints first
       const constraints = {
         video: {
-          facingMode: { ideal: facingMode },
+          facingMode: facingMode,
         },
         audio: false
       };
       
-      let mediaStream: MediaStream;
+      console.log('Requesting camera with constraints:', constraints);
       
-      try {
-        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      } catch (err) {
-        // Fallback: try without facingMode constraint
-        console.warn('Camera constraint failed, trying without facingMode:', err);
-        mediaStream = await navigator.mediaDevices.getUserMedia({ 
-          video: true, 
-          audio: false 
-        });
-      }
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
+      console.log('Camera stream obtained:', mediaStream.getTracks());
       
       setStream(mediaStream);
       setIsCapturing(true);
       
-      // Attach stream to video element with better mobile support
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        
-        // Use play promise for better mobile compatibility
-        videoRef.current.play()
-          .then(() => {
-            console.log('Video stream playing successfully');
-          })
-          .catch((e: any) => {
-            console.error('Video play error:', e);
-            setError('ไม่สามารถเล่นวิดีโอจากกล้องได้');
-          });
-      }
+      // Wait for video element to be available
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play().catch(e => console.error('Video play error:', e));
+          };
+        }
+      }, 100);
       
     } catch (err: any) {
       console.error('Camera error:', err);
@@ -110,76 +97,30 @@ const EventPage: React.FC = () => {
   };
 
   // Switch camera
-  const switchCamera = async () => {
-    try {
-      setError(null);
-      
-      // Check if mediaDevices is supported
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setError('เบราว์เซอร์ไม่รองรับการใช้งานกล้อง กรุณาใช้ Chrome หรือ Safari');
-        return;
-      }
-      
-      const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
-      
-      // Stop current stream
-      if (stream) {
-        stream.getTracks().forEach(track => track.stop());
-        setStream(null);
-      }
-      setIsCapturing(false);
-      
-      // Try with specific facingMode first
-      const constraints = {
-        video: {
-          facingMode: { ideal: newFacingMode },
-        },
-        audio: false
-      };
-      
-      let mediaStream: MediaStream;
-      
-      try {
-        mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      } catch (err) {
-        // Fallback: try without facingMode constraint
-        console.warn('Camera constraint failed, trying without facingMode:', err);
-        mediaStream = await navigator.mediaDevices.getUserMedia({ 
-          video: true, 
-          audio: false 
-        });
-      }
-      
-      setStream(mediaStream);
-      setIsCapturing(true);
-      setFacingMode(newFacingMode);
-      
-      // Attach stream to video element
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-        
-        videoRef.current.play()
-          .then(() => {
-            console.log('Video stream playing successfully');
-          })
-          .catch((e: any) => {
-            console.error('Video play error:', e);
-            setError('ไม่สามารถเล่นวิดีโอจากกล้องได้');
-          });
-      }
-    } catch (err: any) {
-      console.error('Switch camera error:', err);
-      if (err.name === 'NotAllowedError') {
-        setError('กรุณาอนุญาตการใช้งานกล้องในการตั้งค่าเบราว์เซอร์');
-      } else if (err.name === 'NotFoundError') {
-        setError('ไม่พบกล้องในอุปกรณ์นี้');
-      } else if (err.name === 'NotReadableError') {
-        setError('กล้องถูกใช้งานโดยแอปอื่นอยู่');
-      } else {
-        setError(`ไม่สามารถสลับกล้องได้: ${err.message || 'Unknown error'}`);
-      }
-      setIsCapturing(false);
+  const switchCamera = () => {
+    const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+    setFacingMode(newFacingMode);
+    
+    // Stop current stream and restart with new facing mode
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
     }
+    
+    // Restart camera with new facing mode
+    setTimeout(async () => {
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: newFacingMode },
+          audio: false
+        });
+        setStream(mediaStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      } catch (err) {
+        console.error('Switch camera error:', err);
+      }
+    }, 200);
   };
 
   // Capture photo and save to localStorage
@@ -208,7 +149,7 @@ const EventPage: React.FC = () => {
           id: Date.now().toString(),
           dataUrl: base64Image,
           timestamp: Date.now(),
-          eventName: 'วันนักประดิษฐ์ 2569'
+          eventName: 'วันนักประดิษฐ์ไทย 2026'
         };
         
         // Get existing photos from localStorage
@@ -281,7 +222,7 @@ const EventPage: React.FC = () => {
         {/* Event Banner */}
         <div className="relative rounded-3xl overflow-hidden mb-6 shadow-xl">
           <img 
-            src={eventBanner} 
+            src={eventBanner}
             alt="Event Banner"
             className="w-full h-48 object-cover"
           />
@@ -374,8 +315,6 @@ const EventPage: React.FC = () => {
                   autoPlay
                   playsInline
                   muted
-                  width={1280}
-                  height={960}
                   className={`w-full aspect-[3/4] object-cover ${facingMode === 'user' ? 'scale-x-[-1]' : ''}`}
                 />
                 
