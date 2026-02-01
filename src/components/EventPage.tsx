@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Layout from './Layout';
+import eventBanner from '../assets/event1.jpg';
 
 interface CapturedPhoto {
   id: string;
@@ -221,7 +222,7 @@ const EventPage: React.FC = () => {
         {/* Event Banner */}
         <div className="relative rounded-3xl overflow-hidden mb-6 shadow-xl">
           <img 
-            src="/src/assets/event1.jpg" 
+            src={eventBanner} 
             alt="Event Banner"
             className="w-full h-48 object-cover"
           />
