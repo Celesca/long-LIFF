@@ -39,24 +39,46 @@ const EventPage: React.FC = () => {
   const startCamera = async () => {
     try {
       setError(null);
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: { 
+      
+      // Check if mediaDevices is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError('เบราว์เซอร์ไม่รองรับการใช้งานกล้อง กรุณาใช้ Chrome หรือ Safari');
+        return;
+      }
+      
+      // Request camera permission with simpler constraints first
+      const constraints = {
+        video: {
           facingMode: facingMode,
-          width: { ideal: 1280 },
-          height: { ideal: 720 }
         },
         audio: false
-      });
+      };
+      
+      const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
       
       setStream(mediaStream);
       setIsCapturing(true);
       
+      // Attach stream to video element
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch(e => {
+            setError('ไม่สามารถเล่นวิดีโอจากกล้องได้');
+          });
+        };
       }
-    } catch (err) {
-      console.error('Camera error:', err);
-      setError('ไม่สามารถเข้าถึงกล้องได้ กรุณาอนุญาตการใช้งานกล้อง');
+      
+    } catch (err: any) {
+      if (err.name === 'NotAllowedError') {
+        setError('กรุณาอนุญาตการใช้งานกล้องในการตั้งค่าเบราว์เซอร์');
+      } else if (err.name === 'NotFoundError') {
+        setError('ไม่พบกล้องในอุปกรณ์นี้');
+      } else if (err.name === 'NotReadableError') {
+        setError('กล้องถูกใช้งานโดยแอปอื่นอยู่');
+      } else {
+        setError(`ไม่สามารถเข้าถึงกล้องได้: ${err.message || 'Unknown error'}`);
+      }
     }
   };
 
@@ -71,9 +93,55 @@ const EventPage: React.FC = () => {
 
   // Switch camera
   const switchCamera = async () => {
-    stopCamera();
-    setFacingMode(prev => prev === 'user' ? 'environment' : 'user');
-    setTimeout(() => startCamera(), 100);
+    try {
+      setError(null);
+      
+      // Check if mediaDevices is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError('เบราว์เซอร์ไม่รองรับการใช้งานกล้อง กรุณาใช้ Chrome หรือ Safari');
+        return;
+      }
+      
+      const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+      
+      // Stop current stream
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        setStream(null);
+      }
+      setIsCapturing(false);
+      
+      // Start camera with new facing mode
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: newFacingMode },
+        audio: false
+      });
+      
+      setStream(mediaStream);
+      setIsCapturing(true);
+      setFacingMode(newFacingMode);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch(e => {
+            setError('ไม่สามารถเล่นวิดีโอจากกล้องได้');
+          });
+        };
+      }
+    } catch (err: any) {
+      if (err.name === 'NotAllowedError') {
+        setError('กรุณาอนุญาตการใช้งานกล้องในการตั้งค่าเบราว์เซอร์');
+      } else if (err.name === 'NotFoundError') {
+        setError('ไม่พบกล้องในอุปกรณ์นี้');
+      } else if (err.name === 'NotReadableError') {
+        setError('กล้องถูกใช้งานโดยแอปอื่นอยู่');
+      } else {
+        setError(`ไม่สามารถสลับกล้องได้: ${err.message || 'Unknown error'}`);
+      }
+      // Restore capturing state if switching failed
+      setIsCapturing(false);
+    }
   };
 
   // Capture photo and save to localStorage
@@ -102,7 +170,7 @@ const EventPage: React.FC = () => {
           id: Date.now().toString(),
           dataUrl: base64Image,
           timestamp: Date.now(),
-          eventName: 'วันนักประดิษฐ์ไทย 2026'
+          eventName: 'วันนักประดิษฐ์ 2569'
         };
         
         // Get existing photos from localStorage
@@ -189,7 +257,7 @@ const EventPage: React.FC = () => {
                 📍 Thailand
               </span>
             </div>
-            <h2 className="text-white font-bold text-xl">LONG Thailand Event 2026</h2>
+            <h2 className="text-white font-bold text-xl">วันนักประดิษฐ์ 2569</h2>
             <p className="text-white/80 text-sm">ถ่ายรูปร่วมกิจกรรมเพื่อรับรางวัลพิเศษ!</p>
           </div>
         </div>
