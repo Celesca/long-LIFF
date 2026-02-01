@@ -101,6 +101,32 @@ const LaunchPage: React.FC = () => {
     return () => clearInterval(interval);
   }, []);
 
+  const handleStartExploring = () => {
+    setIsPersonalityModalOpen(true);
+  };
+
+  const handlePersonalityConfirm = async (personality: string, duration: string) => {
+    try {
+      if (userId) {
+        await userService.createOrUpdateUser({
+          liff_user_id: userId,
+          display_name: displayName || 'User',
+          picture_url: pictureUrl,
+          preferences: {
+            personality,
+            trip_duration: duration,
+            location_filter: 'Chiang Mai', // Defaulting for now
+          }
+        });
+      }
+      navigate('/tinder');
+    } catch (error) {
+      console.error("Failed to save preferences:", error);
+      // Navigate anyway for demo
+      navigate('/tinder');
+    }
+  };
+
   return (
     <Layout showHeader showCoinCounter backgroundVariant="thailand" backgroundIntensity="medium">
       <div className="px-4 py-4 max-w-lg mx-auto">

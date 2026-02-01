@@ -111,7 +111,11 @@ const TinderPage: React.FC = () => {
   };
 
   const remainingPlaces = places.slice(currentIndex, currentIndex + 2);
-  const isFinished = currentIndex >= places.length;
+  const isFinished = !isLoading && currentIndex >= places.length;
+
+  if (isLoading) {
+    return <div className="min-h-screen flex items-center justify-center text-purple-600">Loading places...</div>;
+  }
 
   // Loading state
   if (loading) {

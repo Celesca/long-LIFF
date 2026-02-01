@@ -8,6 +8,7 @@ import { CoinSystem } from '../utils/coinSystem';
 import CoinCounter from './CoinCounter';
 import PlaceDetailModal from './PlaceDetailModal';
 import { getUserStorageKey } from '../hooks/useLiff';
+import { tripService } from '../utils/api';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
