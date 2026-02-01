@@ -54,26 +54,22 @@ const EventPage: React.FC = () => {
         audio: false
       };
       
-      console.log('Requesting camera with constraints:', constraints);
-      
       const mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
-      console.log('Camera stream obtained:', mediaStream.getTracks());
       
       setStream(mediaStream);
       setIsCapturing(true);
       
-      // Wait for video element to be available
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-          videoRef.current.onloadedmetadata = () => {
-            videoRef.current?.play().catch(e => console.error('Video play error:', e));
-          };
-        }
-      }, 100);
+      // Attach stream to video element
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch(e => {
+            setError('ไม่สามารถเล่นวิดีโอจากกล้องได้');
+          });
+        };
+      }
       
     } catch (err: any) {
-      console.error('Camera error:', err);
       if (err.name === 'NotAllowedError') {
         setError('กรุณาอนุญาตการใช้งานกล้องในการตั้งค่าเบราว์เซอร์');
       } else if (err.name === 'NotFoundError') {
@@ -96,30 +92,56 @@ const EventPage: React.FC = () => {
   };
 
   // Switch camera
-  const switchCamera = () => {
-    const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
-    setFacingMode(newFacingMode);
-    
-    // Stop current stream and restart with new facing mode
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-    }
-    
-    // Restart camera with new facing mode
-    setTimeout(async () => {
-      try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: newFacingMode },
-          audio: false
-        });
-        setStream(mediaStream);
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
-        }
-      } catch (err) {
-        console.error('Switch camera error:', err);
+  const switchCamera = async () => {
+    try {
+      setError(null);
+      
+      // Check if mediaDevices is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setError('เบราว์เซอร์ไม่รองรับการใช้งานกล้อง กรุณาใช้ Chrome หรือ Safari');
+        return;
       }
-    }, 200);
+      
+      const newFacingMode = facingMode === 'user' ? 'environment' : 'user';
+      
+      // Stop current stream
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        setStream(null);
+      }
+      setIsCapturing(false);
+      
+      // Start camera with new facing mode
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: newFacingMode },
+        audio: false
+      });
+      
+      setStream(mediaStream);
+      setIsCapturing(true);
+      setFacingMode(newFacingMode);
+      
+      if (videoRef.current) {
+        videoRef.current.srcObject = mediaStream;
+        videoRef.current.onloadedmetadata = () => {
+          videoRef.current?.play().catch(e => {
+            setError('ไม่สามารถเล่นวิดีโอจากกล้องได้');
+          });
+        };
+      }
+    } catch (err: any) {
+      if (err.name === 'NotAllowedError') {
+        setError('กรุณาอนุญาตการใช้งานกล้องในการตั้งค่าเบราว์เซอร์');
+      } else if (err.name === 'NotFoundError') {
+        setError('ไม่พบกล้องในอุปกรณ์นี้');
+      } else if (err.name === 'NotReadableError') {
+        setError('กล้องถูกใช้งานโดยแอปอื่นอยู่');
+      } else {
+        setError(`ไม่สามารถสลับกล้องได้: ${err.message || 'Unknown error'}`);
+      }
+      // Restore capturing state if switching failed
+      setIsCapturing(false);
+    }
   };
 
   // Capture photo and save to localStorage
@@ -148,7 +170,7 @@ const EventPage: React.FC = () => {
           id: Date.now().toString(),
           dataUrl: base64Image,
           timestamp: Date.now(),
-          eventName: 'วันนักประดิษฐ์ไทย 2026'
+          eventName: 'วันนักประดิษฐ์ 2569'
         };
         
         // Get existing photos from localStorage
