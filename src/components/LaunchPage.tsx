@@ -4,6 +4,7 @@ import Layout from './Layout';
 import { useLiff } from '../hooks/useLiff';
 import { CoinSystem, type ActiveJourney } from '../utils/coinSystem';
 import eventBanner from '../assets/event1.jpg';
+import { userService } from '../utils/api';
 
 const featuredPlaces = [
   {
@@ -71,7 +72,7 @@ const quickActions = [
 ];
 
 const LaunchPage: React.FC = () => {
-  const { isLoggedIn, displayName, pictureUrl } = useLiff();
+  const { isLoggedIn, displayName, pictureUrl, userId } = useLiff();
   const navigate = useNavigate();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [greeting, setGreeting] = useState('');
@@ -486,3 +487,7 @@ const LaunchPage: React.FC = () => {
 };
 
 export default LaunchPage;
+function setIsPersonalityModalOpen(arg0: boolean) {
+  throw new Error('Function not implemented.');
+}
+
