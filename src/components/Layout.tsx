@@ -15,7 +15,6 @@ interface LayoutProps {
   hideNavbar?: boolean;
   transparentHeader?: boolean;
   backgroundVariant?: 'default' | 'travel' | 'minimal' | 'gradient' | 'none' | 'thailand' | 'tinder';
-  backgroundIntensity?: 'low' | 'medium' | 'high';
 }
 
 const Layout: React.FC<LayoutProps> = ({
@@ -29,7 +28,6 @@ const Layout: React.FC<LayoutProps> = ({
   hideNavbar = false,
   transparentHeader = false,
   backgroundVariant = 'default',
-  backgroundIntensity = 'medium',
 }) => {
   const { displayName, pictureUrl, isLoggedIn } = useLiff();
 
@@ -45,7 +43,7 @@ const Layout: React.FC<LayoutProps> = ({
     <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-white to-amber-50/30 relative overflow-hidden">
       {/* Animated Background */}
       {backgroundVariant !== 'none' && (
-        <AnimatedBackground variant={backgroundVariant} intensity={backgroundIntensity} />
+        <AnimatedBackground variant={backgroundVariant} />
       )}
       {/* Header */}
       {showHeader && (
