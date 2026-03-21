@@ -15,7 +15,7 @@ import EventPage from "./components/EventPage.js";
 import { mockApi } from "./services/mockApi";
 
 // Development mode - bypass LIFF authentication
-const DEV_MODE = false; // Set to true for local development without LINE app
+const DEV_MODE = import.meta.env.VITE_DEV_MODE === "true";
 
 // Create context for LIFF user data
 export const LiffContext = createContext<{
