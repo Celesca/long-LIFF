@@ -40,52 +40,56 @@ const Layout: React.FC<LayoutProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-white to-amber-50/30 relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden">
       {/* Animated Background */}
       {backgroundVariant !== 'none' && (
         <AnimatedBackground variant={backgroundVariant} />
       )}
+
       {/* Header */}
       {showHeader && (
         <header
-          className={`fixed top-0 left-0 right-0 z-40 transition-all duration-300 ${transparentHeader
+          className={`fixed top-0 left-0 right-0 z-40 transition-all duration-200 ${
+            transparentHeader
               ? 'bg-transparent'
-              : 'bg-white/80 backdrop-blur-xl border-b border-gray-100/50 shadow-[0_2px_20px_rgba(0,0,0,0.04)]'
-            }`}
+              : 'bg-white/85 backdrop-blur-xl border-b border-[#E8E2DB]/50 shadow-[0_1px_8px_rgba(45,41,38,0.03)]'
+          }`}
         >
           <div className="flex items-center justify-between h-14 px-4 max-w-lg mx-auto">
             {/* Left Section */}
-            <div className="flex items-center min-w-[80px]">
+            <div className="flex items-center min-w-[72px]">
               {showBackButton ? (
                 <button
                   onClick={handleBack}
-                  className="flex items-center space-x-1 text-gray-600 hover:text-rose-500 transition-colors -ml-2 p-2 rounded-full hover:bg-rose-50"
+                  className="flex items-center justify-center w-10 h-10 -ml-1 rounded-full text-[#6B635B] hover:text-[#C2703E] hover:bg-[#FDF5EF] transition-colors"
+                  aria-label="Go back"
                 >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                   </svg>
                 </button>
               ) : isLoggedIn && pictureUrl ? (
-                <div className="flex items-center space-x-2">
-                  <img
-                    src={pictureUrl}
-                    alt={displayName || 'User'}
-                    className="w-9 h-9 rounded-full border-2 border-rose-200 shadow-sm"
-                  />
-                </div>
+                <img
+                  src={pictureUrl}
+                  alt={displayName || 'User'}
+                  className="w-9 h-9 rounded-full border-2 border-[#E8E2DB] shadow-sm object-cover"
+                />
               ) : null}
             </div>
 
-            {/* Center Section - Title */}
+            {/* Center Section - Brand or Title */}
             <div className="flex-1 text-center">
               {headerTitle ? (
-                <h1 className="text-lg font-bold text-gray-800 truncate">{headerTitle}</h1>
+                <h1 className="text-base font-semibold text-[#2D2926] truncate">{headerTitle}</h1>
               ) : (
                 <div className="flex items-center justify-center space-x-1.5">
-                  <span className="text-xl font-extrabold bg-gradient-to-r from-rose-500 via-pink-500 to-orange-400 bg-clip-text text-transparent tracking-tight">
+                  <svg className="w-5 h-5 text-[#C2703E]" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+                  </svg>
+                  <span className="text-lg font-bold text-[#2D2926] tracking-tight">
                     LONG
                   </span>
-                  <span className="text-xs bg-gradient-to-r from-amber-400 to-orange-400 text-white px-2 py-0.5 rounded-full font-semibold shadow-sm">
+                  <span className="text-[10px] bg-[#C2703E] text-white px-1.5 py-0.5 rounded font-semibold tracking-wider">
                     TH
                   </span>
                 </div>
@@ -93,7 +97,7 @@ const Layout: React.FC<LayoutProps> = ({
             </div>
 
             {/* Right Section */}
-            <div className="flex items-center justify-end min-w-[80px]">
+            <div className="flex items-center justify-end min-w-[72px]">
               {rightAction ? (
                 rightAction
               ) : showCoinCounter ? (
@@ -105,9 +109,7 @@ const Layout: React.FC<LayoutProps> = ({
       )}
 
       {/* Main Content */}
-      <main
-        className={`${showHeader ? 'pt-14' : ''} ${!hideNavbar ? 'pb-20' : ''}`}
-      >
+      <main className={`${showHeader ? 'pt-14' : ''} ${!hideNavbar ? 'pb-20' : ''}`}>
         {children}
       </main>
 

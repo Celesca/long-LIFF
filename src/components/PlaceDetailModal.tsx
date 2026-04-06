@@ -46,8 +46,8 @@ const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({ place, isOpen, onCl
 
                     {/* Rating badge */}
                     {place.rating && (
-                        <div className="absolute bottom-3 right-3 flex items-center space-x-1 bg-amber-500/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-sm font-semibold shadow-lg">
-                            <span>⭐</span>
+                        <div className="absolute bottom-3 right-3 flex items-center space-x-1 bg-[#D4A853]/90 backdrop-blur-sm text-white px-2.5 py-1 rounded-full text-sm font-semibold shadow-lg">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
                             <span>{place.rating}</span>
                         </div>
                     )}
@@ -76,7 +76,7 @@ const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({ place, isOpen, onCl
                                 {place.tags.map((tag, index) => (
                                     <span
                                         key={index}
-                                        className="px-3 py-1.5 rounded-full text-sm font-medium bg-purple-100 text-purple-700"
+                                        className="px-3 py-1.5 rounded-full text-sm font-medium bg-[#FDF5EF] text-[#C2703E]"
                                     >
                                         {tag}
                                     </span>
@@ -99,7 +99,7 @@ const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({ place, isOpen, onCl
                         <div className="bg-gray-50 rounded-xl p-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center text-gray-700">
-                                    <span className="text-lg mr-2">📍</span>
+                                    <svg className="w-5 h-5 mr-2 text-[#D4A853]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
                                     <span className="text-sm">
                                         {place.lat.toFixed(4)}°N, {place.long.toFixed(4)}°E
                                     </span>
@@ -108,7 +108,7 @@ const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({ place, isOpen, onCl
                                     href={`https://www.google.com/maps?q=${place.lat},${place.long}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center text-blue-600 text-sm font-medium hover:text-blue-700 active:scale-95 transition-all"
+                                    className="flex items-center text-[#2D6A6A] text-sm font-medium hover:text-[#245858] active:scale-95 transition-all"
                                 >
                                     <span>ดูแผนที่</span>
                                     <svg className="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,7 +123,7 @@ const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({ place, isOpen, onCl
                     {place.distance && (
                         <div className="mb-4">
                             <div className="flex items-center text-gray-600">
-                                <span className="text-lg mr-2">🚗</span>
+                                <svg className="w-5 h-5 mr-2 text-[#6B8F71]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25m-2.25 0h-2.25m4.5 0V3.375c0-.621-.504-1.125-1.125-1.125H5.25c-.621 0-1.125.504-1.125 1.125v14.25"/></svg>
                                 <span className="text-sm">ระยะทาง: {place.distance}</span>
                             </div>
                         </div>
@@ -134,7 +134,7 @@ const PlaceDetailModal: React.FC<PlaceDetailModalProps> = ({ place, isOpen, onCl
                 <div className="border-t border-gray-100 p-4 bg-white">
                     <button
                         onClick={onClose}
-                        className="w-full py-3.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
+                        className="w-full py-3.5 bg-gradient-to-r from-[#C2703E] to-[#A85C2F] text-white font-semibold rounded-xl shadow-md active:scale-[0.98] transition-all"
                     >
                         เข้าใจแล้ว
                     </button>

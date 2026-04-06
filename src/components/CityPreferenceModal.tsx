@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { mockApi } from '../services/mockApi';
+import { appApi } from '../services/apiAdapter';
 
 interface City {
   name: string;
@@ -38,7 +38,7 @@ const CityPreferenceModal: React.FC<CityPreferenceModalProps> = ({
     try {
       setLoading(true);
       setError(null);
-      const response = await mockApi.getAvailableCities();
+      const response = await appApi.getAvailableCities();
       setAvailableCities(response.cities);
     } catch (err) {
       console.error('Failed to fetch cities:', err);
@@ -83,22 +83,27 @@ const CityPreferenceModal: React.FC<CityPreferenceModalProps> = ({
 
   if (!isOpen) return null;
 
-  const cityEmojis: Record<string, string> = {
-    'Chiang Mai': '🏔️',
-    'Bangkok': '🏙️',
-    'Phuket': '🏖️',
-    'Pattaya': '🌴',
-    'Krabi': '🪸',
+  const CityIcon: React.FC<{ city: string }> = ({ city }) => {
+    switch (city) {
+      case 'Chiang Mai':
+        return <svg className="w-6 h-6 text-[#6B8F71]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3H21m-3.75 3H21"/></svg>;
+      case 'Bangkok':
+        return <svg className="w-6 h-6 text-[#C2703E]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21"/></svg>;
+      case 'Phuket':
+        return <svg className="w-6 h-6 text-[#2D6A6A]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>;
+      default:
+        return <svg className="w-6 h-6 text-[#D4A853]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>;
+    }
   };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-fade-in">
         {/* Header */}
-        <div className="p-6 border-b border-purple-100">
+        <div className="p-6 border-b border-[#E8E2DB]">
           <div className="flex items-center justify-between">
-            <h2 className="text-2xl font-bold text-purple-800">
-              🗺️ เลือกจุดหมายปลายทาง
+            <h2 className="text-2xl font-bold text-[#2D2926]">
+              เลือกจุดหมายปลายทาง
             </h2>
             <button
               onClick={onClose}
@@ -119,7 +124,7 @@ const CityPreferenceModal: React.FC<CityPreferenceModalProps> = ({
               </svg>
             </button>
           </div>
-          <p className="text-purple-600 mt-2">
+          <p className="text-[#C2703E] mt-2">
             เลือกเมืองที่คุณต้องการสำรวจ คุณสามารถเลือกหลายเมือง
             หรือสำรวจทั่วประเทศไทย!
           </p>
@@ -128,15 +133,15 @@ const CityPreferenceModal: React.FC<CityPreferenceModalProps> = ({
         <div className="p-6">
           {loading ? (
             <div className="text-center py-8">
-              <div className="w-12 h-12 mx-auto border-4 border-purple-200 border-t-purple-600 rounded-full animate-spin"></div>
-              <p className="mt-4 text-purple-600">กำลังโหลดเมือง...</p>
+              <div className="w-12 h-12 mx-auto border-4 border-[#D4C5B5] border-t-[#C2703E] rounded-full animate-spin"></div>
+              <p className="mt-4 text-[#C2703E]">กำลังโหลดเมือง...</p>
             </div>
           ) : error ? (
             <div className="text-center py-8">
               <p className="text-red-500">{error}</p>
               <button
                 onClick={fetchCities}
-                className="mt-4 text-purple-600 hover:text-purple-700 underline"
+                className="mt-4 text-[#C2703E] hover:text-[#A85C2F] underline"
               >
                 ลองใหม่
               </button>
@@ -147,7 +152,7 @@ const CityPreferenceModal: React.FC<CityPreferenceModalProps> = ({
               <div className="flex justify-between mb-4">
                 <button
                   onClick={selectAll}
-                  className="text-sm text-purple-600 hover:text-purple-700 font-medium"
+                  className="text-sm text-[#C2703E] hover:text-[#A85C2F] font-medium"
                 >
                   เลือกทั้งหมด
                 </button>
@@ -167,17 +172,15 @@ const CityPreferenceModal: React.FC<CityPreferenceModalProps> = ({
                     onClick={() => toggleCity(city.name)}
                     className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:shadow-md ${
                       selectedCities.includes(city.name)
-                        ? 'border-purple-500 bg-purple-50'
-                        : 'border-gray-200 hover:border-purple-300'
+                        ? 'border-[#C2703E] bg-[#FDF5EF]'
+                        : 'border-gray-200 hover:border-[#D4A853]'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
-                        <span className="text-2xl">
-                          {cityEmojis[city.name] || '📍'}
-                        </span>
+                        <CityIcon city={city.name} />
                         <div>
-                          <h4 className="font-semibold text-purple-800">
+                          <h4 className="font-semibold text-[#2D2926]">
                             {city.name}
                           </h4>
                           <p className="text-sm text-gray-500">
@@ -188,7 +191,7 @@ const CityPreferenceModal: React.FC<CityPreferenceModalProps> = ({
                       <div
                         className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${
                           selectedCities.includes(city.name)
-                            ? 'bg-purple-500'
+                            ? 'bg-[#FDF5EF]0'
                             : 'bg-gray-200'
                         }`}
                       >
@@ -208,14 +211,14 @@ const CityPreferenceModal: React.FC<CityPreferenceModalProps> = ({
               </div>
 
               {/* All Cities Option */}
-              <div className="mb-6 p-4 bg-gradient-to-r from-purple-100 to-pink-100 rounded-xl">
+              <div className="mb-6 p-4 bg-gradient-to-r from-[#FDF5EF] to-[#FAF0E6] rounded-xl">
                 <div className="flex items-center space-x-3">
-                  <span className="text-2xl">🇹🇭</span>
+                  <svg className="w-6 h-6 text-[#C2703E]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
                   <div className="flex-1">
-                    <h4 className="font-semibold text-purple-800">
+                    <h4 className="font-semibold text-[#2D2926]">
                       สำรวจทั่วประเทศไทย
                     </h4>
-                    <p className="text-sm text-purple-600">
+                    <p className="text-sm text-[#C2703E]">
                       {selectedCities.length === 0 ||
                       selectedCities.length === availableCities.length
                         ? 'เลือกทุกเมืองแล้ว - หลากหลายสุด!'
@@ -228,7 +231,7 @@ const CityPreferenceModal: React.FC<CityPreferenceModalProps> = ({
               {/* Confirm Button */}
               <button
                 onClick={handleConfirm}
-                className="w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-4 px-6 rounded-xl font-semibold text-lg hover:from-purple-600 hover:to-purple-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg"
+                className="w-full bg-gradient-to-r from-[#C2703E] to-[#A85C2F] text-white py-4 px-6 rounded-xl font-semibold text-lg hover:from-[#A85C2F] hover:to-[#8F4E28] transform hover:scale-[1.02] transition-all duration-200 shadow-lg"
               >
                 {selectedCities.length === 0
                   ? 'สำรวจทุกเมือง'

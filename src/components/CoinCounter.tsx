@@ -18,17 +18,13 @@ const CoinCounter: React.FC<CoinCounterProps> = ({ showAnimation = false, onCoin
     };
 
     updateCoins();
-    
-    // Listen for storage changes to update coins in real time
+
     const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'userProfile') {
-        updateCoins();
-      }
+      if (e.key === 'userProfile') updateCoins();
     };
 
     window.addEventListener('storage', handleStorageChange);
-    
-    // Custom event for same-tab updates
+
     const handleCoinUpdate = (e: CustomEvent) => {
       updateCoins();
       if (showAnimation && e.detail.earned) {
@@ -47,23 +43,21 @@ const CoinCounter: React.FC<CoinCounterProps> = ({ showAnimation = false, onCoin
   }, [showAnimation, onCoinEarned]);
 
   return (
-    <Link 
+    <Link
       to="/rewards"
-      className="group flex items-center space-x-1.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-orange-400 text-white px-3 py-1.5 rounded-full shadow-md hover:shadow-lg hover:scale-105 transition-all duration-300 cursor-pointer"
+      className="group flex items-center space-x-1.5 bg-[#D4A853] text-white px-3 py-1.5 rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer"
     >
       <div className="relative">
-        <span className="text-base group-hover:animate-bounce">🪙</span>
-        
+        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125" />
+        </svg>
         {animatingCoins > 0 && (
-          <div className="absolute -top-8 -right-2 bg-emerald-500 text-white text-xs px-2 py-1 rounded-full animate-bounce font-bold">
+          <div className="absolute -top-7 -right-2 bg-[#4D8B5C] text-white text-[10px] px-1.5 py-0.5 rounded-md animate-bounce font-bold">
             +{animatingCoins}
           </div>
         )}
       </div>
-      
-      <span className="font-bold text-sm drop-shadow-sm">
-        {coins.toLocaleString()}
-      </span>
+      <span className="font-bold text-sm">{coins.toLocaleString()}</span>
     </Link>
   );
 };

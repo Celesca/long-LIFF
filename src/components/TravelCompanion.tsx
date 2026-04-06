@@ -160,9 +160,9 @@ const TravelCompanion: React.FC = () => {
   };
 
   const createMarkerIcon = (index: number, visited: boolean, isCurrent: boolean): L.DivIcon => {
-    const bgColor = visited ? '#10B981' : isCurrent ? '#8B5CF6' : '#94A3B8';
+    const bgColor = visited ? '#4D8B5C' : isCurrent ? '#C2703E' : '#9C9490';
     const size = isCurrent ? 40 : 32;
-    
+
     return L.divIcon({
       html: `<div style="
         background-color: ${bgColor};
@@ -187,8 +187,8 @@ const TravelCompanion: React.FC = () => {
 
   if (!journey) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full" />
+      <div className="min-h-screen bg-[#FAF7F4] flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-4 border-[#C2703E] border-t-transparent rounded-full" />
       </div>
     );
   }
@@ -200,39 +200,39 @@ const TravelCompanion: React.FC = () => {
     : [13.7563, 100.5018];
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col">
+    <div className="min-h-screen bg-[#FAF7F4] flex flex-col">
       {/* Mobile Header */}
-      <div className="bg-white shadow-sm sticky top-0 z-50">
+      <div className="bg-white/85 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b border-[#E8E2DB]">
         <div className="px-4 py-3">
           <div className="flex items-center justify-between">
             <button
               onClick={() => navigate('/')}
-              className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 active:bg-gray-200"
+              className="w-10 h-10 flex items-center justify-center rounded-full bg-[#F5F0EB] active:bg-[#E8E2DB]"
             >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-[#2D2926]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
-            
+
             <div className="text-center flex-1 mx-3">
-              <h1 className="font-bold text-gray-800 text-sm">
+              <h1 className="font-bold text-[#2D2926] text-sm">
                 {journey.city === 'all' ? 'ทริปหลายเมือง' : journey.city}
               </h1>
-              <p className="text-xs text-gray-500">{journey.duration}</p>
+              <p className="text-xs text-[#9C9490]">{journey.duration}</p>
             </div>
-            
+
             <CoinCounter showAnimation={true} />
           </div>
 
           {/* Progress Bar */}
           <div className="mt-3">
-            <div className="flex items-center justify-between text-xs text-gray-600 mb-1">
+            <div className="flex items-center justify-between text-xs text-[#6B5E54] mb-1">
               <span>{progress.visited} จาก {progress.total} สถานที่</span>
               <span>{progress.percentage}%</span>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div 
-                className="bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full h-2 transition-all duration-500"
+            <div className="w-full bg-[#E8E2DB] rounded-full h-2">
+              <div
+                className="bg-[#4D8B5C] rounded-full h-2 transition-all duration-500"
                 style={{ width: `${progress.percentage}%` }}
               />
             </div>
@@ -240,26 +240,32 @@ const TravelCompanion: React.FC = () => {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex border-t border-gray-100">
+        <div className="flex border-t border-[#E8E2DB]">
           <button
             onClick={() => setActiveTab('places')}
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'places' 
-                ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50' 
-                : 'text-gray-500'
+            className={`flex-1 py-3 text-sm font-medium transition-colors flex items-center justify-center space-x-1.5 ${
+              activeTab === 'places'
+                ? 'text-[#C2703E] border-b-2 border-[#C2703E] bg-[#FDF5EF]'
+                : 'text-[#9C9490]'
             }`}
           >
-            📍 สถานที่
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
+            </svg>
+            <span>สถานที่</span>
           </button>
           <button
             onClick={() => setActiveTab('map')}
-            className={`flex-1 py-3 text-sm font-medium transition-colors ${
-              activeTab === 'map' 
-                ? 'text-purple-600 border-b-2 border-purple-600 bg-purple-50' 
-                : 'text-gray-500'
+            className={`flex-1 py-3 text-sm font-medium transition-colors flex items-center justify-center space-x-1.5 ${
+              activeTab === 'map'
+                ? 'text-[#C2703E] border-b-2 border-[#C2703E] bg-[#FDF5EF]'
+                : 'text-[#9C9490]'
             }`}
           >
-            🗺️ แผนที่
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z" />
+            </svg>
+            <span>แผนที่</span>
           </button>
         </div>
       </div>
@@ -270,22 +276,22 @@ const TravelCompanion: React.FC = () => {
           <div className="h-full flex flex-col overflow-y-auto">
             {/* Current Place Card */}
             {currentPlace && (
-              <div className="p-4 bg-gradient-to-b from-white to-gray-50">
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+              <div className="p-4">
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-[#E8E2DB]">
                   {/* Place Image */}
                   <div className="relative h-48">
-                    <img 
-                      src={currentPlace.image || 'https://via.placeholder.com/400x200?text=No+Image'} 
+                    <img
+                      src={currentPlace.image || 'https://via.placeholder.com/400x200?text=No+Image'}
                       alt={currentPlace.name}
                       className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                    
+
                     {/* Status Badge */}
                     <div className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold ${
-                      currentPlace.visited 
-                        ? 'bg-emerald-500 text-white' 
-                        : 'bg-purple-500 text-white'
+                      currentPlace.visited
+                        ? 'bg-[#4D8B5C] text-white'
+                        : 'bg-[#C2703E] text-white'
                     }`}>
                       {currentPlace.visited ? '✓ เยี่ยมแล้ว' : `จุดที่ ${currentIndex + 1}`}
                     </div>
@@ -294,8 +300,18 @@ const TravelCompanion: React.FC = () => {
                     <div className="absolute bottom-0 left-0 right-0 p-4">
                       <h2 className="text-white font-bold text-xl mb-1">{currentPlace.name}</h2>
                       <div className="flex items-center space-x-3 text-white/90 text-sm">
-                        {currentPlace.rating && <span>⭐ {currentPlace.rating}</span>}
-                        {currentPlace.city && <span>📍 {currentPlace.city}</span>}
+                        {currentPlace.rating && (
+                          <span className="flex items-center space-x-1">
+                            <svg className="w-3.5 h-3.5 text-[#D4A853]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <span>{currentPlace.rating}</span>
+                          </span>
+                        )}
+                        {currentPlace.city && (
+                          <span className="flex items-center space-x-1">
+                            <svg className="w-3.5 h-3.5 text-[#D4A853]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                            <span>{currentPlace.city}</span>
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -303,7 +319,7 @@ const TravelCompanion: React.FC = () => {
                   {/* Place Details */}
                   <div className="p-4">
                     {currentPlace.description && (
-                      <p className="text-gray-600 text-sm mb-4">{currentPlace.description}</p>
+                      <p className="text-[#6B5E54] text-sm mb-4">{currentPlace.description}</p>
                     )}
 
                     {/* Action Buttons */}
@@ -311,14 +327,14 @@ const TravelCompanion: React.FC = () => {
                       {!currentPlace.visited ? (
                         <button
                           onClick={() => openPhotoUpload(currentPlace)}
-                          className="w-full bg-gradient-to-r from-purple-500 to-indigo-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-98 transition-transform flex items-center justify-center space-x-2"
+                          className="w-full bg-[#C2703E] text-white py-4 rounded-xl font-bold text-lg shadow-lg active:scale-[0.98] transition-transform flex items-center justify-center space-x-2"
                         >
-                          <span className="text-2xl">📸</span>
+                          <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                           <span>เช็คอินด้วยภาพถ่าย</span>
                         </button>
                       ) : (
-                        <div className="w-full bg-emerald-50 text-emerald-700 py-4 rounded-xl font-bold text-center flex items-center justify-center space-x-2">
-                          <span>✅</span>
+                        <div className="w-full bg-[#4D8B5C]/10 text-[#4D8B5C] py-4 rounded-xl font-bold text-center flex items-center justify-center space-x-2">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                           <span>คุณได้รับ {currentPlace.coinsEarned} เหรียญ!</span>
                         </div>
                       )}
@@ -327,9 +343,9 @@ const TravelCompanion: React.FC = () => {
                         onClick={() => {
                           window.open(`https://www.google.com/maps/dir/?api=1&destination=${currentPlace.lat},${currentPlace.long}`, '_blank');
                         }}
-                        className="w-full bg-blue-500 text-white py-3 rounded-xl font-semibold flex items-center justify-center space-x-2"
+                        className="w-full bg-[#2D6A6A] text-white py-3 rounded-xl font-semibold flex items-center justify-center space-x-2"
                       >
-                        <span>🧭</span>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/></svg>
                         <span>นำทางด้วย Google Maps</span>
                       </button>
                     </div>
@@ -339,9 +355,9 @@ const TravelCompanion: React.FC = () => {
             )}
 
             {/* Horizontal Place Carousel */}
-            <div className="flex-1 bg-gray-50 pt-2 pb-4">
-              <p className="px-4 text-sm font-semibold text-gray-700 mb-2">จุดหมายปลายทางทั้งหมด</p>
-              <div 
+            <div className="flex-1 bg-[#F5F0EB] pt-2 pb-4">
+              <p className="px-4 text-sm font-semibold text-[#2D2926] mb-2">จุดหมายปลายทางทั้งหมด</p>
+              <div
                 ref={carouselRef}
                 className="flex overflow-x-auto gap-4 px-4 pb-4 snap-x snap-mandatory scrollbar-hide"
                 style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -350,28 +366,31 @@ const TravelCompanion: React.FC = () => {
                   <div
                     key={place.id}
                     onClick={() => handlePlaceSelect(index)}
-                    className={`flex-shrink-0 w-[280px] snap-center bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transition-all ${
-                      index === currentIndex ? 'ring-2 ring-purple-500 scale-[1.02]' : ''
+                    className={`flex-shrink-0 w-[280px] snap-center bg-white rounded-xl shadow-md overflow-hidden cursor-pointer transition-all border border-[#E8E2DB] ${
+                      index === currentIndex ? 'ring-2 ring-[#C2703E] scale-[1.02]' : ''
                     }`}
                   >
                     <div className="relative h-28">
-                      <img 
-                        src={place.image || 'https://via.placeholder.com/300x150'} 
+                      <img
+                        src={place.image || 'https://via.placeholder.com/300x150'}
                         alt={place.name}
                         className="w-full h-full object-cover"
                       />
                       <div className={`absolute top-2 left-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white ${
-                        place.visited ? 'bg-emerald-500' : 'bg-purple-600'
+                        place.visited ? 'bg-[#4D8B5C]' : 'bg-[#C2703E]'
                       }`}>
                         {place.visited ? '✓' : index + 1}
                       </div>
                     </div>
                     <div className="p-3">
-                      <h4 className="font-semibold text-gray-800 text-sm truncate">{place.name}</h4>
+                      <h4 className="font-semibold text-[#2D2926] text-sm truncate">{place.name}</h4>
                       <div className="flex items-center justify-between mt-1">
-                        <span className="text-xs text-gray-500">{place.city}</span>
+                        <span className="text-xs text-[#9C9490]">{place.city}</span>
                         {place.visited && (
-                          <span className="text-xs text-emerald-600 font-medium">+{place.coinsEarned} 🪙</span>
+                          <span className="text-xs text-[#4D8B5C] font-medium flex items-center space-x-0.5">
+                            <span>+{place.coinsEarned}</span>
+                            <svg className="w-3 h-3 text-[#D4A853]" fill="currentColor" viewBox="0 0 24 24"><path d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375"/></svg>
+                          </span>
                         )}
                       </div>
                     </div>
@@ -406,10 +425,10 @@ const TravelCompanion: React.FC = () => {
                 >
                   <Popup>
                     <div className="text-center p-2">
-                      <p className="font-bold text-purple-800">{place.name}</p>
-                      <p className="text-xs text-gray-500">จุดที่ {index + 1}</p>
+                      <p className="font-bold text-[#2D2926]">{place.name}</p>
+                      <p className="text-xs text-[#9C9490]">จุดที่ {index + 1}</p>
                       {place.visited && (
-                        <p className="text-xs text-emerald-600 mt-1">✓ เยี่ยมแล้ว</p>
+                        <p className="text-xs text-[#4D8B5C] mt-1">✓ เยี่ยมแล้ว</p>
                       )}
                     </div>
                   </Popup>
@@ -420,7 +439,7 @@ const TravelCompanion: React.FC = () => {
               <Polyline
                 positions={journey.places.map(p => [p.lat, p.long] as [number, number])}
                 pathOptions={{
-                  color: '#8B5CF6',
+                  color: '#C2703E',
                   weight: 4,
                   opacity: 0.7,
                   dashArray: '10, 8'
@@ -430,25 +449,26 @@ const TravelCompanion: React.FC = () => {
 
             {/* Floating Current Place Card */}
             <div className="absolute bottom-4 left-4 right-4 z-[1000]">
-              <div className="bg-white rounded-xl shadow-lg p-4 flex items-center space-x-4">
-                <img 
-                  src={currentPlace?.image || 'https://via.placeholder.com/80'} 
+              <div className="bg-white rounded-xl shadow-lg p-4 flex items-center space-x-4 border border-[#E8E2DB]">
+                <img
+                  src={currentPlace?.image || 'https://via.placeholder.com/80'}
                   alt={currentPlace?.name}
                   className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                 />
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-gray-800 truncate">{currentPlace?.name}</p>
-                  <p className="text-sm text-gray-500">จุดที่ {currentIndex + 1} จาก {journey.places.length}</p>
+                  <p className="font-bold text-[#2D2926] truncate">{currentPlace?.name}</p>
+                  <p className="text-sm text-[#9C9490]">จุดที่ {currentIndex + 1} จาก {journey.places.length}</p>
                 </div>
                 {!currentPlace?.visited ? (
                   <button
                     onClick={() => currentPlace && openPhotoUpload(currentPlace)}
-                    className="bg-purple-500 text-white px-4 py-2 rounded-lg font-semibold text-sm flex-shrink-0"
+                    className="bg-[#C2703E] text-white px-4 py-2 rounded-lg font-semibold text-sm flex-shrink-0 flex items-center space-x-1"
                   >
-                    📸 เช็คอิน
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    <span>เช็คอิน</span>
                   </button>
                 ) : (
-                  <div className="bg-emerald-100 text-emerald-700 px-3 py-2 rounded-lg text-sm font-medium flex-shrink-0">
+                  <div className="bg-[#4D8B5C]/10 text-[#4D8B5C] px-3 py-2 rounded-lg text-sm font-medium flex-shrink-0">
                     ✓ เสร็จแล้ว
                   </div>
                 )}
@@ -459,21 +479,21 @@ const TravelCompanion: React.FC = () => {
       </div>
 
       {/* Bottom Navigation */}
-      <div className="bg-white border-t border-gray-200 px-4 py-3 flex items-center justify-between">
+      <div className="bg-white border-t border-[#E8E2DB] px-4 py-3 flex items-center justify-between">
         <button
           disabled={currentIndex === 0}
           onClick={() => handlePlaceSelect(currentIndex - 1)}
-          className="flex items-center space-x-1 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed bg-gray-100 active:bg-gray-200"
+          className="flex items-center space-x-1 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed bg-[#F5F0EB] active:bg-[#E8E2DB]"
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
-          <span className="font-medium">ก่อนหน้า</span>
+          <span className="font-medium text-[#2D2926]">ก่อนหน้า</span>
         </button>
 
         <button
           onClick={handleEndJourney}
-          className="text-red-500 font-medium text-sm px-3 py-2"
+          className="text-[#C75050] font-medium text-sm px-3 py-2"
         >
           จบทริป
         </button>
@@ -481,7 +501,7 @@ const TravelCompanion: React.FC = () => {
         <button
           disabled={currentIndex === journey.places.length - 1}
           onClick={() => handlePlaceSelect(currentIndex + 1)}
-          className="flex items-center space-x-1 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed bg-purple-100 text-purple-700 active:bg-purple-200"
+          className="flex items-center space-x-1 px-4 py-2 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed bg-[#FDF5EF] text-[#C2703E] active:bg-[#F5E6D8]"
         >
           <span className="font-medium">ถัดไป</span>
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -494,18 +514,18 @@ const TravelCompanion: React.FC = () => {
       {showPhotoModal && selectedPlace && (
         <div className="fixed inset-0 z-[9999] bg-black/50 flex items-end sm:items-center justify-center">
           <div className="bg-white w-full sm:max-w-md sm:rounded-2xl rounded-t-3xl max-h-[90vh] overflow-y-auto animate-slide-up">
-            <div className="sticky top-0 bg-white p-4 border-b flex items-center justify-between">
-              <h3 className="font-bold text-lg">เช็คอินที่ {selectedPlace.name}</h3>
+            <div className="sticky top-0 bg-white p-4 border-b border-[#E8E2DB] flex items-center justify-between">
+              <h3 className="font-bold text-lg text-[#2D2926]">เช็คอินที่ {selectedPlace.name}</h3>
               <button
                 onClick={() => setShowPhotoModal(false)}
-                className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center"
+                className="w-8 h-8 rounded-full bg-[#F5F0EB] flex items-center justify-center text-[#6B5E54]"
               >
-                ✕
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
 
             <div className="p-4">
-              <p className="text-gray-600 mb-4">
+              <p className="text-[#6B5E54] mb-4">
                 ถ่ายหรืออัปโหลดภาพเพื่อยืนยันว่าคุณมาเยี่ยมสถานที่นี้แล้วและรับเหรียญ!
               </p>
 
@@ -513,16 +533,16 @@ const TravelCompanion: React.FC = () => {
               <div className="grid grid-cols-3 gap-3 mb-4">
                 {uploadedPhotos.map((photo, index) => (
                   <div key={index} className="relative aspect-square">
-                    <img 
-                      src={photo} 
+                    <img
+                      src={photo}
                       alt={`Photo ${index + 1}`}
                       className="w-full h-full object-cover rounded-xl"
                     />
                     <button
                       onClick={() => setUploadedPhotos(prev => prev.filter((_, i) => i !== index))}
-                      className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs"
+                      className="absolute -top-2 -right-2 w-6 h-6 bg-[#C75050] text-white rounded-full text-xs flex items-center justify-center"
                     >
-                      ✕
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                   </div>
                 ))}
@@ -531,13 +551,13 @@ const TravelCompanion: React.FC = () => {
                   <button
                     onClick={() => fileInputRef.current?.click()}
                     disabled={isUploading}
-                    className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center text-gray-400 hover:border-purple-400 hover:text-purple-500 transition-colors"
+                    className="aspect-square border-2 border-dashed border-[#D4C5B5] rounded-xl flex flex-col items-center justify-center text-[#9C9490] hover:border-[#C2703E] hover:text-[#C2703E] transition-colors"
                   >
                     {isUploading ? (
-                      <div className="animate-spin w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full" />
+                      <div className="animate-spin w-6 h-6 border-2 border-[#C2703E] border-t-transparent rounded-full" />
                     ) : (
                       <>
-                        <span className="text-2xl">📷</span>
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         <span className="text-xs mt-1">เพิ่มรูป</span>
                       </>
                     )}
@@ -556,11 +576,13 @@ const TravelCompanion: React.FC = () => {
               />
 
               {/* Coin Reward Info */}
-              <div className="bg-amber-50 rounded-xl p-3 mb-4 flex items-center space-x-3">
-                <span className="text-2xl">🪙</span>
+              <div className="bg-[#D4A853]/10 rounded-xl p-3 mb-4 flex items-center space-x-3">
+                <div className="w-10 h-10 bg-[#D4A853]/20 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#D4A853]" fill="currentColor" viewBox="0 0 24 24"><path d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375"/></svg>
+                </div>
                 <div>
-                  <p className="font-semibold text-amber-800">รับ {uploadedPhotos.length * 10} เหรียญ!</p>
-                  <p className="text-xs text-amber-600">10 เหรียญต่อภาพที่อัปโหลด</p>
+                  <p className="font-semibold text-[#8B6914]">รับ {uploadedPhotos.length * 10} เหรียญ!</p>
+                  <p className="text-xs text-[#A68425]">10 เหรียญต่อภาพที่อัปโหลด</p>
                 </div>
               </div>
 
@@ -569,13 +591,13 @@ const TravelCompanion: React.FC = () => {
                 <button
                   onClick={handleConfirmVisit}
                   disabled={uploadedPhotos.length === 0}
-                  className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full bg-[#4D8B5C] text-white py-4 rounded-xl font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   ยืนยันการเยี่ยมชม & รับเหรียญ
                 </button>
                 <button
                   onClick={() => setShowPhotoModal(false)}
-                  className="w-full bg-gray-100 text-gray-700 py-3 rounded-xl font-medium"
+                  className="w-full bg-[#F5F0EB] text-[#6B5E54] py-3 rounded-xl font-medium"
                 >
                   ยกเลิก
                 </button>
@@ -618,7 +640,7 @@ const TravelCompanion: React.FC = () => {
                   width: '10px',
                   height: '10px',
                   borderRadius: Math.random() > 0.5 ? '50%' : '0',
-                  backgroundColor: ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'][Math.floor(Math.random() * 6)],
+                  backgroundColor: ['#D4A853', '#C2703E', '#4D8B5C', '#2D6A6A', '#6B8F71', '#E8C97A'][Math.floor(Math.random() * 6)],
                   animationDelay: `${Math.random() * 2}s`
                 }}
               />
@@ -626,56 +648,65 @@ const TravelCompanion: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-3xl max-w-sm w-full overflow-hidden shadow-2xl animate-bounce-in">
-            {/* Header with gradient */}
-            <div className="bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 p-6 text-center">
-              <div className="text-6xl mb-2">🎉</div>
-              <h2 className="text-2xl font-bold text-white drop-shadow-lg">
-                ยินดีด้วย!
-              </h2>
+            {/* Header */}
+            <div className="bg-[#D4A853] p-6 text-center">
+              <div className="w-16 h-16 mx-auto bg-white/20 rounded-full flex items-center justify-center mb-3">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+              </div>
+              <h2 className="text-2xl font-bold text-white">ยินดีด้วย!</h2>
               <p className="text-white/90 mt-1">คุณทำทริปเสร็จสมบูรณ์แล้ว!</p>
             </div>
 
             {/* Trip Summary */}
             <div className="p-6 space-y-4">
               <div className="text-center mb-4">
-                <p className="text-gray-600 text-sm">ทริปของคุณไป</p>
-                <h3 className="text-xl font-bold text-purple-600">{journey?.city}</h3>
+                <p className="text-[#9C9490] text-sm">ทริปของคุณไป</p>
+                <h3 className="text-xl font-bold text-[#C2703E]">{journey?.city}</h3>
               </div>
 
               {/* Stats Grid */}
               <div className="grid grid-cols-3 gap-3">
-                <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 text-center">
-                  <div className="text-3xl mb-1">📍</div>
-                  <div className="text-2xl font-bold text-purple-600">{tripSummary.placesVisited}</div>
-                  <div className="text-xs text-gray-500">สถานที่ที่เยี่ยม</div>
+                <div className="bg-[#FDF5EF] rounded-xl p-4 text-center">
+                  <div className="w-8 h-8 mx-auto mb-1 bg-[#C2703E]/10 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#C2703E]" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                  </div>
+                  <div className="text-2xl font-bold text-[#C2703E]">{tripSummary.placesVisited}</div>
+                  <div className="text-xs text-[#9C9490]">สถานที่</div>
                 </div>
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 text-center">
-                  <div className="text-3xl mb-1">📸</div>
-                  <div className="text-2xl font-bold text-blue-600">{tripSummary.totalPhotos}</div>
-                  <div className="text-xs text-gray-500">ภาพถ่าย</div>
+                <div className="bg-[#2D6A6A]/5 rounded-xl p-4 text-center">
+                  <div className="w-8 h-8 mx-auto mb-1 bg-[#2D6A6A]/10 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#2D6A6A]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                  </div>
+                  <div className="text-2xl font-bold text-[#2D6A6A]">{tripSummary.totalPhotos}</div>
+                  <div className="text-xs text-[#9C9490]">ภาพถ่าย</div>
                 </div>
-                <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-xl p-4 text-center">
-                  <div className="text-3xl mb-1">🪙</div>
-                  <div className="text-2xl font-bold text-amber-600">{tripSummary.totalCoins}</div>
-                  <div className="text-xs text-gray-500">เหรียญที่ได้รับ</div>
+                <div className="bg-[#D4A853]/10 rounded-xl p-4 text-center">
+                  <div className="w-8 h-8 mx-auto mb-1 bg-[#D4A853]/20 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#D4A853]" fill="currentColor" viewBox="0 0 24 24"><path d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375"/></svg>
+                  </div>
+                  <div className="text-2xl font-bold text-[#D4A853]">{tripSummary.totalCoins}</div>
+                  <div className="text-xs text-[#9C9490]">เหรียญ</div>
                 </div>
               </div>
 
               {/* Bonus Section */}
-              <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-4 flex items-center space-x-3">
-                <span className="text-3xl">🏆</span>
+              <div className="bg-[#4D8B5C]/10 rounded-xl p-4 flex items-center space-x-3">
+                <div className="w-10 h-10 bg-[#4D8B5C]/20 rounded-full flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#4D8B5C]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M18.75 4.236c.982.143 1.954.317 2.916.52A6.003 6.003 0 0016.27 9.728M18.75 4.236V4.5c0 2.108-.966 3.99-2.48 5.228m0 0a6.002 6.002 0 01-4.27 1.772 6.002 6.002 0 01-4.27-1.772"/></svg>
+                </div>
                 <div>
-                  <p className="font-semibold text-emerald-700">โบนัสทริปสำเร็จ!</p>
-                  <p className="text-sm text-emerald-600">+100 โบนัสเหรียญเพิ่มเติมแล้ว</p>
+                  <p className="font-semibold text-[#4D8B5C]">โบนัสทริปสำเร็จ!</p>
+                  <p className="text-sm text-[#4D8B5C]/80">+100 โบนัสเหรียญเพิ่มเติมแล้ว</p>
                 </div>
               </div>
 
               {/* Action Button */}
               <button
                 onClick={handleFinishTrip}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]"
+                className="w-full bg-[#C2703E] text-white py-4 rounded-xl font-bold text-lg shadow-lg hover:bg-[#A85C2F] transition-colors flex items-center justify-center space-x-2"
               >
-                🏠 กลับหน้าแรก
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/></svg>
+                <span>กลับหน้าแรก</span>
               </button>
             </div>
           </div>

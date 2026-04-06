@@ -11,7 +11,7 @@ interface TinderCardProps {
 
 const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
   const [imageLoaded, setImageLoaded] = useState(false);
-  
+
   const [{ x, y, rotate, scale }, api] = useSpring(() => ({
     x: 0,
     y: 0,
@@ -24,7 +24,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
       const { movement: [mx, my], direction: [xDir], down, velocity } = state;
       const trigger = Math.abs(mx) > 80 || (velocity > 0.5 && Math.abs(mx) > 50);
       const dir = xDir < 0 ? 'left' : 'right';
-      
+
       if (!down && trigger) {
         onSwipe(dir);
         api.start({
@@ -50,112 +50,102 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
   return (
     <animated.div
       {...bind()}
-      style={{
-        x,
-        y,
-        rotate,
-        scale,
-        touchAction: 'none',
-      }}
-      className={`absolute inset-0 bg-white rounded-3xl shadow-2xl overflow-hidden select-none ${
-        isTop ? 'z-20 ring-1 ring-black/5' : 'z-10 opacity-60 scale-[0.92]'
+      style={{ x, y, rotate, scale, touchAction: 'none' }}
+      className={`absolute inset-0 bg-white rounded-2xl shadow-lg overflow-hidden select-none ${
+        isTop ? 'z-20 ring-1 ring-[#E8E2DB]' : 'z-10 opacity-50 scale-[0.94]'
       }`}
     >
       <div className="relative h-full">
-        {/* Loading skeleton with shimmer */}
+        {/* Loading skeleton */}
         {!imageLoaded && (
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 animate-pulse">
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/50 to-transparent animate-shimmer" />
-          </div>
+          <div className="absolute inset-0 skeleton" />
         )}
-        
+
         <img
           src={place.image}
           alt={place.name}
-          className={`w-full h-full object-cover transition-opacity duration-500 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
           draggable={false}
           onLoad={() => setImageLoaded(true)}
         />
-        
-        {/* Like indicator with animation */}
+
+        {/* Like indicator */}
         <animated.div
           style={{
             opacity: x.to((val: number) => Math.min(val / 60, 1)),
-            scale: x.to((val: number) => 1 + Math.min(val / 200, 0.2)),
+            scale: x.to((val: number) => 1 + Math.min(val / 200, 0.15)),
           }}
           className="absolute top-1/2 right-6 -translate-y-1/2 flex items-center justify-center"
         >
-          <div className="w-24 h-24 bg-gradient-to-br from-emerald-400 to-green-500 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl border-4 border-white/90">
-            <svg className="w-12 h-12 text-white drop-shadow-lg" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+          <div className="w-20 h-20 bg-[#4D8B5C] rounded-full flex items-center justify-center shadow-xl border-4 border-white/90">
+            <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
             </svg>
           </div>
-          <span className="absolute -bottom-2 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">LIKE</span>
+          <span className="absolute -bottom-2 bg-[#4D8B5C] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-md uppercase tracking-wider">Like</span>
         </animated.div>
-        
-        {/* Skip indicator with animation */}
+
+        {/* Skip indicator */}
         <animated.div
           style={{
             opacity: x.to((val: number) => Math.min(Math.abs(val) / 60, 1) * (val < 0 ? 1 : 0)),
-            scale: x.to((val: number) => val < 0 ? 1 + Math.min(Math.abs(val) / 200, 0.2) : 1),
+            scale: x.to((val: number) => val < 0 ? 1 + Math.min(Math.abs(val) / 200, 0.15) : 1),
           }}
           className="absolute top-1/2 left-6 -translate-y-1/2 flex items-center justify-center"
         >
-          <div className="w-24 h-24 bg-gradient-to-br from-gray-500 to-gray-700 backdrop-blur-md rounded-full flex items-center justify-center shadow-2xl border-4 border-white/90">
-            <svg className="w-12 h-12 text-white drop-shadow-lg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+          <div className="w-20 h-20 bg-[#8B7D74] rounded-full flex items-center justify-center shadow-xl border-4 border-white/90">
+            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" strokeWidth={3} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </div>
-          <span className="absolute -bottom-2 bg-gray-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">NOPE</span>
+          <span className="absolute -bottom-2 bg-[#8B7D74] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-md uppercase tracking-wider">Nope</span>
         </animated.div>
 
-        {/* Premium gradient overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 via-40% to-transparent" />
-        
-        {/* Top gradient for better readability */}
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-black/30 to-transparent" />
+        {/* Gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 via-40% to-transparent" />
+        <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/25 to-transparent" />
 
-        {/* Category badge at top */}
+        {/* Category badge */}
         {place.tags && place.tags[0] && (
           <div className="absolute top-4 left-4">
-            <span className="px-3 py-1.5 bg-white/95 backdrop-blur-sm rounded-full text-xs font-semibold text-gray-800 shadow-lg">
+            <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-[11px] font-semibold text-[#2D2926] shadow-sm">
               {place.tags[0]}
             </span>
           </div>
         )}
 
         {/* Content */}
-        <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-          {/* Rating & Distance Row */}
-          <div className="flex items-center justify-between mb-2">
-            {place.rating && (
-              <div className="flex items-center space-x-1.5 bg-amber-500/90 backdrop-blur-sm px-3 py-1.5 rounded-full">
-                <span className="text-white text-sm">⭐</span>
-                <span className="font-bold text-sm">{place.rating}</span>
-              </div>
-            )}
-          </div>
-          
-          <h3 className="text-2xl font-bold mb-1.5 drop-shadow-lg tracking-tight">{place.name}</h3>
-          
+        <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+          {/* Rating */}
+          {place.rating && (
+            <div className="flex items-center space-x-1 bg-[#D4A853]/90 backdrop-blur-sm px-2.5 py-1 rounded-lg w-fit mb-2">
+              <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" />
+              </svg>
+              <span className="font-semibold text-sm">{place.rating}</span>
+            </div>
+          )}
+
+          <h3 className="text-2xl font-bold mb-1 drop-shadow-md tracking-tight">{place.name}</h3>
+
           {place.country && (
-            <div className="flex items-center text-white/90 text-sm mb-3">
-              <svg className="w-4 h-4 mr-1.5 text-rose-400" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            <div className="flex items-center text-white/80 text-sm mb-2.5">
+              <svg className="w-3.5 h-3.5 mr-1 text-[#D4A853]" fill="currentColor" viewBox="0 0 24 24">
+                <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
               </svg>
               <span className="font-medium">{place.country}</span>
             </div>
           )}
-          
-          <p className="text-sm text-white/85 mb-4 line-clamp-2 leading-relaxed">{place.description}</p>
-          
-          {/* Tags as pills */}
+
+          <p className="text-sm text-white/75 mb-3 line-clamp-2 leading-relaxed">{place.description}</p>
+
+          {/* Tags */}
           {place.tags && place.tags.length > 1 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5">
               {place.tags.slice(1, 4).map((tag, index) => (
                 <span
                   key={index}
-                  className="px-3 py-1 rounded-full text-xs font-semibold bg-white/15 backdrop-blur-md text-white/95 border border-white/20"
+                  className="px-2.5 py-0.5 rounded-md text-[11px] font-medium bg-white/12 backdrop-blur-sm text-white/90 border border-white/15"
                 >
                   {tag}
                 </span>

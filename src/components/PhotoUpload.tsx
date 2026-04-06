@@ -50,13 +50,13 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border border-purple-100">
+    <div className="bg-white rounded-xl shadow-lg p-6 border border-[#E8E2DB]">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-lg font-bold text-purple-800">
-            📸 อัปโหลดภาพเพื่อทำเครื่องหมายว่าเยี่ยมแล้ว
+          <h3 className="text-lg font-bold text-[#2D2926]">
+            อัปโหลดภาพเพื่อทำเครื่องหมายว่าเยี่ยมแล้ว
           </h3>
-          <p className="text-sm text-purple-600">{placeName}</p>
+          <p className="text-sm text-[#C2703E]">{placeName}</p>
         </div>
         <div className="text-sm text-gray-500">
           {uploadedPhotos.length}/{maxPhotos} ภาพ
@@ -70,7 +70,7 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
             <img 
               src={photo} 
               alt={`Photo ${index + 1}`}
-              className="w-full h-24 object-cover rounded-lg border-2 border-purple-200"
+              className="w-full h-24 object-cover rounded-lg border-2 border-[#D4C5B5]"
             />
             <button
               onClick={() => removePhoto(index)}
@@ -86,10 +86,10 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={isUploading}
-            className="w-full h-24 border-2 border-dashed border-purple-300 rounded-lg flex flex-col items-center justify-center text-purple-500 hover:border-purple-500 hover:bg-purple-50 transition-all duration-200 disabled:opacity-50"
+            className="w-full h-24 border-2 border-dashed border-[#D4C5B5] rounded-lg flex flex-col items-center justify-center text-[#C2703E] hover:border-[#C2703E] hover:bg-[#FDF5EF] transition-all duration-200 disabled:opacity-50"
           >
             {isUploading ? (
-              <div className="animate-spin w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full"></div>
+              <div className="animate-spin w-6 h-6 border-2 border-[#C2703E] border-t-transparent rounded-full"></div>
             ) : (
               <>
                 <svg className="w-6 h-6 mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -103,13 +103,13 @@ const PhotoUpload: React.FC<PhotoUploadProps> = ({
       </div>
 
       {/* Upload Instructions */}
-      <div className="text-sm text-gray-600 bg-purple-50 rounded-lg p-3">
+      <div className="text-sm text-gray-600 bg-[#FDF5EF] rounded-lg p-3">
         <div className="flex items-start space-x-2">
-          <svg className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
+          <svg className="w-4 h-4 text-[#C2703E] mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
           </svg>
           <div>
-            <p className="font-medium text-purple-800 mb-1">ข้อกำหนดการอัปโหลดภาพ:</p>
+            <p className="font-medium text-[#2D2926] mb-1">ข้อกำหนดการอัปโหลดภาพ:</p>
             <ul className="text-xs space-y-1">
               <li>• อัปโหลดอย่างน้อย 1 ภาพเพื่อทำเครื่องหมายว่าเยี่ยมสถานที่นี้แล้ว</li>
               <li>• รับ +10 เหรียญต่อภาพที่อัปโหลด</li>

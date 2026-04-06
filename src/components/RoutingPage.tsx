@@ -301,7 +301,7 @@ const RoutingPage: React.FC = () => {
     const createNumberedIcon = (number: number): L.DivIcon => {
       return L.divIcon({
         html: `<div style="
-          background-color: #8B5CF6;
+          background-color: #C2703E;
           color: white;
           border-radius: 50%;
           width: 32px;
@@ -324,17 +324,17 @@ const RoutingPage: React.FC = () => {
     return (
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-bold text-purple-800">
+          <h3 className="text-xl font-bold text-[#2D2926]">
             แผนที่เส้นทางแบบอินเตอร์แอกทีฟ - {city && city !== 'all' ? city : 'ประเทศไทย'}
           </h3>
 
           {/* Map Type Toggle */}
-          <div className="flex bg-purple-100 rounded-lg p-1">
+          <div className="flex bg-[#FDF5EF] rounded-lg p-1">
             <button
               onClick={() => setMapType('street')}
               className={`px-3 py-1 rounded text-sm font-medium transition-all ${mapType === 'street'
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'text-purple-600 hover:bg-purple-200'
+                  ? 'bg-[#C2703E] text-white shadow-sm'
+                  : 'text-[#C2703E] hover:bg-[#FAF0E6]'
                 }`}
             >
               ถนน
@@ -342,8 +342,8 @@ const RoutingPage: React.FC = () => {
             <button
               onClick={() => setMapType('satellite')}
               className={`px-3 py-1 rounded text-sm font-medium transition-all ${mapType === 'satellite'
-                  ? 'bg-purple-600 text-white shadow-sm'
-                  : 'text-purple-600 hover:bg-purple-200'
+                  ? 'bg-[#C2703E] text-white shadow-sm'
+                  : 'text-[#C2703E] hover:bg-[#FAF0E6]'
                 }`}
             >
               ดาวเทียม
@@ -351,7 +351,7 @@ const RoutingPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="h-[500px] rounded-xl overflow-hidden border-2 border-purple-100">
+        <div className="h-[500px] rounded-xl overflow-hidden border-2 border-[#E8E2DB]">
           <MapContainer
             center={mapCenter}
             zoom={12}
@@ -380,20 +380,20 @@ const RoutingPage: React.FC = () => {
               >
                 <Popup className="custom-popup">
                   <div className="text-center min-w-[200px]">
-                    <div className="bg-purple-600 text-white px-3 py-1 rounded-full text-xs font-bold mb-3">
+                    <div className="bg-[#C2703E] text-white px-3 py-1 rounded-full text-xs font-bold mb-3">
                       จุดที่ {index + 1}
                     </div>
-                    <h4 className="font-bold text-purple-800 mb-2 text-lg">
+                    <h4 className="font-bold text-[#2D2926] mb-2 text-lg">
                       {place.name}
                     </h4>
                     <p className="text-sm text-gray-600 mb-3">{place.description}</p>
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="bg-yellow-50 p-2 rounded">
-                        <div className="text-yellow-600">⭐ คะแนน</div>
+                      <div className="bg-[#D4A853]/10 p-2 rounded">
+                        <div className="text-[#D4A853]">⭐ คะแนน</div>
                         <div className="font-bold">{place.rating}</div>
                       </div>
                       <div className="bg-blue-50 p-2 rounded">
-                        <div className="text-blue-600">📍 ระยะทาง</div>
+                        <div className="text-[#2D6A6A]">📍 ระยะทาง</div>
                         <div className="font-bold">{place.distance}</div>
                       </div>
                     </div>
@@ -412,7 +412,7 @@ const RoutingPage: React.FC = () => {
               <Polyline
                 positions={pathCoordinates}
                 pathOptions={{
-                  color: '#8B5CF6',
+                  color: '#C2703E',
                   weight: 5,
                   opacity: 0.8,
                   dashArray: '15, 10',
@@ -428,45 +428,45 @@ const RoutingPage: React.FC = () => {
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Map Legend */}
           <div className="p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-xl">
-            <h4 className="font-semibold text-purple-800 mb-3">คู่มือแผนที่</h4>
+            <h4 className="font-semibold text-[#2D2926] mb-3">คู่มือแผนที่</h4>
             <div className="space-y-2 text-sm">
               <div className="flex items-center space-x-3">
-                <div className="w-7 h-7 bg-purple-600 rounded-full flex items-center justify-center text-white text-xs font-bold">1</div>
+                <div className="w-7 h-7 bg-[#C2703E] rounded-full flex items-center justify-center text-white text-xs font-bold">1</div>
                 <span>ลำดับเส้นทาง (คลิกเพื่อดูรายละเอียด)</span>
               </div>
               <div className="flex items-center space-x-3">
                 <div className="flex items-center">
-                  <div className="w-6 h-1 bg-purple-600"></div>
+                  <div className="w-6 h-1 bg-[#C2703E]"></div>
                   <div className="w-2 h-1 bg-transparent"></div>
-                  <div className="w-6 h-1 bg-purple-600"></div>
+                  <div className="w-6 h-1 bg-[#C2703E]"></div>
                 </div>
                 <span>เส้นทางที่เหมาะสม</span>
               </div>
               <div className="flex items-center space-x-3">
-                <span className="text-purple-600">🖱️</span>
+                <span className="text-[#C2703E]">🖱️</span>
                 <span>ซูมและเลื่อนเพื่อสำรวจ</span>
               </div>
               <div className="flex items-center space-x-3">
-                <span className="text-purple-600">🗺️</span>
+                <span className="text-[#C2703E]">🗺️</span>
                 <span>สลับระหว่างมุมมองถนน/ดาวเทียม</span>
               </div>
             </div>
           </div>
 
           {/* Map Statistics */}
-          <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-100 rounded-xl">
-            <h4 className="font-semibold text-indigo-800 mb-3">สถิติเส้นทาง</h4>
+          <div className="p-4 bg-gradient-to-r from-[#2D6A6A]/5 to-[#2D6A6A]/10 rounded-xl">
+            <h4 className="font-semibold text-[#2D6A6A] mb-3">สถิติเส้นทาง</h4>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span className="text-indigo-600">พื้นที่:</span>
+                <span className="text-[#2D6A6A]">พื้นที่:</span>
                 <span className="font-bold">เชียงใหม่, ประเทศไทย</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-indigo-600">จำนวนจุด:</span>
+                <span className="text-[#2D6A6A]">จำนวนจุด:</span>
                 <span className="font-bold">{optimizedRoute.length}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-indigo-600">คะแนนเฉลี่ย:</span>
+                <span className="text-[#2D6A6A]">คะแนนเฉลี่ย:</span>
                 <span className="font-bold">
                   {optimizedRoute.length > 0 &&
                     (optimizedRoute.reduce((sum, place) => sum + (place.rating || 0), 0) / optimizedRoute.length).toFixed(1)
@@ -474,7 +474,7 @@ const RoutingPage: React.FC = () => {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-indigo-600">เวลาเดินทางโดยประมาณ:</span>
+                <span className="text-[#2D6A6A]">เวลาเดินทางโดยประมาณ:</span>
                 <span className="font-bold">
                   {duration === '1 วัน ไม่ค้างคืน' ? '8-10 ชั่วโมง' : '2 วัน'}
                 </span>
@@ -519,12 +519,12 @@ const RoutingPage: React.FC = () => {
   // Show message if no places found for selected city
   if (optimizedRoute.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-gradient-to-br from-[#FAF7F4] via-[#FAF7F4] to-white flex flex-col items-center justify-center p-6">
         <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md text-center">
-          <div className="w-20 h-20 mx-auto bg-purple-100 rounded-full flex items-center justify-center mb-6">
-            <span className="text-4xl">🗺️</span>
+          <div className="w-20 h-20 mx-auto bg-[#FDF5EF] rounded-full flex items-center justify-center mb-6">
+            <svg className="w-10 h-10 text-[#C2703E]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/></svg>
           </div>
-          <h2 className="text-2xl font-bold text-purple-800 mb-3">
+          <h2 className="text-2xl font-bold text-[#2D2926] mb-3">
             ไม่พบสถานที่ใน {city && city !== 'all' ? city : 'ที่คุณเลือก'}
           </h2>
           <p className="text-gray-600 mb-6">
@@ -533,13 +533,13 @@ const RoutingPage: React.FC = () => {
           <div className="space-y-3">
             <Link
               to="/tinder"
-              className="block w-full bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transition-all"
+              className="block w-full bg-gradient-to-r from-[#C2703E] to-[#A85C2F] text-white py-3 px-6 rounded-xl font-semibold hover:from-[#A85C2F] hover:to-[#8F4E28] transition-all"
             >
               สำรวจสถานที่
             </Link>
             <Link
               to="/gallery"
-              className="block w-full border border-purple-300 text-purple-600 py-3 px-6 rounded-xl font-semibold hover:bg-purple-50 transition-all"
+              className="block w-full border border-purple-300 text-[#C2703E] py-3 px-6 rounded-xl font-semibold hover:bg-[#FDF5EF] transition-all"
             >
               กลับไปที่บันทึก
             </Link>
@@ -550,9 +550,9 @@ const RoutingPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white">
+    <div className="min-h-screen bg-gradient-to-br from-[#FAF7F4] via-[#FAF7F4] to-white">
       {/* Header - Responsive */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-purple-100 sticky top-0 z-10">
+      <div className="bg-white/80 backdrop-blur-sm border-b border-[#E8E2DB] sticky top-0 z-10">
         <div className="p-4 sm:p-6">
           {/* Mobile Layout */}
           <div className="flex flex-col space-y-3 md:hidden">
@@ -560,7 +560,7 @@ const RoutingPage: React.FC = () => {
             <div className="flex items-center justify-between">
               <Link
                 to="/gallery"
-                className="flex items-center space-x-2 text-purple-600 hover:text-purple-700"
+                className="flex items-center space-x-2 text-[#C2703E] hover:text-[#A85C2F]"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -569,8 +569,8 @@ const RoutingPage: React.FC = () => {
               </Link>
 
               <div className="text-center flex-1 mx-2">
-                <h1 className="text-base font-bold text-purple-800">เส้นทางท่องเที่ยวของคุณ</h1>
-                <p className="text-xs text-purple-500">
+                <h1 className="text-base font-bold text-[#2D2926]">เส้นทางท่องเที่ยวของคุณ</h1>
+                <p className="text-xs text-[#C2703E]/70">
                   {city && city !== 'all' ? `📍 ${city} • ` : ''}{optimizedRoute.length} สถานที่
                 </p>
               </div>
@@ -583,7 +583,7 @@ const RoutingPage: React.FC = () => {
                 onClick={triggerEmergencyPlan}
                 className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-3 py-2 rounded-lg font-medium text-xs shadow-sm transition"
               >
-                <span>🚨</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
                 <span>ฉุกเฉิน</span>
               </button>
             </div>
@@ -593,7 +593,7 @@ const RoutingPage: React.FC = () => {
           <div className="hidden md:flex items-center justify-between">
             <Link
               to="/gallery"
-              className="flex items-center space-x-2 text-purple-600 hover:text-purple-700"
+              className="flex items-center space-x-2 text-[#C2703E] hover:text-[#A85C2F]"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -602,8 +602,8 @@ const RoutingPage: React.FC = () => {
             </Link>
 
             <div className="text-center">
-              <h1 className="text-xl font-bold text-purple-800">เส้นทางท่องเที่ยวของคุณ</h1>
-              <p className="text-sm text-purple-500">
+              <h1 className="text-xl font-bold text-[#2D2926]">เส้นทางท่องเที่ยวของคุณ</h1>
+              <p className="text-sm text-[#C2703E]/70">
                 {city && city !== 'all' ? `📍 ${city} • ` : ''}{optimizedRoute.length} สถานที่
               </p>
             </div>
@@ -614,7 +614,7 @@ const RoutingPage: React.FC = () => {
                 onClick={triggerEmergencyPlan}
                 className="flex items-center space-x-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-medium text-sm shadow-sm transition"
               >
-                <span>🚨</span>
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
                 <span>แผนฉุกเฉิน</span>
               </button>
             </div>
@@ -630,7 +630,7 @@ const RoutingPage: React.FC = () => {
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 animate-fade-in">
               <div className="flex items-start justify-between mb-4">
                 <h2 className="text-xl font-bold text-red-600 flex items-center space-x-2">
-                  <span>⚠️ แจ้งเตือนฉุกเฉิน</span>
+                  <span>แจ้งเตือนฉุกเฉิน</span>
                 </h2>
                 <button
                   onClick={() => setShowEmergencyModal(false)}
@@ -642,29 +642,29 @@ const RoutingPage: React.FC = () => {
               </div>
               <div className="space-y-4">
                 <p className="text-sm text-gray-700">
-                  สถานที่ <span className="font-semibold text-purple-700">{emergencyPlace.name}</span> กำลังได้รับผลกระทบจาก<span className="font-semibold">สภาพน้ำท่วม</span> เพื่อความปลอดภัยของคุณ เราแนะนำให้เลือกสถานที่ทดแทน
+                  สถานที่ <span className="font-semibold text-[#A85C2F]">{emergencyPlace.name}</span> กำลังได้รับผลกระทบจาก<span className="font-semibold">สภาพน้ำท่วม</span> เพื่อความปลอดภัยของคุณ เราแนะนำให้เลือกสถานที่ทดแทน
                 </p>
                 {alternativePlaces.length > 0 ? (
                   <div>
                     <h3 className="text-sm font-semibold text-gray-800 mb-2">สถานที่ทดแทนที่แนะนำ</h3>
                     <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                       {alternativePlaces.map(alt => (
-                        <div key={alt.id} className="border rounded-lg p-3 flex items-start justify-between hover:border-purple-400 transition cursor-pointer" onClick={() => handleSelectAlternative(alt)}>
+                        <div key={alt.id} className="border rounded-lg p-3 flex items-start justify-between hover:border-[#D4A853] transition cursor-pointer" onClick={() => handleSelectAlternative(alt)}>
                           <div className="text-sm">
-                            <p className="font-semibold text-purple-800">{alt.name}</p>
+                            <p className="font-semibold text-[#2D2926]">{alt.name}</p>
                             {alt.description && <p className="text-gray-500 text-xs line-clamp-2">{alt.description}</p>}
                             <div className="text-xs text-gray-400 mt-1 flex space-x-3">
                               {alt.rating && <span>⭐ {alt.rating}</span>}
                               <span>{alt.lat.toFixed(2)}, {alt.long.toFixed(2)}</span>
                             </div>
                           </div>
-                          <button className="ml-4 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-xs px-3 py-1 rounded-md font-medium hover:from-purple-600 hover:to-purple-700">เลือก</button>
+                          <button className="ml-4 bg-gradient-to-r from-[#C2703E] to-[#A85C2F] text-white text-xs px-3 py-1 rounded-md font-medium hover:from-[#A85C2F] hover:to-[#8F4E28]">เลือก</button>
                         </div>
                       ))}
                     </div>
                   </div>
                 ) : (
-                  <div className="p-4 bg-yellow-50 text-yellow-700 rounded-lg text-sm">ไม่มีสถานที่ทดแทนในขณะนี้</div>
+                  <div className="p-4 bg-[#D4A853]/10 text-[#8B6914] rounded-lg text-sm">ไม่มีสถานที่ทดแทนในขณะนี้</div>
                 )}
                 <div className="flex justify-end space-x-3 pt-2">
                   <button
@@ -685,10 +685,10 @@ const RoutingPage: React.FC = () => {
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setShowSwapModal(false)}></div>
             <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-hidden animate-fade-in">
               {/* Header */}
-              <div className="sticky top-0 bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white">
+              <div className="sticky top-0 bg-gradient-to-r from-[#2D6A6A] to-[#C2703E] p-4 text-white">
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold flex items-center space-x-2">
-                    <span>🔄</span>
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
                     <span>สลับสถานที่</span>
                   </h2>
                   <button
@@ -726,8 +726,8 @@ const RoutingPage: React.FC = () => {
 
                 {/* Arrow */}
                 <div className="flex justify-center my-2">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-8 h-8 bg-[#2D6A6A]/10 rounded-full flex items-center justify-center">
+                    <svg className="w-4 h-4 text-[#2D6A6A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                     </svg>
                   </div>
@@ -743,7 +743,7 @@ const RoutingPage: React.FC = () => {
                       {swapAlternatives.map(alt => (
                         <div
                           key={alt.id}
-                          className="p-3 border rounded-xl hover:border-blue-400 hover:bg-blue-50 transition cursor-pointer flex items-center justify-between"
+                          className="p-3 border rounded-xl hover:border-[#2D6A6A] hover:bg-[#2D6A6A]/5 transition cursor-pointer flex items-center justify-between"
                           onClick={() => handleSwapPlace(alt)}
                         >
                           <div className="flex items-center space-x-3 flex-1 min-w-0">
@@ -751,7 +751,7 @@ const RoutingPage: React.FC = () => {
                               <img src={alt.image} alt={alt.name} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
                             )}
                             <div className="flex-1 min-w-0">
-                              <p className="font-semibold text-purple-800 truncate">{alt.name}</p>
+                              <p className="font-semibold text-[#2D2926] truncate">{alt.name}</p>
                               {alt.description && (
                                 <p className="text-xs text-gray-500 line-clamp-1">{alt.description}</p>
                               )}
@@ -761,7 +761,7 @@ const RoutingPage: React.FC = () => {
                               </div>
                             </div>
                           </div>
-                          <button className="ml-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs px-3 py-2 rounded-lg font-medium hover:from-blue-600 hover:to-purple-700 flex-shrink-0">
+                          <button className="ml-3 bg-gradient-to-r from-[#2D6A6A] to-[#C2703E] text-white text-xs px-3 py-2 rounded-lg font-medium hover:from-[#245858] hover:to-[#A85C2F] flex-shrink-0">
                             เลือก
                           </button>
                         </div>
@@ -769,8 +769,8 @@ const RoutingPage: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  <div className="p-4 bg-yellow-50 text-yellow-700 rounded-lg text-sm text-center">
-                    <span className="text-2xl block mb-2">😔</span>
+                  <div className="p-4 bg-[#D4A853]/10 text-[#8B6914] rounded-lg text-sm text-center">
+                    <svg className="w-8 h-8 mx-auto mb-2 text-[#D4A853]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z"/></svg>
                     ไม่มีสถานที่ทดแทนใน {swapPlace.place.city || 'เมืองนี้'}
                     <br />
                     <span className="text-xs">ลองปัดเพิ่มเติมสถานที่ในหน้าสำรวจ!</span>
@@ -793,28 +793,28 @@ const RoutingPage: React.FC = () => {
 
         {/* Travel Settings Summary */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <h2 className="text-lg font-bold text-purple-800 mb-4">การตั้งค่าทริป</h2>
+          <h2 className="text-lg font-bold text-[#2D2926] mb-4">การตั้งค่าทริป</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 bg-[#FDF5EF] rounded-full flex items-center justify-center">
+                <svg className="w-5 h-5 text-[#C2703E]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                 </svg>
               </div>
               <div>
                 <p className="text-sm text-gray-500">บุคลิกภาพ</p>
-                <p className="font-semibold text-purple-800">{personality || 'เริ่มต้น'}</p>
+                <p className="font-semibold text-[#2D2926]">{personality || 'เริ่มต้น'}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+              <div className="w-10 h-10 bg-[#FDF5EF] rounded-full flex items-center justify-center">
+                <svg className="w-5 h-5 text-[#C2703E]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
               </div>
               <div>
                 <p className="text-sm text-gray-500">ระยะเวลา</p>
-                <p className="font-semibold text-purple-800">{duration || 'ไม่ระบุ'}</p>
+                <p className="font-semibold text-[#2D2926]">{duration || 'ไม่ระบุ'}</p>
               </div>
             </div>
             <div className="flex items-center space-x-3">
@@ -833,13 +833,13 @@ const RoutingPage: React.FC = () => {
           </div>
 
           {/* Selection Info */}
-          <div className="mt-4 p-3 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg">
+          <div className="mt-4 p-3 bg-gradient-to-r from-[#2D6A6A]/5 to-[#2D6A6A]/10 rounded-lg">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-[#2D6A6A]" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                 </svg>
-                <span className="text-sm text-blue-800">
+                <span className="text-sm text-[#2D6A6A]">
                   {duration === '1 วัน ไม่ค้างคืน'
                     ? `สุ่มเลือก 3 สถานที่จากคอลเลคชันของคุณสำหรับทริปวันเดียวที่สมบูรณ์แบบ`
                     : duration === '2 วัน 1 คืน'
@@ -853,7 +853,7 @@ const RoutingPage: React.FC = () => {
               {(duration === '1 วัน ไม่ค้างคืน' || duration === '2 วัน 1 คืน') && (
                 <button
                   onClick={regenerateRoute}
-                  className="flex items-center space-x-1 bg-blue-500 text-white px-3 py-1 rounded-lg text-xs font-medium hover:bg-blue-600 transition-colors duration-200"
+                  className="flex items-center space-x-1 bg-[#2D6A6A] text-white px-3 py-1 rounded-lg text-xs font-medium hover:bg-[#245858] transition-colors duration-200"
                 >
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" />
@@ -869,7 +869,7 @@ const RoutingPage: React.FC = () => {
           {/* Route List */}
           <div className="xl:col-span-1 bg-white rounded-2xl shadow-lg p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-bold text-purple-800">ลำดับเส้นทาง</h3>
+              <h3 className="text-xl font-bold text-[#2D2926]">ลำดับเส้นทาง</h3>
               <p className="text-xs text-gray-500">ลากเพื่อจัดเรียงใหม่</p>
             </div>
             <div className="space-y-3">
@@ -880,20 +880,20 @@ const RoutingPage: React.FC = () => {
                   onDragStart={() => handleDragStart(index)}
                   onDragOver={(e) => handleDragOver(e, index)}
                   onDragEnd={handleDragEnd}
-                  className={`p-4 bg-purple-50 rounded-xl border-2 transition-all cursor-grab active:cursor-grabbing ${draggedIndex === index ? 'border-purple-500 opacity-50' : 'border-purple-100'
+                  className={`p-4 bg-[#FDF5EF] rounded-xl border-2 transition-all cursor-grab active:cursor-grabbing ${draggedIndex === index ? 'border-[#C2703E] opacity-50' : 'border-[#E8E2DB]'
                     }`}
                 >
                   <div className="flex items-start space-x-3">
                     {/* Drag Handle */}
                     <div className="flex flex-col items-center space-y-1 pt-1">
-                      <div className="w-8 h-8 rounded-full bg-purple-600 text-white flex items-center justify-center text-sm font-bold">
+                      <div className="w-8 h-8 rounded-full bg-[#C2703E] text-white flex items-center justify-center text-sm font-bold">
                         {index + 1}
                       </div>
                       <div className="flex flex-col space-y-0.5">
                         <button
                           onClick={() => movePlace(index, 'up')}
                           disabled={index === 0}
-                          className="text-gray-400 hover:text-purple-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="text-gray-400 hover:text-[#C2703E] disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -902,7 +902,7 @@ const RoutingPage: React.FC = () => {
                         <button
                           onClick={() => movePlace(index, 'down')}
                           disabled={index === optimizedRoute.length - 1}
-                          className="text-gray-400 hover:text-purple-600 disabled:opacity-30 disabled:cursor-not-allowed"
+                          className="text-gray-400 hover:text-[#C2703E] disabled:opacity-30 disabled:cursor-not-allowed"
                         >
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -914,7 +914,7 @@ const RoutingPage: React.FC = () => {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between">
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-bold text-purple-800 truncate">{place.name}</h4>
+                          <h4 className="font-bold text-[#2D2926] truncate">{place.name}</h4>
                           <p className="text-sm text-gray-600 line-clamp-2">{place.description}</p>
                         </div>
                         {/* Action buttons */}
@@ -922,7 +922,7 @@ const RoutingPage: React.FC = () => {
                           {/* Swap button */}
                           <button
                             onClick={() => openSwapModal(place, index)}
-                            className="p-1 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-full transition-colors"
+                            className="p-1 text-gray-400 hover:text-blue-500 hover:bg-[#2D6A6A]/5 rounded-full transition-colors"
                             title="สลับกับสถานที่ทดแทน"
                           >
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -953,8 +953,8 @@ const RoutingPage: React.FC = () => {
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-3 mt-2 text-xs text-purple-600">
-                        {place.city && <span className="bg-purple-100 px-2 py-0.5 rounded">📍 {place.city}</span>}
+                      <div className="flex items-center space-x-3 mt-2 text-xs text-[#C2703E]">
+                        {place.city && <span className="bg-[#FDF5EF] px-2 py-0.5 rounded">📍 {place.city}</span>}
                         {place.rating && <span>⭐ {place.rating}</span>}
                       </div>
 
@@ -973,9 +973,9 @@ const RoutingPage: React.FC = () => {
             </div>
 
             {/* Total Distance Summary */}
-            <div className="mt-6 p-4 bg-gradient-to-r from-purple-100 to-purple-50 rounded-xl">
-              <h4 className="font-semibold text-purple-800 mb-2">สรุปเส้นทาง</h4>
-              <div className="text-sm text-purple-700">
+            <div className="mt-6 p-4 bg-gradient-to-r from-[#FDF5EF] to-[#FAF7F4] rounded-xl">
+              <h4 className="font-semibold text-[#2D2926] mb-2">สรุปเส้นทาง</h4>
+              <div className="text-sm text-[#A85C2F]">
                 <div className="flex justify-between mb-1">
                   <span>จำนวนสถานที่:</span>
                   <span className="font-bold">{optimizedRoute.length}</span>
@@ -1006,9 +1006,9 @@ const RoutingPage: React.FC = () => {
           {/* Start Journey Button - Primary CTA */}
           <button
             onClick={startActiveJourney}
-            className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-4 px-8 rounded-xl font-bold text-lg shadow-lg hover:from-emerald-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2"
+            className="bg-gradient-to-r from-[#4D8B5C] to-[#2D6A6A] text-white py-4 px-8 rounded-xl font-bold text-lg shadow-lg hover:from-[#3A7048] hover:to-[#245858] transform hover:scale-105 transition-all duration-200 flex items-center justify-center space-x-2"
           >
-            <span>🚀</span>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.58-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>
             <span>เริ่มการเดินทางเลย</span>
           </button>
 
@@ -1017,7 +1017,7 @@ const RoutingPage: React.FC = () => {
               const url = optimizedRoute.map(place => `${place.lat},${place.long}`).join('/');
               window.open(`https://www.google.com/maps/dir/${url}`, '_blank');
             }}
-            className="bg-gradient-to-r from-purple-500 to-purple-600 text-white py-3 px-8 rounded-xl font-semibold hover:from-purple-600 hover:to-purple-700 transform hover:scale-105 transition-all duration-200"
+            className="bg-gradient-to-r from-[#C2703E] to-[#A85C2F] text-white py-3 px-8 rounded-xl font-semibold hover:from-[#A85C2F] hover:to-[#8F4E28] transform hover:scale-105 transition-all duration-200"
           >
             เปิดใน Google Maps
           </button>
@@ -1034,9 +1034,9 @@ const RoutingPage: React.FC = () => {
         <div className="fixed bottom-6 left-4 right-4 z-50 md:hidden">
           <button
             onClick={startActiveJourney}
-            className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-2xl flex items-center justify-center space-x-2"
+            className="w-full bg-gradient-to-r from-[#4D8B5C] to-[#2D6A6A] text-white py-4 px-6 rounded-2xl font-bold text-lg shadow-2xl flex items-center justify-center space-x-2"
           >
-            <span className="text-2xl">🚀</span>
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.8m5.84-2.58a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.631 8.41m5.96 5.96a14.926 14.926 0 01-5.841 2.58m-.119-8.54a6 6 0 00-7.381 5.84h4.8m2.58-5.84a14.927 14.927 0 00-2.58 5.84m2.699 2.7c-.103.021-.207.041-.311.06a15.09 15.09 0 01-2.448-2.448 14.9 14.9 0 01.06-.312m-2.24 2.39a4.493 4.493 0 00-1.757 4.306 4.493 4.493 0 004.306-1.758M16.5 9a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/></svg>
             <span>เริ่มเดินทาง</span>
           </button>
         </div>

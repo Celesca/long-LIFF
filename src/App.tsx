@@ -12,7 +12,7 @@ import TravelCompanion from "./components/TravelCompanion.js";
 import HistoryPage from "./components/HistoryPage.js";
 import AboutPage from "./components/AboutPage.js";
 import EventPage from "./components/EventPage.js";
-import { mockApi } from "./services/mockApi";
+import { appApi } from "./services/apiAdapter";
 
 // Development mode - bypass LIFF authentication
 const DEV_MODE = import.meta.env.VITE_DEV_MODE === "true";
@@ -60,8 +60,8 @@ function App() {
       localStorage.setItem("liff_displayName", mockUser.displayName);
       localStorage.setItem("liff_pictureUrl", mockUser.pictureUrl);
 
-      // Initialize user in mockApi
-      mockApi.createOrGetUser(mockUser.userId).catch((err) => {
+      // Initialize user in backend
+      appApi.createOrGetUser(mockUser.userId).catch((err: Error) => {
         console.error("DEV MODE: Failed to initialize mock user:", err);
       });
 
@@ -112,8 +112,8 @@ function App() {
                 displayName: profile.displayName,
               });
 
-              // Initialize user in mockApi (localStorage-based)
-              mockApi.createOrGetUser(profile.userId).catch((err) => {
+              // Initialize user in backend
+              appApi.createOrGetUser(profile.userId).catch((err: Error) => {
                 console.error("Failed to initialize user:", err);
               });
             })
@@ -137,15 +137,15 @@ function App() {
   // Show loading screen while LIFF initializes
   if (!isLiffReady) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 via-purple-50 to-white flex flex-col items-center justify-center">
+      <div className="min-h-screen bg-[#FAF7F4] flex flex-col items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 mx-auto bg-gradient-to-br from-purple-400 to-purple-600 rounded-full flex items-center justify-center animate-pulse">
-            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <div className="w-14 h-14 mx-auto bg-[#C2703E] rounded-2xl flex items-center justify-center animate-pulse">
+            <svg className="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-purple-800">Loading...</h2>
-          <p className="text-purple-600">Please wait</p>
+          <h2 className="text-lg font-bold text-[#2D2926]">Loading...</h2>
+          <p className="text-[#9C9490] text-sm">Please wait</p>
         </div>
       </div>
     );
@@ -154,16 +154,18 @@ function App() {
   // Show error screen if LIFF failed to initialize
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-red-100 via-red-50 to-white flex flex-col items-center justify-center p-6">
+      <div className="min-h-screen bg-[#FAF7F4] flex flex-col items-center justify-center p-6">
         <div className="text-center space-y-4 max-w-md">
-          <div className="w-16 h-16 mx-auto bg-red-500 rounded-full flex items-center justify-center">
-            <span className="text-3xl text-white">⚠️</span>
+          <div className="w-14 h-14 mx-auto bg-[#C75050]/10 rounded-2xl flex items-center justify-center">
+            <svg className="w-7 h-7 text-[#C75050]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+            </svg>
           </div>
-          <h2 className="text-xl font-bold text-red-800">Initialization Error</h2>
-          <p className="text-red-600 text-sm">{error}</p>
+          <h2 className="text-lg font-bold text-[#2D2926]">Initialization Error</h2>
+          <p className="text-[#9C9490] text-sm">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="mt-4 bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors"
+            className="mt-2 bg-[#C2703E] text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:bg-[#A85C2F] transition-colors"
           >
             Retry
           </button>

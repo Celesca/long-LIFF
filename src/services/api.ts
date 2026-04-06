@@ -1,10 +1,10 @@
 /**
- * API Service for communicating with the FastAPI backend
+ * API Service for communicating with the Go backend
  */
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
-// Types
+// Types matching Go backend responses
 export interface Place {
   id: number;
   external_id: string;
@@ -87,7 +87,6 @@ export interface UserStats {
   photos_uploaded: number;
 }
 
-// API Client
 class ApiService {
   private baseUrl: string;
 
@@ -95,10 +94,7 @@ class ApiService {
     this.baseUrl = baseUrl;
   }
 
-  private async fetch<T>(
-    endpoint: string,
-    options: RequestInit = {}
-  ): Promise<T> {
+  private async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const url = `${this.baseUrl}${endpoint}`;
     const response = await fetch(url, {
       ...options,
@@ -110,7 +106,7 @@ class ApiService {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
-      throw new Error(error.detail || `HTTP ${response.status}`);
+      throw new Error(error.detail || error.error || `HTTP ${response.status}`);
     }
 
     return response.json();
@@ -152,7 +148,6 @@ class ApiService {
     if (options?.tag) params.append('tag', options.tag);
     if (options?.page) params.append('page', options.page.toString());
     if (options?.per_page) params.append('per_page', options.per_page.toString());
-
     const query = params.toString();
     return this.fetch(`/api/places${query ? `?${query}` : ''}`);
   }
@@ -177,10 +172,7 @@ class ApiService {
   async createSwipe(lineUserId: string, placeId: number, direction: 'left' | 'right'): Promise<Swipe> {
     return this.fetch<Swipe>(`/api/users/${lineUserId}/swipes`, {
       method: 'POST',
-      body: JSON.stringify({
-        place_id: placeId,
-        direction,
-      }),
+      body: JSON.stringify({ place_id: placeId, direction }),
     });
   }
 
@@ -189,15 +181,11 @@ class ApiService {
   }
 
   async removeLikedPlace(lineUserId: string, placeId: number): Promise<void> {
-    await this.fetch(`/api/users/${lineUserId}/liked-places/${placeId}`, {
-      method: 'DELETE',
-    });
+    await this.fetch(`/api/users/${lineUserId}/liked-places/${placeId}`, { method: 'DELETE' });
   }
 
   async clearLikedPlaces(lineUserId: string): Promise<void> {
-    await this.fetch(`/api/users/${lineUserId}/liked-places`, {
-      method: 'DELETE',
-    });
+    await this.fetch(`/api/users/${lineUserId}/liked-places`, { method: 'DELETE' });
   }
 
   // ============ Preference Endpoints ============
@@ -222,19 +210,10 @@ class ApiService {
 
   // ============ Journey Endpoints ============
 
-  async createJourney(
-    lineUserId: string,
-    personality: string,
-    duration: string,
-    placeIds: number[]
-  ): Promise<Journey> {
+  async createJourney(lineUserId: string, personality: string, duration: string, placeIds: number[]): Promise<Journey> {
     return this.fetch<Journey>(`/api/users/${lineUserId}/journeys`, {
       method: 'POST',
-      body: JSON.stringify({
-        personality,
-        duration,
-        place_ids: placeIds,
-      }),
+      body: JSON.stringify({ personality, duration, place_ids: placeIds }),
     });
   }
 
@@ -247,18 +226,10 @@ class ApiService {
     journeyId: number,
     placeId: number,
     photos: string[] = []
-  ): Promise<{
-    success: boolean;
-    coins_earned: number;
-    total_coins: number;
-    journey_completed: boolean;
-  }> {
+  ): Promise<{ success: boolean; coins_earned: number; total_coins: number; journey_completed: boolean }> {
     return this.fetch(`/api/users/${lineUserId}/journeys/${journeyId}/visit`, {
       method: 'POST',
-      body: JSON.stringify({
-        place_id: placeId,
-        photos,
-      }),
+      body: JSON.stringify({ place_id: placeId, photos }),
     });
   }
 
@@ -276,9 +247,7 @@ class ApiService {
   }> {
     return this.fetch(`/api/users/${lineUserId}/rewards/redeem`, {
       method: 'POST',
-      body: JSON.stringify({
-        reward_id: rewardId,
-      }),
+      body: JSON.stringify({ reward_id: rewardId }),
     });
   }
 

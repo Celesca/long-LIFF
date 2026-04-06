@@ -34,80 +34,75 @@ const experiences = [
         company: 'SCB',
         period: '7 Jan 2025 - 30 April 2025',
         type: 'full-time',
-        color: 'from-purple-500 to-violet-600',
+        color: 'from-[#C2703E] to-[#A85C2F]',
     },
     {
         role: 'Machine Learning Engineer',
         company: 'Green Bloom',
         period: 'Part-time',
         type: 'part-time',
-        color: 'from-emerald-500 to-green-600',
+        color: 'from-[#4D8B5C] to-[#3A7048]',
     },
     {
         role: 'AI Engineer',
         company: 'SCB Tech Hub',
         period: 'Part-time',
         type: 'part-time',
-        color: 'from-blue-500 to-indigo-600',
+        color: 'from-[#2D6A6A] to-[#1F4F4F]',
     },
     {
         role: 'Junior Developer',
         company: 'Deep Capital',
         period: 'Part-time',
         type: 'part-time',
-        color: 'from-cyan-500 to-teal-600',
+        color: 'from-[#6B8F71] to-[#4D8B5C]',
     },
     {
         role: 'AI Engineer Intern',
         company: 'SCG',
         period: 'Mar 2025 - October 2025 (8 months)',
         type: 'ex',
-        color: 'from-red-500 to-rose-600',
+        color: 'from-[#D4A853] to-[#B8922E]',
     },
     {
         role: 'Market Researcher Intern',
         company: 'SEA Bridge',
         period: 'Internship',
         type: 'ex',
-        color: 'from-amber-500 to-orange-600',
+        color: 'from-[#C2703E] to-[#D4A853]',
     },
 ];
 
 const achievements = [
     {
-        medal: '🥇',
+        medal: 'gold',
         title: 'Gold Medal Super AI Engineer Season 5',
         org: 'AIAT',
         detail: 'Track 2 : AI Engineer | EXP House',
-        color: 'from-yellow-400 to-amber-500',
     },
     {
-        medal: '🥇',
+        medal: 'gold',
         title: 'Winner GenAI Hackathon',
         org: 'YES Talent Camp 2025 by Mitr Phol Group',
         detail: '',
-        color: 'from-yellow-400 to-amber-500',
     },
     {
-        medal: '🥇',
+        medal: 'gold',
         title: 'Winner BDI Hackathon',
         org: 'AI & Data Innovation for Smart Tourism',
         detail: 'at Chiang Mai',
-        color: 'from-yellow-400 to-amber-500',
     },
     {
-        medal: '🥈',
+        medal: 'silver',
         title: 'Silver Medal Creative AI Camp Gen 7',
         org: 'CP ALL',
         detail: '',
-        color: 'from-gray-300 to-slate-400',
     },
     {
-        medal: '🥈',
+        medal: 'silver',
         title: 'Beta Microsoft Learn Student Ambassador',
         org: 'Microsoft',
         detail: '',
-        color: 'from-blue-400 to-sky-500',
     },
 ];
 
@@ -120,12 +115,12 @@ const AboutPage: React.FC = () => {
                 {/* Hero Section with Profile */}
                 <div className="relative overflow-hidden">
                     {/* Gradient Background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-purple-600 via-violet-600 to-indigo-700" />
+                    <div className="absolute inset-0 bg-gradient-to-br from-[#C2703E] via-[#A85C2F] to-[#8B4513]" />
 
                     {/* Decorative Shapes */}
                     <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-purple-300/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
-                    <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-indigo-400/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />
+                    <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#D4A853]/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
+                    <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-[#6B8F71]/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />
 
                     <div className="relative px-4 pt-8 pb-12 max-w-lg mx-auto">
                         {/* Back Button */}
@@ -151,14 +146,14 @@ const AboutPage: React.FC = () => {
                                     />
                                 </div>
                                 {/* Status Badge */}
-                                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                                <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#4D8B5C] text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                                     Available
                                 </div>
                             </div>
 
                             {/* Name & Title */}
                             <h1 className="text-3xl font-bold text-white mb-2">Folk</h1>
-                            <p className="text-purple-200 text-lg font-medium mb-4">
+                            <p className="text-white/70 text-lg font-medium mb-4">
                                 Machine Learning Engineer
                             </p>
 
@@ -180,8 +175,8 @@ const AboutPage: React.FC = () => {
                     {/* About Section */}
                     <div className="bg-white rounded-2xl shadow-lg p-6 animate-fade-in">
                         <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                            <span className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                                <svg className="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span className="w-8 h-8 bg-[#FDF5EF] rounded-lg flex items-center justify-center mr-3">
+                                <svg className="w-4 h-4 text-[#C2703E]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                 </svg>
                             </span>
@@ -197,8 +192,8 @@ const AboutPage: React.FC = () => {
                     {/* Experience Section */}
                     <div className="bg-white rounded-2xl shadow-lg p-6 animate-slide-up">
                         <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                            <span className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span className="w-8 h-8 bg-[#2D6A6A]/10 rounded-lg flex items-center justify-center mr-3">
+                                <svg className="w-4 h-4 text-[#2D6A6A]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                                 </svg>
                             </span>
@@ -218,10 +213,10 @@ const AboutPage: React.FC = () => {
                                                     <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">Ex</span>
                                                 )}
                                                 {exp.type === 'part-time' && (
-                                                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">Part-time</span>
+                                                    <span className="text-xs bg-[#2D6A6A]/10 text-[#2D6A6A] px-2 py-0.5 rounded-full">Part-time</span>
                                                 )}
                                             </div>
-                                            <p className="text-sm text-purple-600 font-medium">{exp.company}</p>
+                                            <p className="text-sm text-[#C2703E] font-medium">{exp.company}</p>
                                             <p className="text-xs text-gray-500 mt-1">{exp.period}</p>
                                         </div>
                                         <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${exp.color} flex items-center justify-center shadow-sm flex-shrink-0`}>
@@ -238,8 +233,8 @@ const AboutPage: React.FC = () => {
                     {/* Achievements Section */}
                     <div className="bg-white rounded-2xl shadow-lg p-6 animate-slide-up" style={{ animationDelay: '0.1s' }}>
                         <h2 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                            <span className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3">
-                                <svg className="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span className="w-8 h-8 bg-[#D4A853]/10 rounded-lg flex items-center justify-center mr-3">
+                                <svg className="w-4 h-4 text-[#D4A853]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                                 </svg>
                             </span>
@@ -252,10 +247,12 @@ const AboutPage: React.FC = () => {
                                     className="p-4 rounded-xl bg-gradient-to-r from-gray-50 to-white border border-gray-100 hover:shadow-md transition-all duration-200"
                                 >
                                     <div className="flex items-start space-x-3">
-                                        <span className="text-2xl">{achievement.medal}</span>
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${achievement.medal === 'gold' ? 'bg-[#D4A853]/20' : 'bg-[#9C9490]/20'}`}>
+                                            <svg className={`w-5 h-5 ${achievement.medal === 'gold' ? 'text-[#D4A853]' : 'text-[#9C9490]'}`} fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+                                        </div>
                                         <div className="flex-1">
                                             <h3 className="font-semibold text-gray-900 text-sm">{achievement.title}</h3>
-                                            <p className="text-xs text-purple-600 font-medium">{achievement.org}</p>
+                                            <p className="text-xs text-[#C2703E] font-medium">{achievement.org}</p>
                                             {achievement.detail && (
                                                 <p className="text-xs text-gray-500 mt-0.5">{achievement.detail}</p>
                                             )}
@@ -267,7 +264,7 @@ const AboutPage: React.FC = () => {
                     </div>
 
                     {/* Contact Section */}
-                    <div className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-2xl shadow-lg p-6 text-white animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                    <div className="bg-gradient-to-br from-[#2D6A6A] to-[#1F4F4F] rounded-2xl shadow-lg p-6 text-white animate-slide-up" style={{ animationDelay: '0.2s' }}>
                         <h2 className="text-lg font-bold mb-4 flex items-center">
                             <span className="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mr-3">
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,8 +328,8 @@ const AboutPage: React.FC = () => {
                     {/* About This Project */}
                     <div className="bg-white rounded-2xl shadow-lg p-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
                         <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
-                            <span className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
-                                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <span className="w-8 h-8 bg-[#4D8B5C]/10 rounded-lg flex items-center justify-center mr-3">
+                                <svg className="w-4 h-4 text-[#4D8B5C]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                 </svg>
                             </span>
@@ -343,15 +340,15 @@ const AboutPage: React.FC = () => {
                             ที่ผสมผสานเทคโนโลยี AI และ Machine Learning เพื่อแนะนำสถานที่ที่เหมาะสมกับคุณ
                             พัฒนาด้วยความตั้งใจเพื่อส่งเสริมการท่องเที่ยวไทย
                         </p>
-                        <div className="mt-4 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl">
+                        <div className="mt-4 p-4 bg-gradient-to-r from-[#FDF5EF] to-[#FAF0E6] rounded-xl">
                             <div className="flex items-center space-x-3">
-                                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+                                <div className="w-10 h-10 bg-gradient-to-br from-[#C2703E] to-[#A85C2F] rounded-xl flex items-center justify-center shadow-sm">
                                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                                     </svg>
                                 </div>
                                 <div>
-                                    <p className="text-sm font-semibold text-gray-900">Built with ❤️ by Folk</p>
+                                    <p className="text-sm font-semibold text-gray-900">Built with passion by Folk</p>
                                     <p className="text-xs text-gray-500">Powered by React, TypeScript & LINE LIFF</p>
                                 </div>
                             </div>
