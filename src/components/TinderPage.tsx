@@ -5,11 +5,10 @@ import LocationPreferenceModal, { type DiscoveryLocation } from '../components/L
 import PlaceDetailModal from '../components/PlaceDetailModal';
 import Layout from './Layout';
 import { poiApi } from '../services/poiApi';
-import { getUserStorageKey } from '../hooks/useLiff';
+import { getUserId, getUserStorageKey } from '../hooks/useLiff';
 import type { TravelPlace } from '../types/TravelPlace';
 
 const LOCATION_STORAGE_KEY = 'poiDiscoveryLocation';
-const SWIPES_STORAGE_KEY = 'poiSwipes';
 
 const TinderPage: React.FC = () => {
   const [places, setPlaces] = useState<TravelPlace[]>([]);
@@ -22,69 +21,103 @@ const TinderPage: React.FC = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
 
   const navigate = useNavigate();
+  const lineUserId = getUserId() || 'anonymous';
 
-  const getStoredSwipedIds = () => {
-    const swipesKey = getUserStorageKey(SWIPES_STORAGE_KEY);
-    const swipes: { placeId: string; direction: 'left' | 'right' }[] = JSON.parse(localStorage.getItem(swipesKey) || '[]');
-    return swipes.map((swipe) => swipe.placeId);
-  };
+  const loadLikedPlaces = useCallback(async () => {
+    const liked = await poiApi.getLikedPlaces(lineUserId);
+    setLikedPlaces(liked.places);
+  }, [lineUserId]);
 
-  const loadLikedPlaces = () => {
-    const likedKey = getUserStorageKey('likedPlaces');
-    const liked: TravelPlace[] = JSON.parse(localStorage.getItem(likedKey) || '[]');
-    setLikedPlaces(liked);
+  const loadSwipedIds = useCallback(async () => {
+    const response = await poiApi.getSwipes(lineUserId);
+    return response.swipes.map((swipe) => swipe.place_id);
+  }, [lineUserId]);
+
+  const ensureUser = useCallback(async () => {
+    await poiApi.createOrGetUser({ line_user_id: lineUserId });
+  }, [lineUserId]);
+
+  const persistDiscoveryLocation = useCallback(async (location: DiscoveryLocation) => {
+    await poiApi.createDiscoverySession(lineUserId, {
+      lat: location.lat,
+      lng: location.lng,
+      radius_km: location.radiusKm,
+      label: location.label,
+      source: location.label ? 'cluster-or-pin' : 'pin',
+    });
+  }, [lineUserId]);
+
+  const restoreDiscoveryLocation = useCallback(async (): Promise<DiscoveryLocation | null> => {
+    const latest = await poiApi.getLatestDiscoverySession(lineUserId);
+    if (latest) {
+      return {
+        lat: latest.lat,
+        lng: latest.lng,
+        radiusKm: latest.radius_km,
+        label: latest.label,
+      };
+    }
+
+    const stored = localStorage.getItem(getUserStorageKey(LOCATION_STORAGE_KEY));
+    return stored ? JSON.parse(stored) as DiscoveryLocation : null;
+  }, [lineUserId]);
+
+  const cacheDiscoveryLocation = (location: DiscoveryLocation) => {
+    localStorage.setItem(getUserStorageKey(LOCATION_STORAGE_KEY), JSON.stringify(location));
   };
 
   const fetchPlaces = useCallback(async (location: DiscoveryLocation) => {
     try {
       setLoading(true);
       setError(null);
+      await ensureUser();
+      const swipedIds = await loadSwipedIds();
       const response = await poiApi.getNearbyPlaces({
         lat: location.lat,
         lng: location.lng,
         radiusKm: location.radiusKm,
         limit: 80,
-        excludeIds: getStoredSwipedIds(),
+        excludeIds: swipedIds,
         imagesOnly: true,
       });
       setPlaces(response.places);
       setCurrentIndex(0);
-      loadLikedPlaces();
+      await loadLikedPlaces();
     } catch (err) {
       console.error('Failed to fetch places:', err);
       setError('เปิด FastAPI backend ที่พอร์ต 8000 แล้วลองโหลด POI ใกล้หมุดอีกครั้ง');
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [ensureUser, loadLikedPlaces, loadSwipedIds]);
 
   useEffect(() => {
     const checkPreferencesAndLoad = async () => {
       try {
-        const stored = localStorage.getItem(getUserStorageKey(LOCATION_STORAGE_KEY));
-        if (stored) {
-          const location = JSON.parse(stored) as DiscoveryLocation;
+        await ensureUser();
+        const location = await restoreDiscoveryLocation();
+        if (location) {
           setSelectedLocation(location);
           fetchPlaces(location);
         } else {
           setShowLocationModal(true);
-          loadLikedPlaces();
+          await loadLikedPlaces();
           setLoading(false);
         }
       } catch (err) {
         console.error('Failed to load POI discovery location:', err);
         setShowLocationModal(true);
-        loadLikedPlaces();
         setLoading(false);
       }
     };
     checkPreferencesAndLoad();
-  }, [fetchPlaces]);
+  }, [ensureUser, fetchPlaces, loadLikedPlaces, restoreDiscoveryLocation]);
 
   const handleLocationSelection = async (location: DiscoveryLocation) => {
     setSelectedLocation(location);
     setShowLocationModal(false);
-    localStorage.setItem(getUserStorageKey(LOCATION_STORAGE_KEY), JSON.stringify(location));
+    cacheDiscoveryLocation(location);
+    await persistDiscoveryLocation(location);
     fetchPlaces(location);
   };
 
@@ -92,27 +125,18 @@ const TinderPage: React.FC = () => {
     const currentPlace = places[currentIndex];
     if (!currentPlace) return;
 
-    const swipesKey = getUserStorageKey(SWIPES_STORAGE_KEY);
-    const swipes = JSON.parse(localStorage.getItem(swipesKey) || '[]');
-    swipes.push({ placeId: currentPlace.id, direction, timestamp: new Date().toISOString() });
-    localStorage.setItem(swipesKey, JSON.stringify(swipes));
+    await poiApi.recordSwipe(lineUserId, currentPlace, direction);
 
     if (direction === 'right') {
-      const likedKey = getUserStorageKey('likedPlaces');
-      const liked: TravelPlace[] = JSON.parse(localStorage.getItem(likedKey) || '[]');
-      if (!liked.some((place) => place.id === currentPlace.id)) {
-        const updatedLiked = [...liked, currentPlace];
-        localStorage.setItem(likedKey, JSON.stringify(updatedLiked));
-        setLikedPlaces(updatedLiked);
-      }
+      setLikedPlaces(prev => prev.some(place => place.id === currentPlace.id) ? prev : [...prev, currentPlace]);
     }
     setCurrentIndex(prev => prev + 1);
-  }, [places, currentIndex]);
+  }, [places, currentIndex, lineUserId]);
 
   const handleResetDestinations = async () => {
     try {
       setLoading(true);
-      localStorage.setItem(getUserStorageKey(SWIPES_STORAGE_KEY), JSON.stringify([]));
+      await poiApi.clearSwipes(lineUserId);
       if (selectedLocation) {
         await fetchPlaces(selectedLocation);
       } else {

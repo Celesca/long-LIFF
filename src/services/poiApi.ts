@@ -28,6 +28,46 @@ export interface PoiClusterResponse {
   total: number;
 }
 
+export interface UserPayload {
+  line_user_id: string;
+  display_name?: string | null;
+  picture_url?: string | null;
+}
+
+export interface DiscoverySessionPayload {
+  lat: number;
+  lng: number;
+  radius_km: number;
+  label?: string;
+  source?: string;
+}
+
+export interface RouteAnchor {
+  lat: number;
+  lng: number;
+  radius_km: number;
+  label?: string;
+}
+
+export interface RouteGeneratePayload {
+  personality: string;
+  duration: string;
+  anchor?: RouteAnchor | null;
+  liked_place_ids?: string[];
+}
+
+export interface RouteGenerateResponse {
+  id: string;
+  trip_name: string;
+  description: string;
+  provider: string;
+  is_ai_generated: boolean;
+  places: TravelPlace[];
+  candidate_count: number;
+  anchor?: RouteAnchor | null;
+  reasoning?: string | null;
+}
+
 type RawPoi = TravelPlace & {
   longitude?: number;
   lng?: number;
@@ -69,8 +109,14 @@ class PoiApi {
     this.baseUrl = baseUrl;
   }
 
-  private async fetch<T>(endpoint: string): Promise<T> {
-    const response = await fetch(`${this.baseUrl}${endpoint}`);
+  private async fetch<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+    });
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({ detail: 'Unknown error' }));
@@ -145,6 +191,69 @@ class PoiApi {
     });
 
     return this.fetch<PoiClusterResponse>(`/api/poi-clusters?${params.toString()}`);
+  }
+
+  async createOrGetUser(payload: UserPayload) {
+    return this.fetch('/api/users', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getLikedPlaces(lineUserId: string): Promise<PoiResponse> {
+    return this.fetchPoiResponse(`/api/users/${encodeURIComponent(lineUserId)}/liked-places`);
+  }
+
+  async recordSwipe(lineUserId: string, place: TravelPlace, direction: 'left' | 'right') {
+    return this.fetch(`/api/users/${encodeURIComponent(lineUserId)}/swipes`, {
+      method: 'POST',
+      body: JSON.stringify({ place, direction, source: 'swipe' }),
+    });
+  }
+
+  async getSwipes(lineUserId: string): Promise<{ swipes: { place_id: string; direction: 'left' | 'right'; created_at: string }[]; total: number }> {
+    return this.fetch(`/api/users/${encodeURIComponent(lineUserId)}/swipes`);
+  }
+
+  async clearSwipes(lineUserId: string) {
+    return this.fetch(`/api/users/${encodeURIComponent(lineUserId)}/swipes`, {
+      method: 'DELETE',
+    });
+  }
+
+  async removeLikedPlace(lineUserId: string, placeId: string) {
+    return this.fetch(`/api/users/${encodeURIComponent(lineUserId)}/liked-places/${encodeURIComponent(placeId)}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async clearLikedPlaces(lineUserId: string) {
+    return this.fetch(`/api/users/${encodeURIComponent(lineUserId)}/liked-places`, {
+      method: 'DELETE',
+    });
+  }
+
+  async createDiscoverySession(lineUserId: string, payload: DiscoverySessionPayload) {
+    return this.fetch(`/api/users/${encodeURIComponent(lineUserId)}/discovery-sessions`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  async getLatestDiscoverySession(lineUserId: string): Promise<(DiscoverySessionPayload & { id: string }) | null> {
+    return this.fetch(`/api/users/${encodeURIComponent(lineUserId)}/discovery-sessions/latest`);
+  }
+
+  async generateRoute(lineUserId: string, payload: RouteGeneratePayload): Promise<RouteGenerateResponse> {
+    const response = await this.fetch<RouteGenerateResponse>(`/api/users/${encodeURIComponent(lineUserId)}/routes/generate`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+
+    return {
+      ...response,
+      places: response.places.map((place) => normalizePoi(place as RawPoi)),
+    };
   }
 }
 

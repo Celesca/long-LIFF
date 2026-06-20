@@ -7,7 +7,7 @@ import type { TravelPlace } from '../types/TravelPlace';
 import { CoinSystem } from '../utils/coinSystem';
 import CoinCounter from './CoinCounter';
 import PlaceDetailModal from './PlaceDetailModal';
-import { getUserStorageKey } from '../hooks/useLiff';
+import { getUserId } from '../hooks/useLiff';
 import { poiApi } from '../services/poiApi';
 
 // Fix for default markers in react-leaflet
@@ -21,14 +21,18 @@ L.Icon.Default.mergeOptions({
 interface RoutingPageProps {
   personality?: string;
   duration?: string;
-  city?: string;
+  anchor?: { lat: number; lng: number; radius_km: number; label?: string } | null;
 }
 
 const RoutingPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { personality, duration, city } = (location.state as RoutingPageProps) || {};
+  const { personality, duration, anchor } = (location.state as RoutingPageProps) || {};
+  const lineUserId = getUserId() || 'anonymous';
   const [optimizedRoute, setOptimizedRoute] = useState<TravelPlace[]>([]);
+  const [isGeneratingRoute, setIsGeneratingRoute] = useState(true);
+  const [routeError, setRouteError] = useState('');
+  const [routeMeta, setRouteMeta] = useState<{ name: string; description: string; provider: string; isAi: boolean } | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   // Emergency routing state
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
@@ -153,8 +157,37 @@ const RoutingPage: React.FC = () => {
     setNearbyPois(current => current.filter(place => place.id !== poi.id));
   };
 
+  const generateRoute = React.useCallback(async () => {
+    setIsGeneratingRoute(true);
+    setRouteError('');
+
+    try {
+      await poiApi.createOrGetUser({ line_user_id: lineUserId });
+      const likedResponse = await poiApi.getLikedPlaces(lineUserId);
+      const response = await poiApi.generateRoute(lineUserId, {
+        personality: personality || 'default',
+        duration: duration || 'custom',
+        anchor: anchor || undefined,
+        liked_place_ids: likedResponse.places.map(place => place.id),
+      });
+
+      setOptimizedRoute(response.places);
+      setRouteMeta({
+        name: response.trip_name,
+        description: response.description,
+        provider: response.provider,
+        isAi: response.is_ai_generated,
+      });
+    } catch (error) {
+      console.error('Failed to generate route:', error);
+      setRouteError('ไม่สามารถสร้างเส้นทางได้ กรุณาเปิด FastAPI/Postgres backend แล้วลองอีกครั้ง');
+    } finally {
+      setIsGeneratingRoute(false);
+    }
+  }, [anchor, duration, lineUserId, personality]);
+
   // Trigger an emergency scenario (e.g., flood at next unvisited place) and suggest alternatives
-  const triggerEmergencyPlan = () => {
+  const triggerEmergencyPlan = async () => {
     if (!optimizedRoute || optimizedRoute.length === 0) return;
 
     // Find first place to replace
@@ -163,9 +196,8 @@ const RoutingPage: React.FC = () => {
 
     // Gather candidate alternatives from likedPlaces (excluding the emergency place & already in optimizedRoute)
     try {
-      const storageKey = getUserStorageKey('likedPlaces');
-      const saved = localStorage.getItem(storageKey);
-      const liked: TravelPlace[] = saved ? JSON.parse(saved) : [];
+      const likedResponse = await poiApi.getLikedPlaces(lineUserId);
+      const liked = likedResponse.places;
       const routeIds = new Set(optimizedRoute.map(p => p.id));
       let candidates = liked.filter(p => p.id !== placeToReplace.id && !routeIds.has(p.id));
       // Fallback: allow other places in route (not the emergency place) if no external candidates
@@ -206,21 +238,8 @@ const RoutingPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const storageKey = getUserStorageKey('likedPlaces');
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      let places: TravelPlace[] = JSON.parse(saved);
-
-      // Filter places by selected city (unless 'all' is selected)
-      if (city && city !== 'all') {
-        places = places.filter(p => p.city === city);
-      }
-
-      // Simple routing algorithm based on personality and duration
-      const route = optimizeRoute(places, personality, duration);
-      setOptimizedRoute(route);
-    }
-  }, [personality, duration, city, optimizeRoute]);
+    generateRoute();
+  }, [generateRoute]);
 
   // Drag and drop handlers for reordering
   const handleDragStart = (index: number) => {
@@ -262,24 +281,19 @@ const RoutingPage: React.FC = () => {
   };
 
   // Open swap modal for a place
-  const openSwapModal = (place: TravelPlace, index: number) => {
+  const openSwapModal = async (place: TravelPlace, index: number) => {
     setSwapPlace({ place, index });
 
-    // Get liked places from localStorage
     try {
-      const storageKey = getUserStorageKey('likedPlaces');
-      const saved = localStorage.getItem(storageKey);
-      const liked: TravelPlace[] = saved ? JSON.parse(saved) : [];
+      const likedResponse = await poiApi.getLikedPlaces(lineUserId);
+      const liked = likedResponse.places;
 
       // Get current route place IDs
       const routeIds = new Set(optimizedRoute.map(p => p.id));
 
-      // Filter places from the same city that are not already in the route
-      const placeCity = place.city || city || 'all';
       let candidates = liked.filter(p =>
         p.id !== place.id &&
-        !routeIds.has(p.id) &&
-        (placeCity === 'all' || p.city === placeCity)
+        !routeIds.has(p.id)
       );
 
       // Sort by rating
@@ -312,20 +326,11 @@ const RoutingPage: React.FC = () => {
   const MapVisualization = () => {
     const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
 
-    // City center coordinates
     const getCityCenter = (): [number, number] => {
-      switch (city) {
-        case 'Bangkok':
-          return [13.7563, 100.5018];
-        case 'Phuket':
-          return [7.8804, 98.3923];
-        case 'Chiang Mai':
-        default:
-          return [18.7883, 98.9930];
-      }
+      if (anchor) return [anchor.lat, anchor.lng];
+      return [15.87, 100.9925];
     };
 
-    // Center the map based on selected city or first place in route
     const mapCenter: [number, number] = optimizedRoute.length > 0
       ? [optimizedRoute[0].lat, optimizedRoute[0].long]
       : getCityCenter();
@@ -377,7 +382,7 @@ const RoutingPage: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-[#2D2926]">
-            แผนที่เส้นทางแบบอินเตอร์แอกทีฟ - {city && city !== 'all' ? city : 'ประเทศไทย'}
+            แผนที่เส้นทางแบบอินเตอร์แอกทีฟ - {anchor?.label || 'AI Route'}
           </h3>
 
           {/* Map Type Toggle */}
@@ -571,19 +576,7 @@ const RoutingPage: React.FC = () => {
   };
 
   const regenerateRoute = () => {
-    const storageKey = getUserStorageKey('likedPlaces');
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      let places: TravelPlace[] = JSON.parse(saved);
-
-      // Filter by city if selected
-      if (city && city !== 'all') {
-        places = places.filter(p => p.city === city);
-      }
-
-      const newRoute = optimizeRoute(places, personality, duration);
-      setOptimizedRoute(newRoute);
-    }
+    generateRoute();
   };
 
   // Start active journey and navigate to travel companion
@@ -593,14 +586,42 @@ const RoutingPage: React.FC = () => {
     CoinSystem.startActiveJourney(
       personality || 'default',
       duration || 'custom',
-      city || 'all',
+      anchor?.label || 'AI Route',
       optimizedRoute
     );
 
     navigate('/travel-companion');
   };
 
-  // Show message if no places found for selected city
+  if (isGeneratingRoute) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#FAF7F4] via-[#FAF7F4] to-white flex flex-col items-center justify-center p-6">
+        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md text-center">
+          <div className="w-14 h-14 mx-auto border-4 border-[#E8E2DB] border-t-[#C2703E] rounded-full animate-spin mb-6" />
+          <h2 className="text-2xl font-bold text-[#2D2926] mb-3">กำลังสร้างเส้นทาง</h2>
+          <p className="text-gray-600">กำลังวิเคราะห์ POI ที่บันทึกและสถานที่จริงใกล้เคียงจาก places.json</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (routeError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#FAF7F4] via-[#FAF7F4] to-white flex flex-col items-center justify-center p-6">
+        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md text-center">
+          <h2 className="text-2xl font-bold text-[#2D2926] mb-3">สร้างเส้นทางไม่สำเร็จ</h2>
+          <p className="text-gray-600 mb-6">{routeError}</p>
+          <button
+            onClick={generateRoute}
+            className="w-full bg-gradient-to-r from-[#C2703E] to-[#A85C2F] text-white py-3 px-6 rounded-xl font-semibold"
+          >
+            ลองใหม่
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (optimizedRoute.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#FAF7F4] via-[#FAF7F4] to-white flex flex-col items-center justify-center p-6">
@@ -609,10 +630,10 @@ const RoutingPage: React.FC = () => {
             <svg className="w-10 h-10 text-[#C2703E]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/></svg>
           </div>
           <h2 className="text-2xl font-bold text-[#2D2926] mb-3">
-            ไม่พบสถานที่ใน {city && city !== 'all' ? city : 'ที่คุณเลือก'}
+            ไม่พบสถานที่สำหรับสร้างเส้นทาง
           </h2>
           <p className="text-gray-600 mb-6">
-            คุณยังไม่ได้บันทึกสถานที่ในเมืองนี้ กลับไปสำรวจและปัดขวาบันทึกสถานที่ที่คุณชอบ!
+            ลองกลับไปสำรวจ กดถูกใจ POI เพิ่ม หรือเลือกจุดปักหมุดใหม่เพื่อดึงสถานที่ใกล้เคียง
           </p>
           <div className="space-y-3">
             <Link
@@ -655,7 +676,7 @@ const RoutingPage: React.FC = () => {
               <div className="text-center flex-1 mx-2">
                 <h1 className="text-base font-bold text-[#2D2926]">เส้นทางท่องเที่ยวของคุณ</h1>
                 <p className="text-xs text-[#C2703E]/70">
-                  {city && city !== 'all' ? `📍 ${city} • ` : ''}{optimizedRoute.length} สถานที่
+                  {anchor?.label ? `📍 ${anchor.label} • ` : ''}{optimizedRoute.length} สถานที่
                 </p>
               </div>
             </div>
@@ -688,7 +709,7 @@ const RoutingPage: React.FC = () => {
             <div className="text-center">
               <h1 className="text-xl font-bold text-[#2D2926]">เส้นทางท่องเที่ยวของคุณ</h1>
               <p className="text-sm text-[#C2703E]/70">
-                {city && city !== 'all' ? `📍 ${city} • ` : ''}{optimizedRoute.length} สถานที่
+                {anchor?.label ? `📍 ${anchor.label} • ` : ''}{optimizedRoute.length} สถานที่
               </p>
             </div>
 
@@ -877,6 +898,25 @@ const RoutingPage: React.FC = () => {
 
         {/* Travel Settings Summary */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          {routeMeta && (
+            <div className="mb-5 rounded-xl bg-[#2D6A6A]/5 p-4">
+              <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase text-[#2D6A6A]">
+                    {routeMeta.isAi ? 'AI route' : 'Fallback route'} · {routeMeta.provider}
+                  </p>
+                  <h2 className="text-lg font-bold text-[#2D2926]">{routeMeta.name}</h2>
+                  <p className="text-sm text-gray-600">{routeMeta.description}</p>
+                </div>
+                {anchor && (
+                  <div className="text-sm text-[#6B635B] md:text-right">
+                    <p>{anchor.label || 'Pinned location'}</p>
+                    <p>{anchor.lat.toFixed(4)}, {anchor.lng.toFixed(4)} · {anchor.radius_km} km</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           <h2 className="text-lg font-bold text-[#2D2926] mb-4">การตั้งค่าทริป</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center space-x-3">

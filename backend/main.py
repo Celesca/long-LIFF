@@ -3,22 +3,163 @@ from __future__ import annotations
 import json
 import math
 import os
+import re
+import uuid
+from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
-from typing import Any
+from typing import Any, Generator
 
-from fastapi import FastAPI, HTTPException, Query
+import httpx
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    create_engine,
+)
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
 DEFAULT_PLACES_PATH = ROOT_DIR / "data" / "places.json"
-PLACES_PATH = Path(os.getenv("PLACES_JSON_PATH", DEFAULT_PLACES_PATH))
+
+
+def load_backend_env() -> None:
+    env_path = ROOT_DIR / "backend" / ".env"
+    if not env_path.exists():
+        return
+
+    for raw_line in env_path.read_text(encoding="utf-8").splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, value = line.split("=", 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+load_backend_env()
+
+
+def resolve_backend_path(value: str | None, default: Path) -> Path:
+    if not value:
+        return default
+    path = Path(value)
+    if path.is_absolute():
+        return path
+    return (ROOT_DIR / "backend" / path).resolve()
+
+
+PLACES_PATH = resolve_backend_path(os.getenv("PLACES_JSON_PATH"), DEFAULT_PLACES_PATH)
+DATABASE_URL = os.getenv(
+    "DATABASE_URL",
+    "postgresql+psycopg://long_liff:long_liff@localhost:5432/long_liff",
+)
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+
+engine = create_engine(DATABASE_URL, pool_pre_ping=True)
+SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+class UserRecord(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    line_user_id: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    display_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    picture_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class PlaceRecord(Base):
+    __tablename__ = "places"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    place_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    name: Mapped[str] = mapped_column(Text)
+    lat: Mapped[float] = mapped_column(Float)
+    lng: Mapped[float] = mapped_column(Float)
+    image: Mapped[str] = mapped_column(Text, default="")
+    province: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    district: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    category: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    snapshot: Mapped[dict[str, Any]] = mapped_column(JSON)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class UserPlaceRecord(Base):
+    __tablename__ = "user_places"
+    __table_args__ = (UniqueConstraint("user_id", "place_id", name="uq_user_places_user_place"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    place_id: Mapped[str] = mapped_column(String(64), ForeignKey("places.place_id"), index=True)
+    status: Mapped[str] = mapped_column(String(32), default="liked", index=True)
+    source: Mapped[str] = mapped_column(String(64), default="swipe")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class SwipeRecord(Base):
+    __tablename__ = "swipes"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    place_id: Mapped[str] = mapped_column(String(64), ForeignKey("places.place_id"), index=True)
+    direction: Mapped[str] = mapped_column(String(16))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class DiscoverySessionRecord(Base):
+    __tablename__ = "discovery_sessions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    lat: Mapped[float] = mapped_column(Float)
+    lng: Mapped[float] = mapped_column(Float)
+    radius_km: Mapped[float] = mapped_column(Float)
+    label: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    source: Mapped[str] = mapped_column(String(64), default="pin")
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+
+class RoutePlanRecord(Base):
+    __tablename__ = "route_plans"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    personality: Mapped[str] = mapped_column(String(128))
+    duration: Mapped[str] = mapped_column(String(128))
+    anchor_lat: Mapped[float | None] = mapped_column(Float, nullable=True)
+    anchor_lng: Mapped[float | None] = mapped_column(Float, nullable=True)
+    radius_km: Mapped[float | None] = mapped_column(Float, nullable=True)
+    provider: Mapped[str] = mapped_column(String(64), default="fallback")
+    prompt_payload: Mapped[dict[str, Any]] = mapped_column(JSON)
+    result_payload: Mapped[dict[str, Any]] = mapped_column(JSON)
+    is_ai_generated: Mapped[bool] = mapped_column(Boolean, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 app = FastAPI(
     title="LONG POI API",
-    description="Small FastAPI service for browsing real POIs from data/places.json.",
+    description="FastAPI service for real POI discovery, Postgres workflow storage, and AI route generation.",
     version="0.1.0",
 )
 
@@ -29,6 +170,31 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.on_event("startup")
+def startup() -> None:
+    try:
+        Base.metadata.create_all(bind=engine)
+        app.state.database_ready = True
+    except SQLAlchemyError as exc:
+        app.state.database_ready = False
+        print(f"Database unavailable: {exc}")
+
+
+def get_db() -> Generator[Session, None, None]:
+    if not getattr(app.state, "database_ready", False):
+        try:
+            Base.metadata.create_all(bind=engine)
+            app.state.database_ready = True
+        except SQLAlchemyError as exc:
+            raise HTTPException(status_code=503, detail=f"Database unavailable: {exc}") from exc
+
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 class Poi(BaseModel):
@@ -78,6 +244,59 @@ class PoiCluster(BaseModel):
 class PoiClusterResponse(BaseModel):
     clusters: list[PoiCluster]
     total: int
+
+
+class UserCreate(BaseModel):
+    line_user_id: str
+    display_name: str | None = None
+    picture_url: str | None = None
+
+
+class UserResponse(BaseModel):
+    id: int
+    line_user_id: str
+    display_name: str | None = None
+    picture_url: str | None = None
+
+
+class SwipeCreate(BaseModel):
+    place: Poi
+    direction: str = Field(pattern="^(left|right)$")
+    source: str = "swipe"
+
+
+class DiscoverySessionCreate(BaseModel):
+    lat: float
+    lng: float
+    radius_km: float = 25
+    label: str | None = None
+    source: str = "pin"
+
+
+class RouteAnchor(BaseModel):
+    lat: float
+    lng: float
+    radius_km: float = 25
+    label: str | None = None
+
+
+class RouteGenerateRequest(BaseModel):
+    personality: str
+    duration: str
+    anchor: RouteAnchor | None = None
+    liked_place_ids: list[str] = Field(default_factory=list)
+
+
+class RouteGenerateResponse(BaseModel):
+    id: str
+    trip_name: str
+    description: str
+    provider: str
+    is_ai_generated: bool
+    places: list[Poi]
+    candidate_count: int
+    anchor: RouteAnchor | None = None
+    reasoning: str | None = None
 
 
 def _first_string(value: Any) -> str:
@@ -196,6 +415,257 @@ def get_places() -> list[Poi]:
     return [place for place in places if place is not None]
 
 
+def get_or_create_user(
+    db: Session,
+    line_user_id: str,
+    display_name: str | None = None,
+    picture_url: str | None = None,
+) -> UserRecord:
+    user = db.query(UserRecord).filter(UserRecord.line_user_id == line_user_id).first()
+    if user:
+        if display_name is not None:
+            user.display_name = display_name
+        if picture_url is not None:
+            user.picture_url = picture_url
+        user.updated_at = datetime.utcnow()
+        db.commit()
+        db.refresh(user)
+        return user
+
+    user = UserRecord(line_user_id=line_user_id, display_name=display_name, picture_url=picture_url)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
+
+def require_user(db: Session, line_user_id: str) -> UserRecord:
+    user = db.query(UserRecord).filter(UserRecord.line_user_id == line_user_id).first()
+    if user:
+        return user
+    return get_or_create_user(db, line_user_id)
+
+
+def upsert_place(db: Session, poi: Poi) -> PlaceRecord:
+    snapshot = poi.model_dump()
+    place = db.query(PlaceRecord).filter(PlaceRecord.place_id == poi.id).first()
+
+    if place:
+        place.name = poi.name
+        place.lat = poi.lat
+        place.lng = poi.long
+        place.image = poi.image
+        place.province = poi.province
+        place.district = poi.district
+        place.category = poi.category
+        place.snapshot = snapshot
+        place.updated_at = datetime.utcnow()
+    else:
+        place = PlaceRecord(
+            place_id=poi.id,
+            name=poi.name,
+            lat=poi.lat,
+            lng=poi.long,
+            image=poi.image,
+            province=poi.province,
+            district=poi.district,
+            category=poi.category,
+            snapshot=snapshot,
+        )
+        db.add(place)
+
+    db.commit()
+    db.refresh(place)
+    return place
+
+
+def poi_from_snapshot(snapshot: dict[str, Any]) -> Poi:
+    return Poi.model_validate(snapshot)
+
+
+def liked_places_for_user(db: Session, user: UserRecord) -> list[Poi]:
+    rows = (
+        db.query(UserPlaceRecord, PlaceRecord)
+        .join(PlaceRecord, UserPlaceRecord.place_id == PlaceRecord.place_id)
+        .filter(UserPlaceRecord.user_id == user.id, UserPlaceRecord.status == "liked")
+        .order_by(UserPlaceRecord.updated_at.desc())
+        .all()
+    )
+    return [poi_from_snapshot(place.snapshot) for _, place in rows]
+
+
+def desired_route_count(duration: str) -> int:
+    if duration == "1 วัน ไม่ค้างคืน":
+        return 3
+    if duration == "2 วัน 1 คืน":
+        return 6
+    return 8
+
+
+def centroid(places: list[Poi]) -> RouteAnchor | None:
+    if not places:
+        return None
+    return RouteAnchor(
+        lat=sum(place.lat for place in places) / len(places),
+        lng=sum(place.long for place in places) / len(places),
+        radius_km=35,
+        label="AI liked-place centroid",
+    )
+
+
+def nearby_candidates(
+    anchor: RouteAnchor,
+    exclude_ids: set[str],
+    limit: int,
+    images_only: bool = True,
+) -> list[Poi]:
+    candidates: list[Poi] = []
+    for place in get_places():
+        if place.id in exclude_ids:
+            continue
+        if images_only and not place.thumbnail_url:
+            continue
+        distance_km = _haversine_km(anchor.lat, anchor.lng, place.lat, place.long)
+        if distance_km <= anchor.radius_km:
+            candidates.append(
+                place.model_copy(
+                    update={
+                        "distance_km": round(distance_km, 3),
+                        "distance": f"{distance_km:.1f} km",
+                    }
+                )
+            )
+    candidates.sort(key=lambda item: (item.distance_km or 999999, -(item.viewer or 0)))
+    return candidates[:limit]
+
+
+def fallback_route(
+    candidates: list[Poi],
+    count: int,
+    anchor: RouteAnchor | None,
+    personality: str,
+) -> list[Poi]:
+    personality_keywords = {
+        "introvert mode": ["วัด", "ธรรมชาติ", "พิพิธภัณฑ์", "สวน", "ศิลปะ", "เรียนรู้"],
+        "extrovert mode": ["ตลาด", "ร้านอาหาร", "คาเฟ่", "ช้อป", "กลางคืน", "กิจกรรม"],
+        "adventure mode": ["หาด", "เกาะ", "น้ำตก", "ภูเขา", "ผจญภัย", "กีฬา"],
+    }
+    keywords = personality_keywords.get(personality, [])
+
+    def score(place: Poi) -> tuple[float, float, int]:
+        text = " ".join([place.name, place.description or "", place.category or "", " ".join(place.tags)])
+        keyword_score = sum(1 for keyword in keywords if keyword in text)
+        distance = place.distance_km if place.distance_km is not None else 999999
+        viewer = place.viewer or 0
+        return (-keyword_score, distance, -viewer)
+
+    selected = sorted(candidates, key=score)[:count]
+    if len(selected) <= 2:
+        return selected
+
+    ordered = [selected.pop(0)]
+    while selected:
+        current = ordered[-1]
+        next_index = min(
+            range(len(selected)),
+            key=lambda idx: _haversine_km(current.lat, current.long, selected[idx].lat, selected[idx].long),
+        )
+        ordered.append(selected.pop(next_index))
+
+    if anchor:
+        ordered.sort(key=lambda place: _haversine_km(anchor.lat, anchor.lng, place.lat, place.long))
+    return ordered
+
+
+def parse_json_content(content: str) -> dict[str, Any]:
+    stripped = content.strip()
+    fence = re.search(r"```(?:json)?\s*(.*?)```", stripped, flags=re.DOTALL)
+    if fence:
+        stripped = fence.group(1).strip()
+    return json.loads(stripped)
+
+
+def call_openrouter(
+    personality: str,
+    duration: str,
+    anchor: RouteAnchor | None,
+    candidates: list[Poi],
+    count: int,
+) -> dict[str, Any] | None:
+    if not OPENROUTER_API_KEY:
+        return None
+
+    candidate_payload = [
+        {
+            "id": place.id,
+            "name": place.name,
+            "category": place.category,
+            "province": place.province,
+            "district": place.district,
+            "lat": place.lat,
+            "lng": place.long,
+            "distance_km": place.distance_km,
+            "tags": place.tags[:6],
+            "description": (place.description or "")[:350],
+        }
+        for place in candidates[:40]
+    ]
+
+    prompt = {
+        "personality": personality,
+        "duration": duration,
+        "desired_place_count": count,
+        "anchor": anchor.model_dump() if anchor else None,
+        "candidate_places": candidate_payload,
+        "instructions": [
+            "Return strict JSON only.",
+            "Select only ids that exist in candidate_places.",
+            "Prioritize a coherent nearby route, minimal backtracking, and variety.",
+            "If liked places are far from the anchor, choose nearby candidates that fit better.",
+        ],
+        "schema": {
+            "trip_name": "string",
+            "description": "string",
+            "reasoning": "string",
+            "ordered_place_ids": ["string"],
+        },
+    }
+
+    try:
+        response = httpx.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": os.getenv("OPENROUTER_SITE_URL", "http://localhost:5173"),
+                "X-Title": os.getenv("OPENROUTER_APP_NAME", "LONG LIFF Travel"),
+            },
+            json={
+                "model": OPENROUTER_MODEL,
+                "messages": [
+                    {
+                        "role": "system",
+                        "content": "You are a Thai travel route planner. You return compact strict JSON.",
+                    },
+                    {
+                        "role": "user",
+                        "content": json.dumps(prompt, ensure_ascii=False),
+                    },
+                ],
+                "temperature": 0.35,
+            },
+            timeout=30,
+        )
+        response.raise_for_status()
+        content = response.json()["choices"][0]["message"]["content"]
+        parsed = parse_json_content(content)
+        if isinstance(parsed.get("ordered_place_ids"), list):
+            return parsed
+    except Exception as exc:
+        print(f"OpenRouter route generation failed: {exc}")
+    return None
+
+
 @app.get("/api/health")
 def health_check() -> dict[str, str | int]:
     try:
@@ -203,6 +673,278 @@ def health_check() -> dict[str, str | int]:
     except Exception:
         total = 0
     return {"status": "ok", "places": total}
+
+
+@app.post("/api/users", response_model=UserResponse)
+def create_or_get_user(payload: UserCreate, db: Session = Depends(get_db)) -> UserResponse:
+    user = get_or_create_user(db, payload.line_user_id, payload.display_name, payload.picture_url)
+    return UserResponse(
+        id=user.id,
+        line_user_id=user.line_user_id,
+        display_name=user.display_name,
+        picture_url=user.picture_url,
+    )
+
+
+@app.get("/api/users/{line_user_id}/liked-places", response_model=PoiListResponse)
+def get_liked_places(line_user_id: str, db: Session = Depends(get_db)) -> PoiListResponse:
+    user = require_user(db, line_user_id)
+    places = liked_places_for_user(db, user)
+    return PoiListResponse(places=places, total=len(places), source_total=len(places))
+
+
+@app.post("/api/users/{line_user_id}/swipes")
+def record_swipe(line_user_id: str, payload: SwipeCreate, db: Session = Depends(get_db)) -> dict[str, Any]:
+    user = require_user(db, line_user_id)
+    upsert_place(db, payload.place)
+
+    swipe = SwipeRecord(user_id=user.id, place_id=payload.place.id, direction=payload.direction)
+    db.add(swipe)
+
+    existing = (
+        db.query(UserPlaceRecord)
+        .filter(UserPlaceRecord.user_id == user.id, UserPlaceRecord.place_id == payload.place.id)
+        .first()
+    )
+    status = "liked" if payload.direction == "right" else "dismissed"
+    if existing:
+        existing.status = status
+        existing.source = payload.source
+        existing.updated_at = datetime.utcnow()
+    else:
+        db.add(
+            UserPlaceRecord(
+                user_id=user.id,
+                place_id=payload.place.id,
+                status=status,
+                source=payload.source,
+            )
+        )
+
+    db.commit()
+    return {"success": True, "place_id": payload.place.id, "status": status}
+
+
+@app.get("/api/users/{line_user_id}/swipes")
+def get_swipes(line_user_id: str, db: Session = Depends(get_db)) -> dict[str, Any]:
+    user = require_user(db, line_user_id)
+    rows = (
+        db.query(SwipeRecord)
+        .filter(SwipeRecord.user_id == user.id)
+        .order_by(SwipeRecord.created_at.desc())
+        .all()
+    )
+    return {
+        "swipes": [
+            {
+                "place_id": row.place_id,
+                "direction": row.direction,
+                "created_at": row.created_at.isoformat(),
+            }
+            for row in rows
+        ],
+        "total": len(rows),
+    }
+
+
+@app.delete("/api/users/{line_user_id}/swipes")
+def clear_swipes(line_user_id: str, db: Session = Depends(get_db)) -> dict[str, bool]:
+    user = require_user(db, line_user_id)
+    db.query(SwipeRecord).filter(SwipeRecord.user_id == user.id).delete()
+    db.query(UserPlaceRecord).filter(UserPlaceRecord.user_id == user.id, UserPlaceRecord.status == "dismissed").delete()
+    db.commit()
+    return {"success": True}
+
+
+@app.delete("/api/users/{line_user_id}/liked-places/{place_id}")
+def remove_liked_place(line_user_id: str, place_id: str, db: Session = Depends(get_db)) -> dict[str, bool]:
+    user = require_user(db, line_user_id)
+    row = (
+        db.query(UserPlaceRecord)
+        .filter(UserPlaceRecord.user_id == user.id, UserPlaceRecord.place_id == place_id)
+        .first()
+    )
+    if row:
+        row.status = "removed"
+        row.updated_at = datetime.utcnow()
+        db.commit()
+    return {"success": True}
+
+
+@app.delete("/api/users/{line_user_id}/liked-places")
+def clear_liked_places(line_user_id: str, db: Session = Depends(get_db)) -> dict[str, bool]:
+    user = require_user(db, line_user_id)
+    rows = db.query(UserPlaceRecord).filter(UserPlaceRecord.user_id == user.id).all()
+    for row in rows:
+        row.status = "removed"
+        row.updated_at = datetime.utcnow()
+    db.commit()
+    return {"success": True}
+
+
+@app.post("/api/users/{line_user_id}/discovery-sessions")
+def create_discovery_session(
+    line_user_id: str,
+    payload: DiscoverySessionCreate,
+    db: Session = Depends(get_db),
+) -> dict[str, Any]:
+    user = require_user(db, line_user_id)
+    session = DiscoverySessionRecord(
+        user_id=user.id,
+        lat=payload.lat,
+        lng=payload.lng,
+        radius_km=payload.radius_km,
+        label=payload.label,
+        source=payload.source,
+    )
+    db.add(session)
+    db.commit()
+    db.refresh(session)
+    return {
+        "id": session.id,
+        "lat": session.lat,
+        "lng": session.lng,
+        "radius_km": session.radius_km,
+        "label": session.label,
+        "source": session.source,
+    }
+
+
+@app.get("/api/users/{line_user_id}/discovery-sessions/latest")
+def get_latest_discovery_session(line_user_id: str, db: Session = Depends(get_db)) -> dict[str, Any] | None:
+    user = require_user(db, line_user_id)
+    session = (
+        db.query(DiscoverySessionRecord)
+        .filter(DiscoverySessionRecord.user_id == user.id)
+        .order_by(DiscoverySessionRecord.created_at.desc())
+        .first()
+    )
+    if not session:
+        return None
+    return {
+        "id": session.id,
+        "lat": session.lat,
+        "lng": session.lng,
+        "radius_km": session.radius_km,
+        "label": session.label,
+        "source": session.source,
+    }
+
+
+@app.post("/api/users/{line_user_id}/routes/generate", response_model=RouteGenerateResponse)
+def generate_route(
+    line_user_id: str,
+    payload: RouteGenerateRequest,
+    db: Session = Depends(get_db),
+) -> RouteGenerateResponse:
+    user = require_user(db, line_user_id)
+    liked = liked_places_for_user(db, user)
+    liked_by_id = {place.id: place for place in liked}
+
+    selected_liked = [
+        liked_by_id[place_id]
+        for place_id in payload.liked_place_ids
+        if place_id in liked_by_id
+    ] or liked
+
+    anchor = payload.anchor or centroid(selected_liked)
+    count = desired_route_count(payload.duration)
+    candidates: list[Poi] = []
+
+    if anchor:
+        for place in selected_liked:
+            distance_km = _haversine_km(anchor.lat, anchor.lng, place.lat, place.long)
+            if distance_km <= max(anchor.radius_km * 1.5, 20):
+                candidates.append(
+                    place.model_copy(
+                        update={
+                            "distance_km": round(distance_km, 3),
+                            "distance": f"{distance_km:.1f} km",
+                        }
+                    )
+                )
+        exclude_ids = {place.id for place in candidates}
+        candidates.extend(nearby_candidates(anchor, exclude_ids, limit=max(40, count * 8), images_only=True))
+        if len(candidates) < count:
+            exclude_ids = {place.id for place in candidates}
+            candidates.extend(nearby_candidates(anchor, exclude_ids, limit=max(40, count * 8), images_only=False))
+    else:
+        candidates = selected_liked
+
+    deduped: dict[str, Poi] = {}
+    for place in candidates:
+        deduped[place.id] = place
+    candidates = list(deduped.values())
+
+    if not candidates:
+        raise HTTPException(status_code=404, detail="No liked or nearby places are available for route generation.")
+
+    ai_payload = call_openrouter(payload.personality, payload.duration, anchor, candidates, count)
+    places_by_id = {place.id: place for place in candidates}
+    provider = "fallback"
+    is_ai_generated = False
+    reasoning = None
+    trip_name = "LONG Nearby Route"
+    description = "Generated from your saved places and nearby real POIs."
+
+    if ai_payload:
+        ordered_ids = [str(place_id) for place_id in ai_payload.get("ordered_place_ids", [])]
+        ordered = [places_by_id[place_id] for place_id in ordered_ids if place_id in places_by_id]
+        if ordered:
+            route_places = ordered[:count]
+            provider = f"openrouter:{OPENROUTER_MODEL}"
+            is_ai_generated = True
+            reasoning = ai_payload.get("reasoning")
+            trip_name = ai_payload.get("trip_name") or trip_name
+            description = ai_payload.get("description") or description
+        else:
+            route_places = fallback_route(candidates, count, anchor, payload.personality)
+    else:
+        route_places = fallback_route(candidates, count, anchor, payload.personality)
+
+    for place in route_places:
+        upsert_place(db, place)
+
+    route_id = str(uuid.uuid4())
+    result_payload = {
+        "trip_name": trip_name,
+        "description": description,
+        "reasoning": reasoning,
+        "places": [place.model_dump() for place in route_places],
+    }
+    route_record = RoutePlanRecord(
+        id=route_id,
+        user_id=user.id,
+        personality=payload.personality,
+        duration=payload.duration,
+        anchor_lat=anchor.lat if anchor else None,
+        anchor_lng=anchor.lng if anchor else None,
+        radius_km=anchor.radius_km if anchor else None,
+        provider=provider,
+        prompt_payload={
+            "personality": payload.personality,
+            "duration": payload.duration,
+            "anchor": anchor.model_dump() if anchor else None,
+            "liked_place_ids": payload.liked_place_ids,
+            "candidate_count": len(candidates),
+        },
+        result_payload=result_payload,
+        is_ai_generated=is_ai_generated,
+    )
+    db.add(route_record)
+    db.commit()
+
+    return RouteGenerateResponse(
+        id=route_id,
+        trip_name=trip_name,
+        description=description,
+        provider=provider,
+        is_ai_generated=is_ai_generated,
+        places=route_places,
+        candidate_count=len(candidates),
+        anchor=anchor,
+        reasoning=reasoning,
+    )
 
 
 @app.get("/api/pois", response_model=PoiListResponse)
