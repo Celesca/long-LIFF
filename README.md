@@ -100,6 +100,18 @@ npm run dev
 npm run build
 ```
 
+## Real POI Backend
+
+The route planner can fetch nearby real POIs from `data/places.json` through a small FastAPI backend:
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Then open the route planner and use the `places.json POI` section to load nearby approved POIs around the first route point.
+
 ## Project Structure
 
 ```

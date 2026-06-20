@@ -7,6 +7,11 @@ export interface TravelPlace {
   description?: string;
   country?: string;
   city?: string;
+  province?: string;
+  district?: string;
+  address?: string;
+  category?: string;
+  distance_km?: number;
   rating?: number;
   distance?: string;
   tags: string[];

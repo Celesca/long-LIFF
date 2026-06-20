@@ -8,7 +8,7 @@ import { CoinSystem } from '../utils/coinSystem';
 import CoinCounter from './CoinCounter';
 import PlaceDetailModal from './PlaceDetailModal';
 import { getUserStorageKey } from '../hooks/useLiff';
-import { tripService } from '../utils/api';
+import { poiApi } from '../services/poiApi';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
@@ -41,6 +41,10 @@ const RoutingPage: React.FC = () => {
   // Place detail modal state
   const [selectedPlace, setSelectedPlace] = useState<TravelPlace | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  // Real POI state from FastAPI places.json backend
+  const [nearbyPois, setNearbyPois] = useState<TravelPlace[]>([]);
+  const [isLoadingPois, setIsLoadingPois] = useState(false);
+  const [poiError, setPoiError] = useState('');
 
   // Helper functions (declared early to avoid dependency ordering issues)
   function shuffleArray(array: TravelPlace[]): TravelPlace[] {
@@ -117,6 +121,37 @@ const RoutingPage: React.FC = () => {
     }
     return filteredPlaces;
   }, [optimizeRouteOrder]);
+
+  const loadNearbyPois = React.useCallback(async () => {
+    const startPoint = optimizedRoute[0];
+    if (!startPoint) return;
+
+    setIsLoadingPois(true);
+    setPoiError('');
+
+    try {
+      const response = await poiApi.getNearbyPlaces({
+        lat: startPoint.lat,
+        lng: startPoint.long,
+        radiusKm: 25,
+        limit: 12,
+        excludeIds: optimizedRoute.map(place => place.id),
+      });
+      setNearbyPois(response.places);
+    } catch (error) {
+      console.error('Failed to load nearby POIs:', error);
+      setPoiError('เปิด FastAPI backend ที่พอร์ต 8000 ก่อนโหลด POI จาก places.json');
+    } finally {
+      setIsLoadingPois(false);
+    }
+  }, [optimizedRoute]);
+
+  const addPoiToRoute = (poi: TravelPlace) => {
+    if (optimizedRoute.some(place => place.id === poi.id)) return;
+    const newRoute = optimizeRouteOrder([...optimizedRoute, poi]);
+    setOptimizedRoute(newRoute);
+    setNearbyPois(current => current.filter(place => place.id !== poi.id));
+  };
 
   // Trigger an emergency scenario (e.g., flood at next unvisited place) and suggest alternatives
   const triggerEmergencyPlan = () => {
@@ -321,6 +356,23 @@ const RoutingPage: React.FC = () => {
       });
     };
 
+    const createPoiIcon = (): L.DivIcon => {
+      return L.divIcon({
+        html: `<div style="
+          background-color: #2D6A6A;
+          border-radius: 50%;
+          width: 14px;
+          height: 14px;
+          border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.24);
+        "></div>`,
+        className: 'nearby-poi-marker',
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+        popupAnchor: [0, -8]
+      });
+    };
+
     return (
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <div className="flex justify-between items-center mb-4">
@@ -421,6 +473,38 @@ const RoutingPage: React.FC = () => {
                 }}
               />
             )}
+
+            {/* Small nearby POIs loaded from places.json through FastAPI */}
+            {nearbyPois.map((place) => (
+              <Marker
+                key={`poi-${place.id}`}
+                position={[place.lat, place.long]}
+                icon={createPoiIcon()}
+              >
+                <Popup className="custom-popup">
+                  <div className="min-w-[180px]">
+                    <p className="text-xs font-bold text-[#2D6A6A] mb-1">POI ใกล้เคียง</p>
+                    <h4 className="font-bold text-[#2D2926] mb-1">{place.name}</h4>
+                    <p className="text-xs text-gray-500 mb-2">{[place.district, place.province].filter(Boolean).join(', ')}</p>
+                    {place.distance && <p className="text-xs text-[#C2703E] font-semibold">{place.distance} จากจุดเริ่มต้น</p>}
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={() => { setSelectedPlace(place); setShowDetailModal(true); }}
+                        className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700"
+                      >
+                        รายละเอียด
+                      </button>
+                      <button
+                        onClick={() => addPoiToRoute(place)}
+                        className="text-xs px-2 py-1 rounded bg-[#2D6A6A] text-white"
+                      >
+                        เพิ่ม
+                      </button>
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
           </MapContainer>
         </div>
 
@@ -863,6 +947,65 @@ const RoutingPage: React.FC = () => {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Real POIs from places.json */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase text-[#2D6A6A]">places.json POI</p>
+              <h2 className="text-lg font-bold text-[#2D2926]">สถานที่จริงใกล้จุดเริ่มต้น</h2>
+              <p className="text-sm text-gray-500">
+                โหลด POI ที่ได้รับอนุมัติจาก FastAPI backend ภายในรัศมี 25 km จาก {optimizedRoute[0]?.name}
+              </p>
+            </div>
+            <button
+              onClick={loadNearbyPois}
+              disabled={isLoadingPois}
+              className="inline-flex items-center justify-center rounded-xl bg-[#2D6A6A] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#245858] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isLoadingPois ? 'กำลังโหลด...' : 'โหลด POI ใกล้เคียง'}
+            </button>
+          </div>
+
+          {poiError && (
+            <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+              {poiError}
+            </div>
+          )}
+
+          {nearbyPois.length > 0 && (
+            <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {nearbyPois.map((poi) => (
+                <div key={poi.id} className="rounded-xl border border-[#E8E2DB] p-3">
+                  <div className="flex gap-3">
+                    {poi.image && (
+                      <img src={poi.image} alt={poi.name} className="h-16 w-16 flex-shrink-0 rounded-lg object-cover" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate font-bold text-[#2D2926]">{poi.name}</h3>
+                      <p className="text-xs text-gray-500">{[poi.district, poi.province].filter(Boolean).join(', ')}</p>
+                      {poi.distance && <p className="mt-1 text-xs font-semibold text-[#C2703E]">{poi.distance}</p>}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={() => { setSelectedPlace(poi); setShowDetailModal(true); }}
+                      className="flex-1 rounded-lg bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-200"
+                    >
+                      ดูรายละเอียด
+                    </button>
+                    <button
+                      onClick={() => addPoiToRoute(poi)}
+                      className="flex-1 rounded-lg bg-[#2D6A6A] px-3 py-2 text-xs font-semibold text-white hover:bg-[#245858]"
+                    >
+                      เพิ่มเข้าเส้นทาง
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

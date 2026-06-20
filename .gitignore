@@ -26,4 +26,6 @@ dist-ssr
 
 LONQ Ted Fund.mp4
 
+data/*
 data/
+data/places.json
