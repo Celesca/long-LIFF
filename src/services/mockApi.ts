@@ -47,18 +47,19 @@ const delay = (ms: number = 100) => new Promise(resolve => setTimeout(resolve, m
 export const mockApi = {
   // ============ User Management ============
   
-  async createOrGetUser(userId: string): Promise<{ id: string; total_coins: number }> {
+  async createOrGetUser(userId: string, displayName?: string, pictureUrl?: string): Promise<{ id: string; total_coins: number }> {
     await delay();
     const storageKey = getUserStorageKey('userProfile');
     let profile = localStorage.getItem(storageKey);
     
     if (!profile) {
-      const newProfile = { totalCoins: 0, journeys: [], currentJourney: undefined };
+      const newProfile = { totalCoins: 0, journeys: [], currentJourney: undefined, displayName, pictureUrl };
       localStorage.setItem(storageKey, JSON.stringify(newProfile));
       return { id: userId, total_coins: 0 };
     }
     
     const parsed = JSON.parse(profile);
+    localStorage.setItem(storageKey, JSON.stringify({ ...parsed, displayName, pictureUrl }));
     return { id: userId, total_coins: parsed.totalCoins || 0 };
   },
 
