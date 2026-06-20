@@ -4,6 +4,8 @@ export interface TravelPlace {
   lat: number;
   long: number;
   image: string;
+  thumbnail_url?: string;
+  images?: string[];
   description?: string;
   country?: string;
   city?: string;

@@ -37,6 +37,8 @@ class Poi(BaseModel):
     lat: float
     long: float
     image: str = ""
+    thumbnail_url: str = ""
+    images: list[str] = Field(default_factory=list)
     description: str | None = None
     country: str = "Thailand"
     city: str | None = None
@@ -58,6 +60,26 @@ class PoiListResponse(BaseModel):
     source_total: int
 
 
+class PoiCluster(BaseModel):
+    id: str
+    label: str
+    lat: float
+    lng: float
+    radius_km: int
+    place_count: int
+    image_count: int
+    province: str | None = None
+    district: str | None = None
+    category: str | None = None
+    thumbnail_url: str = ""
+    sample_names: list[str] = Field(default_factory=list)
+
+
+class PoiClusterResponse(BaseModel):
+    clusters: list[PoiCluster]
+    total: int
+
+
 def _first_string(value: Any) -> str:
     if isinstance(value, str):
         return value
@@ -66,6 +88,14 @@ def _first_string(value: Any) -> str:
             if isinstance(item, str) and item:
                 return item
     return ""
+
+
+def _string_list(value: Any) -> list[str]:
+    if isinstance(value, str) and value:
+        return [value]
+    if isinstance(value, list):
+        return [item for item in value if isinstance(item, str) and item]
+    return []
 
 
 def _nested_name(raw: dict[str, Any], *keys: str) -> str | None:
@@ -114,12 +144,20 @@ def _normalize_place(raw: dict[str, Any]) -> Poi | None:
     tags = raw.get("tags") if isinstance(raw.get("tags"), list) else []
     category = raw.get("category") if isinstance(raw.get("category"), dict) else {}
 
-    image = (
-        _first_string(raw.get("thumbnailUrl"))
-        or _first_string(sha.get("thumbnailUrl"))
-        or _first_string(sha.get("detailThumbnail"))
-        or _first_string(sha.get("detailPicture"))
-    )
+    images = []
+    for value in (
+        raw.get("thumbnailUrl"),
+        raw.get("thumbnail_url"),
+        raw.get("thumbnailURL"),
+        sha.get("thumbnailUrl"),
+        sha.get("thumbnail_url"),
+        sha.get("detailThumbnail"),
+        sha.get("detailPicture"),
+    ):
+        images.extend(_string_list(value))
+
+    images = list(dict.fromkeys(images))
+    image = images[0] if images else ""
     description = raw.get("introduction") or sha.get("detail")
 
     return Poi(
@@ -128,6 +166,8 @@ def _normalize_place(raw: dict[str, Any]) -> Poi | None:
         lat=lat,
         long=lon,
         image=image,
+        thumbnail_url=image,
+        images=images,
         description=description if isinstance(description, str) else None,
         city=_nested_name(location, "province", "name"),
         province=_nested_name(location, "province", "name"),
@@ -211,6 +251,7 @@ def nearby_pois(
     radius_km: float = Query(default=25, gt=0, le=200),
     limit: int = Query(default=12, ge=1, le=100),
     exclude_ids: str | None = Query(default=None, description="Comma-separated place ids to exclude."),
+    images_only: bool = Query(default=False),
 ) -> PoiListResponse:
     try:
         places = get_places()
@@ -223,6 +264,8 @@ def nearby_pois(
     for place in places:
         if place.id in excluded:
             continue
+        if images_only and not place.thumbnail_url:
+            continue
         distance_km = _haversine_km(lat, lng, place.lat, place.long)
         if distance_km <= radius_km:
             nearby.append(
@@ -234,5 +277,73 @@ def nearby_pois(
                 )
             )
 
-    nearby.sort(key=lambda item: (item.distance_km if item.distance_km is not None else 999999, item.name))
+    nearby.sort(
+        key=lambda item: (
+            0 if item.thumbnail_url else 1,
+            item.distance_km if item.distance_km is not None else 999999,
+            item.name,
+        )
+    )
     return PoiListResponse(places=nearby[:limit], total=len(nearby), source_total=len(places))
+
+
+@app.get("/api/poi-clusters", response_model=PoiClusterResponse)
+def poi_clusters(
+    limit: int = Query(default=12, ge=1, le=50),
+    grid_size: float = Query(default=0.25, gt=0.05, le=1.0),
+    min_places: int = Query(default=20, ge=1),
+) -> PoiClusterResponse:
+    try:
+        places = get_places()
+    except (FileNotFoundError, ValueError) as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+    buckets: dict[tuple[int, int], list[Poi]] = {}
+    for place in places:
+        key = (math.floor(place.lat / grid_size), math.floor(place.long / grid_size))
+        buckets.setdefault(key, []).append(place)
+
+    clusters: list[PoiCluster] = []
+    for (lat_cell, lng_cell), bucket in buckets.items():
+        if len(bucket) < min_places:
+            continue
+
+        province_counts: dict[str, int] = {}
+        district_counts: dict[str, int] = {}
+        category_counts: dict[str, int] = {}
+        for place in bucket:
+            if place.province:
+                province_counts[place.province] = province_counts.get(place.province, 0) + 1
+            if place.district:
+                district_counts[place.district] = district_counts.get(place.district, 0) + 1
+            if place.category:
+                category_counts[place.category] = category_counts.get(place.category, 0) + 1
+
+        province = max(province_counts, key=province_counts.get) if province_counts else None
+        district = max(district_counts, key=district_counts.get) if district_counts else None
+        category = max(category_counts, key=category_counts.get) if category_counts else None
+        with_images = [place for place in bucket if place.thumbnail_url]
+        thumbnail = with_images[0].thumbnail_url if with_images else ""
+        sample_names = [place.name for place in sorted(bucket, key=lambda item: item.viewer or 0, reverse=True)[:3]]
+        center_lat = sum(place.lat for place in bucket) / len(bucket)
+        center_lng = sum(place.long for place in bucket) / len(bucket)
+
+        clusters.append(
+            PoiCluster(
+                id=f"{lat_cell}:{lng_cell}",
+                label=" / ".join(item for item in [district, province] if item) or f"{center_lat:.2f}, {center_lng:.2f}",
+                lat=round(center_lat, 6),
+                lng=round(center_lng, 6),
+                radius_km=max(15, min(80, round(grid_size * 111))),
+                place_count=len(bucket),
+                image_count=len(with_images),
+                province=province,
+                district=district,
+                category=category,
+                thumbnail_url=thumbnail,
+                sample_names=sample_names,
+            )
+        )
+
+    clusters.sort(key=lambda item: (item.image_count, item.place_count), reverse=True)
+    return PoiClusterResponse(clusters=clusters[:limit], total=len(clusters))

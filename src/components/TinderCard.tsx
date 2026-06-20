@@ -10,7 +10,8 @@ interface TinderCardProps {
 }
 
 const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(!place.image);
+  const [imageFailed, setImageFailed] = useState(!place.image);
 
   const [{ x, y, rotate, scale }, api] = useSpring(() => ({
     x: 0,
@@ -61,13 +62,31 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
           <div className="absolute inset-0 skeleton" />
         )}
 
-        <img
-          src={place.image}
-          alt={place.name}
-          className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
-          draggable={false}
-          onLoad={() => setImageLoaded(true)}
-        />
+        {imageFailed ? (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#2D6A6A] via-[#6B8F71] to-[#C2703E] p-8 text-center text-white">
+            <div>
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/18 backdrop-blur-sm">
+                <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
+                </svg>
+              </div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-white/80">{place.category || place.tags?.[0] || 'POI'}</p>
+            </div>
+          </div>
+        ) : (
+          <img
+            src={place.image}
+            alt={place.name}
+            className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+            draggable={false}
+            referrerPolicy="no-referrer"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => {
+              setImageFailed(true);
+              setImageLoaded(true);
+            }}
+          />
+        )}
 
         {/* Like indicator */}
         <animated.div
@@ -106,10 +125,10 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
         <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black/25 to-transparent" />
 
         {/* Category badge */}
-        {place.tags && place.tags[0] && (
+        {(place.category || place.tags?.[0]) && (
           <div className="absolute top-4 left-4">
             <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-[11px] font-semibold text-[#2D2926] shadow-sm">
-              {place.tags[0]}
+              {place.category || place.tags[0]}
             </span>
           </div>
         )}
@@ -128,12 +147,12 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
 
           <h3 className="text-2xl font-bold mb-1 drop-shadow-md tracking-tight">{place.name}</h3>
 
-          {place.country && (
+          {(place.province || place.city || place.country) && (
             <div className="flex items-center text-white/80 text-sm mb-2.5">
               <svg className="w-3.5 h-3.5 mr-1 text-[#D4A853]" fill="currentColor" viewBox="0 0 24 24">
                 <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
               </svg>
-              <span className="font-medium">{place.country}</span>
+              <span className="font-medium">{[place.district, place.province || place.city, place.country].filter(Boolean).join(', ')}</span>
             </div>
           )}
 
