@@ -75,13 +75,17 @@ const saved = localStorage.getItem(storageKey);
 
 ### Environment Variables
 
-Create a `.env` file with your LIFF app ID:
+Create a `.env` file when you need to override local defaults:
 
 ```
-VITE_LIFF_ID=your-liff-id-here
+VITE_API_URL=http://localhost:8000
+VITE_LIFF_ID=
+VITE_USE_REAL_API=false
 ```
 
-Get your LIFF ID from the [LINE Developers Console](https://developers.line.biz/console/).
+Local Vite development works without `VITE_LIFF_ID`; the app uses a mock LIFF user for easier testing. Set `VITE_LIFF_ID` when you want to test real LINE login, and get the ID from the [LINE Developers Console](https://developers.line.biz/console/).
+
+By default the frontend uses localStorage mock data. Set `VITE_USE_REAL_API=true` to call the backend configured by `VITE_API_URL`.
 
 ## Development
 

@@ -22,6 +22,8 @@ const getConfiguredLiffId = () =>
   (typeof window !== "undefined" && (window as any).__VITE_LIFF_ID__) ||
   ((typeof import.meta !== "undefined" && (import.meta as any).env?.VITE_LIFF_ID) as string) ||
   "";
+const shouldUseMockLiff = (configuredLiffId: string) =>
+  DEV_MODE || (import.meta.env.DEV && !configuredLiffId);
 
 // Create context for LIFF user data
 export const LiffContext = createContext<{
@@ -57,8 +59,39 @@ function App() {
   const [isInLineClient, setIsInLineClient] = useState(false);
   const [liffId, setLiffId] = useState("");
 
+  const startMockLiffSession = () => {
+    console.log("DEV MODE: Bypassing LIFF authentication");
+    const storedUserId = localStorage.getItem("liff_userId");
+    const mockUser = {
+      userId: storedUserId || "dev_user_local",
+      displayName: "Dev User",
+      pictureUrl: "https://via.placeholder.com/150/8B5CF6/FFFFFF?text=DEV",
+    };
+
+    setError("");
+    setIsLiffReady(true);
+    setIsLoggedIn(true);
+    setUserId(mockUser.userId);
+    setDisplayName(mockUser.displayName);
+    setPictureUrl(mockUser.pictureUrl);
+    setLiffStatus("dev");
+
+    localStorage.setItem("liff_userId", mockUser.userId);
+    localStorage.setItem("liff_displayName", mockUser.displayName);
+    localStorage.setItem("liff_pictureUrl", mockUser.pictureUrl);
+
+    appApi.createOrGetUser(mockUser.userId, mockUser.displayName, mockUser.pictureUrl).catch((err: Error) => {
+      console.error("DEV MODE: Failed to initialize mock user:", err);
+    });
+  };
+
   const loginWithLine = () => {
     const configuredLiffId = liffId || getConfiguredLiffId();
+    if (shouldUseMockLiff(configuredLiffId)) {
+      startMockLiffSession();
+      return;
+    }
+
     if (!configuredLiffId) {
       setError("VITE_LIFF_ID is not configured.");
       setLiffStatus("missing-config");
@@ -111,39 +144,17 @@ function App() {
   };
 
   useEffect(() => {
-    // Development mode - bypass LIFF and use mock user (for local testing without LINE app)
-    if (DEV_MODE) {
-      console.log("DEV MODE: Bypassing LIFF authentication");
-      const mockUser = {
-        userId: "dev_user_" + Date.now(),
-        displayName: "Dev User",
-        pictureUrl: "https://via.placeholder.com/150/8B5CF6/FFFFFF?text=DEV",
-      };
-      setIsLiffReady(true);
-      setIsLoggedIn(true);
-      setUserId(mockUser.userId);
-      setDisplayName(mockUser.displayName);
-      setPictureUrl(mockUser.pictureUrl);
-      setLiffStatus("dev");
-
-      // Store in localStorage
-      localStorage.setItem("liff_userId", mockUser.userId);
-      localStorage.setItem("liff_displayName", mockUser.displayName);
-      localStorage.setItem("liff_pictureUrl", mockUser.pictureUrl);
-
-      // Initialize user in backend
-      appApi.createOrGetUser(mockUser.userId, mockUser.displayName, mockUser.pictureUrl).catch((err: Error) => {
-        console.error("DEV MODE: Failed to initialize mock user:", err);
-      });
-
-      return;
-    }
-
     // Production mode - use real LIFF
     // Initialize LIFF once when the app mounts.
     // Use Vite's import.meta.env at build time, and a window-level fallback for runtime overrides.
     const liffId = getConfiguredLiffId();
     setLiffId(liffId);
+
+    // Local Vite dev can run without a LIFF app ID. Set VITE_LIFF_ID when testing LINE auth.
+    if (shouldUseMockLiff(liffId)) {
+      startMockLiffSession();
+      return;
+    }
 
     if (!liffId) {
       console.warn("LIFF init skipped: VITE_LIFF_ID not provided.");
