@@ -29,3 +29,8 @@ LONQ Ted Fund.mp4
 data/*
 data/
 data/places.json
+
+# pycache
+__pycache__/
+*.pyc
+*.pyd
