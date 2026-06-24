@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 .env
+__pycache__/
+*.py[cod]
 
 # Editor directories and files
 .vscode/*
@@ -25,3 +27,12 @@ dist-ssr
 *.sw?
 
 LONQ Ted Fund.mp4
+
+data/*
+data/
+data/places.json
+
+# pycache
+__pycache__/
+*.pyc
+*.pyd

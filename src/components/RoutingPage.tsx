@@ -7,8 +7,8 @@ import type { TravelPlace } from '../types/TravelPlace';
 import { CoinSystem } from '../utils/coinSystem';
 import CoinCounter from './CoinCounter';
 import PlaceDetailModal from './PlaceDetailModal';
-import { getUserStorageKey } from '../hooks/useLiff';
-import { tripService } from '../utils/api';
+import { getUserId } from '../hooks/useLiff';
+import { poiApi } from '../services/poiApi';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
@@ -21,14 +21,18 @@ L.Icon.Default.mergeOptions({
 interface RoutingPageProps {
   personality?: string;
   duration?: string;
-  city?: string;
+  anchor?: { lat: number; lng: number; radius_km: number; label?: string } | null;
 }
 
 const RoutingPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { personality, duration, city } = (location.state as RoutingPageProps) || {};
+  const { personality, duration, anchor } = (location.state as RoutingPageProps) || {};
+  const lineUserId = getUserId() || 'anonymous';
   const [optimizedRoute, setOptimizedRoute] = useState<TravelPlace[]>([]);
+  const [isGeneratingRoute, setIsGeneratingRoute] = useState(true);
+  const [routeError, setRouteError] = useState('');
+  const [routeMeta, setRouteMeta] = useState<{ name: string; description: string; provider: string; isAi: boolean } | null>(null);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   // Emergency routing state
   const [showEmergencyModal, setShowEmergencyModal] = useState(false);
@@ -41,6 +45,10 @@ const RoutingPage: React.FC = () => {
   // Place detail modal state
   const [selectedPlace, setSelectedPlace] = useState<TravelPlace | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  // Real POI state from FastAPI places.json backend
+  const [nearbyPois, setNearbyPois] = useState<TravelPlace[]>([]);
+  const [isLoadingPois, setIsLoadingPois] = useState(false);
+  const [poiError, setPoiError] = useState('');
 
   // Helper functions (declared early to avoid dependency ordering issues)
   function shuffleArray(array: TravelPlace[]): TravelPlace[] {
@@ -118,8 +126,68 @@ const RoutingPage: React.FC = () => {
     return filteredPlaces;
   }, [optimizeRouteOrder]);
 
+  const loadNearbyPois = React.useCallback(async () => {
+    const startPoint = optimizedRoute[0];
+    if (!startPoint) return;
+
+    setIsLoadingPois(true);
+    setPoiError('');
+
+    try {
+      const response = await poiApi.getNearbyPlaces({
+        lat: startPoint.lat,
+        lng: startPoint.long,
+        radiusKm: 25,
+        limit: 12,
+        excludeIds: optimizedRoute.map(place => place.id),
+      });
+      setNearbyPois(response.places);
+    } catch (error) {
+      console.error('Failed to load nearby POIs:', error);
+      setPoiError('เปิด FastAPI backend ที่พอร์ต 8000 ก่อนโหลด POI จาก places.json');
+    } finally {
+      setIsLoadingPois(false);
+    }
+  }, [optimizedRoute]);
+
+  const addPoiToRoute = (poi: TravelPlace) => {
+    if (optimizedRoute.some(place => place.id === poi.id)) return;
+    const newRoute = optimizeRouteOrder([...optimizedRoute, poi]);
+    setOptimizedRoute(newRoute);
+    setNearbyPois(current => current.filter(place => place.id !== poi.id));
+  };
+
+  const generateRoute = React.useCallback(async () => {
+    setIsGeneratingRoute(true);
+    setRouteError('');
+
+    try {
+      await poiApi.createOrGetUser({ line_user_id: lineUserId });
+      const likedResponse = await poiApi.getLikedPlaces(lineUserId);
+      const response = await poiApi.generateRoute(lineUserId, {
+        personality: personality || 'default',
+        duration: duration || 'custom',
+        anchor: anchor || undefined,
+        liked_place_ids: likedResponse.places.map(place => place.id),
+      });
+
+      setOptimizedRoute(response.places);
+      setRouteMeta({
+        name: response.trip_name,
+        description: response.description,
+        provider: response.provider,
+        isAi: response.is_ai_generated,
+      });
+    } catch (error) {
+      console.error('Failed to generate route:', error);
+      setRouteError('ไม่สามารถสร้างเส้นทางได้ กรุณาเปิด FastAPI/Postgres backend แล้วลองอีกครั้ง');
+    } finally {
+      setIsGeneratingRoute(false);
+    }
+  }, [anchor, duration, lineUserId, personality]);
+
   // Trigger an emergency scenario (e.g., flood at next unvisited place) and suggest alternatives
-  const triggerEmergencyPlan = () => {
+  const triggerEmergencyPlan = async () => {
     if (!optimizedRoute || optimizedRoute.length === 0) return;
 
     // Find first place to replace
@@ -128,9 +196,8 @@ const RoutingPage: React.FC = () => {
 
     // Gather candidate alternatives from likedPlaces (excluding the emergency place & already in optimizedRoute)
     try {
-      const storageKey = getUserStorageKey('likedPlaces');
-      const saved = localStorage.getItem(storageKey);
-      const liked: TravelPlace[] = saved ? JSON.parse(saved) : [];
+      const likedResponse = await poiApi.getLikedPlaces(lineUserId);
+      const liked = likedResponse.places;
       const routeIds = new Set(optimizedRoute.map(p => p.id));
       let candidates = liked.filter(p => p.id !== placeToReplace.id && !routeIds.has(p.id));
       // Fallback: allow other places in route (not the emergency place) if no external candidates
@@ -171,21 +238,8 @@ const RoutingPage: React.FC = () => {
   };
 
   useEffect(() => {
-    const storageKey = getUserStorageKey('likedPlaces');
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      let places: TravelPlace[] = JSON.parse(saved);
-
-      // Filter places by selected city (unless 'all' is selected)
-      if (city && city !== 'all') {
-        places = places.filter(p => p.city === city);
-      }
-
-      // Simple routing algorithm based on personality and duration
-      const route = optimizeRoute(places, personality, duration);
-      setOptimizedRoute(route);
-    }
-  }, [personality, duration, city, optimizeRoute]);
+    generateRoute();
+  }, [generateRoute]);
 
   // Drag and drop handlers for reordering
   const handleDragStart = (index: number) => {
@@ -227,24 +281,19 @@ const RoutingPage: React.FC = () => {
   };
 
   // Open swap modal for a place
-  const openSwapModal = (place: TravelPlace, index: number) => {
+  const openSwapModal = async (place: TravelPlace, index: number) => {
     setSwapPlace({ place, index });
 
-    // Get liked places from localStorage
     try {
-      const storageKey = getUserStorageKey('likedPlaces');
-      const saved = localStorage.getItem(storageKey);
-      const liked: TravelPlace[] = saved ? JSON.parse(saved) : [];
+      const likedResponse = await poiApi.getLikedPlaces(lineUserId);
+      const liked = likedResponse.places;
 
       // Get current route place IDs
       const routeIds = new Set(optimizedRoute.map(p => p.id));
 
-      // Filter places from the same city that are not already in the route
-      const placeCity = place.city || city || 'all';
       let candidates = liked.filter(p =>
         p.id !== place.id &&
-        !routeIds.has(p.id) &&
-        (placeCity === 'all' || p.city === placeCity)
+        !routeIds.has(p.id)
       );
 
       // Sort by rating
@@ -277,20 +326,11 @@ const RoutingPage: React.FC = () => {
   const MapVisualization = () => {
     const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
 
-    // City center coordinates
     const getCityCenter = (): [number, number] => {
-      switch (city) {
-        case 'Bangkok':
-          return [13.7563, 100.5018];
-        case 'Phuket':
-          return [7.8804, 98.3923];
-        case 'Chiang Mai':
-        default:
-          return [18.7883, 98.9930];
-      }
+      if (anchor) return [anchor.lat, anchor.lng];
+      return [15.87, 100.9925];
     };
 
-    // Center the map based on selected city or first place in route
     const mapCenter: [number, number] = optimizedRoute.length > 0
       ? [optimizedRoute[0].lat, optimizedRoute[0].long]
       : getCityCenter();
@@ -321,11 +361,28 @@ const RoutingPage: React.FC = () => {
       });
     };
 
+    const createPoiIcon = (): L.DivIcon => {
+      return L.divIcon({
+        html: `<div style="
+          background-color: #2D6A6A;
+          border-radius: 50%;
+          width: 14px;
+          height: 14px;
+          border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.24);
+        "></div>`,
+        className: 'nearby-poi-marker',
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+        popupAnchor: [0, -8]
+      });
+    };
+
     return (
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-[#2D2926]">
-            แผนที่เส้นทางแบบอินเตอร์แอกทีฟ - {city && city !== 'all' ? city : 'ประเทศไทย'}
+            แผนที่เส้นทางแบบอินเตอร์แอกทีฟ - {anchor?.label || 'AI Route'}
           </h3>
 
           {/* Map Type Toggle */}
@@ -421,6 +478,38 @@ const RoutingPage: React.FC = () => {
                 }}
               />
             )}
+
+            {/* Small nearby POIs loaded from places.json through FastAPI */}
+            {nearbyPois.map((place) => (
+              <Marker
+                key={`poi-${place.id}`}
+                position={[place.lat, place.long]}
+                icon={createPoiIcon()}
+              >
+                <Popup className="custom-popup">
+                  <div className="min-w-[180px]">
+                    <p className="text-xs font-bold text-[#2D6A6A] mb-1">POI ใกล้เคียง</p>
+                    <h4 className="font-bold text-[#2D2926] mb-1">{place.name}</h4>
+                    <p className="text-xs text-gray-500 mb-2">{[place.district, place.province].filter(Boolean).join(', ')}</p>
+                    {place.distance && <p className="text-xs text-[#C2703E] font-semibold">{place.distance} จากจุดเริ่มต้น</p>}
+                    <div className="mt-3 flex gap-2">
+                      <button
+                        onClick={() => { setSelectedPlace(place); setShowDetailModal(true); }}
+                        className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700"
+                      >
+                        รายละเอียด
+                      </button>
+                      <button
+                        onClick={() => addPoiToRoute(place)}
+                        className="text-xs px-2 py-1 rounded bg-[#2D6A6A] text-white"
+                      >
+                        เพิ่ม
+                      </button>
+                    </div>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
           </MapContainer>
         </div>
 
@@ -487,19 +576,7 @@ const RoutingPage: React.FC = () => {
   };
 
   const regenerateRoute = () => {
-    const storageKey = getUserStorageKey('likedPlaces');
-    const saved = localStorage.getItem(storageKey);
-    if (saved) {
-      let places: TravelPlace[] = JSON.parse(saved);
-
-      // Filter by city if selected
-      if (city && city !== 'all') {
-        places = places.filter(p => p.city === city);
-      }
-
-      const newRoute = optimizeRoute(places, personality, duration);
-      setOptimizedRoute(newRoute);
-    }
+    generateRoute();
   };
 
   // Start active journey and navigate to travel companion
@@ -509,14 +586,42 @@ const RoutingPage: React.FC = () => {
     CoinSystem.startActiveJourney(
       personality || 'default',
       duration || 'custom',
-      city || 'all',
+      anchor?.label || 'AI Route',
       optimizedRoute
     );
 
     navigate('/travel-companion');
   };
 
-  // Show message if no places found for selected city
+  if (isGeneratingRoute) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#FAF7F4] via-[#FAF7F4] to-white flex flex-col items-center justify-center p-6">
+        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md text-center">
+          <div className="w-14 h-14 mx-auto border-4 border-[#E8E2DB] border-t-[#C2703E] rounded-full animate-spin mb-6" />
+          <h2 className="text-2xl font-bold text-[#2D2926] mb-3">กำลังสร้างเส้นทาง</h2>
+          <p className="text-gray-600">กำลังวิเคราะห์ POI ที่บันทึกและสถานที่จริงใกล้เคียงจาก places.json</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (routeError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-[#FAF7F4] via-[#FAF7F4] to-white flex flex-col items-center justify-center p-6">
+        <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md text-center">
+          <h2 className="text-2xl font-bold text-[#2D2926] mb-3">สร้างเส้นทางไม่สำเร็จ</h2>
+          <p className="text-gray-600 mb-6">{routeError}</p>
+          <button
+            onClick={generateRoute}
+            className="w-full bg-gradient-to-r from-[#C2703E] to-[#A85C2F] text-white py-3 px-6 rounded-xl font-semibold"
+          >
+            ลองใหม่
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   if (optimizedRoute.length === 0) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#FAF7F4] via-[#FAF7F4] to-white flex flex-col items-center justify-center p-6">
@@ -525,10 +630,10 @@ const RoutingPage: React.FC = () => {
             <svg className="w-10 h-10 text-[#C2703E]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/></svg>
           </div>
           <h2 className="text-2xl font-bold text-[#2D2926] mb-3">
-            ไม่พบสถานที่ใน {city && city !== 'all' ? city : 'ที่คุณเลือก'}
+            ไม่พบสถานที่สำหรับสร้างเส้นทาง
           </h2>
           <p className="text-gray-600 mb-6">
-            คุณยังไม่ได้บันทึกสถานที่ในเมืองนี้ กลับไปสำรวจและปัดขวาบันทึกสถานที่ที่คุณชอบ!
+            ลองกลับไปสำรวจ กดถูกใจ POI เพิ่ม หรือเลือกจุดปักหมุดใหม่เพื่อดึงสถานที่ใกล้เคียง
           </p>
           <div className="space-y-3">
             <Link
@@ -571,7 +676,7 @@ const RoutingPage: React.FC = () => {
               <div className="text-center flex-1 mx-2">
                 <h1 className="text-base font-bold text-[#2D2926]">เส้นทางท่องเที่ยวของคุณ</h1>
                 <p className="text-xs text-[#C2703E]/70">
-                  {city && city !== 'all' ? `📍 ${city} • ` : ''}{optimizedRoute.length} สถานที่
+                  {anchor?.label ? `📍 ${anchor.label} • ` : ''}{optimizedRoute.length} สถานที่
                 </p>
               </div>
             </div>
@@ -604,7 +709,7 @@ const RoutingPage: React.FC = () => {
             <div className="text-center">
               <h1 className="text-xl font-bold text-[#2D2926]">เส้นทางท่องเที่ยวของคุณ</h1>
               <p className="text-sm text-[#C2703E]/70">
-                {city && city !== 'all' ? `📍 ${city} • ` : ''}{optimizedRoute.length} สถานที่
+                {anchor?.label ? `📍 ${anchor.label} • ` : ''}{optimizedRoute.length} สถานที่
               </p>
             </div>
 
@@ -793,6 +898,25 @@ const RoutingPage: React.FC = () => {
 
         {/* Travel Settings Summary */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          {routeMeta && (
+            <div className="mb-5 rounded-xl bg-[#2D6A6A]/5 p-4">
+              <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase text-[#2D6A6A]">
+                    {routeMeta.isAi ? 'AI route' : 'Fallback route'} · {routeMeta.provider}
+                  </p>
+                  <h2 className="text-lg font-bold text-[#2D2926]">{routeMeta.name}</h2>
+                  <p className="text-sm text-gray-600">{routeMeta.description}</p>
+                </div>
+                {anchor && (
+                  <div className="text-sm text-[#6B635B] md:text-right">
+                    <p>{anchor.label || 'Pinned location'}</p>
+                    <p>{anchor.lat.toFixed(4)}, {anchor.lng.toFixed(4)} · {anchor.radius_km} km</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
           <h2 className="text-lg font-bold text-[#2D2926] mb-4">การตั้งค่าทริป</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="flex items-center space-x-3">
@@ -863,6 +987,65 @@ const RoutingPage: React.FC = () => {
               )}
             </div>
           </div>
+        </div>
+
+        {/* Real POIs from places.json */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div>
+              <p className="text-xs font-semibold uppercase text-[#2D6A6A]">places.json POI</p>
+              <h2 className="text-lg font-bold text-[#2D2926]">สถานที่จริงใกล้จุดเริ่มต้น</h2>
+              <p className="text-sm text-gray-500">
+                โหลด POI ที่ได้รับอนุมัติจาก FastAPI backend ภายในรัศมี 25 km จาก {optimizedRoute[0]?.name}
+              </p>
+            </div>
+            <button
+              onClick={loadNearbyPois}
+              disabled={isLoadingPois}
+              className="inline-flex items-center justify-center rounded-xl bg-[#2D6A6A] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#245858] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isLoadingPois ? 'กำลังโหลด...' : 'โหลด POI ใกล้เคียง'}
+            </button>
+          </div>
+
+          {poiError && (
+            <div className="mt-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
+              {poiError}
+            </div>
+          )}
+
+          {nearbyPois.length > 0 && (
+            <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+              {nearbyPois.map((poi) => (
+                <div key={poi.id} className="rounded-xl border border-[#E8E2DB] p-3">
+                  <div className="flex gap-3">
+                    {poi.image && (
+                      <img src={poi.image} alt={poi.name} className="h-16 w-16 flex-shrink-0 rounded-lg object-cover" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <h3 className="truncate font-bold text-[#2D2926]">{poi.name}</h3>
+                      <p className="text-xs text-gray-500">{[poi.district, poi.province].filter(Boolean).join(', ')}</p>
+                      {poi.distance && <p className="mt-1 text-xs font-semibold text-[#C2703E]">{poi.distance}</p>}
+                    </div>
+                  </div>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={() => { setSelectedPlace(poi); setShowDetailModal(true); }}
+                      className="flex-1 rounded-lg bg-gray-100 px-3 py-2 text-xs font-semibold text-gray-700 hover:bg-gray-200"
+                    >
+                      ดูรายละเอียด
+                    </button>
+                    <button
+                      onClick={() => addPoiToRoute(poi)}
+                      className="flex-1 rounded-lg bg-[#2D6A6A] px-3 py-2 text-xs font-semibold text-white hover:bg-[#245858]"
+                    >
+                      เพิ่มเข้าเส้นทาง
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">

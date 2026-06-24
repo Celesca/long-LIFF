@@ -18,8 +18,13 @@ A travel discovery app built with React, TypeScript, and LINE LIFF that lets use
 - **Routing**: Plan trips with personality modes and earn coins
 
 ### 💾 User-Specific Data
-All user data is stored separately based on LINE userId:
+The active POI workflow stores user data in PostgreSQL keyed by LINE userId:
 - Liked places
+- Swipes and dismissals
+- Discovery pins and POI cluster selections
+- Generated route plans
+
+Some legacy companion/coin UI state still uses user-scoped localStorage:
 - User profile (coins, journeys)
 - Journey progress
 - Visited places and photos
@@ -60,9 +65,9 @@ The app uses helper functions to scope localStorage by userId:
 ```typescript
 import { getUserStorageKey } from '../hooks/useLiff';
 
-// Get user-specific key
-const storageKey = getUserStorageKey('likedPlaces');
-// Returns: "{userId}_likedPlaces"
+// Get user-specific key for small UI-only state
+const storageKey = getUserStorageKey('poiDiscoveryLocation');
+// Returns: "{userId}_poiDiscoveryLocation"
 
 // Store data
 localStorage.setItem(storageKey, JSON.stringify(data));
@@ -75,13 +80,16 @@ const saved = localStorage.getItem(storageKey);
 
 ### Environment Variables
 
-Create a `.env` file with your LIFF app ID:
+Create a `.env` file when you need to override local defaults:
 
 ```
-VITE_LIFF_ID=your-liff-id-here
+VITE_API_URL=http://localhost:8000
+VITE_LIFF_ID=
 ```
 
-Get your LIFF ID from the [LINE Developers Console](https://developers.line.biz/console/).
+Local Vite development works without `VITE_LIFF_ID`; the app uses a mock LIFF user for easier testing. Set `VITE_LIFF_ID` when you want to test real LINE login, and get the ID from the [LINE Developers Console](https://developers.line.biz/console/).
+
+The active POI discovery, gallery, and route generation workflow calls the FastAPI backend configured by `VITE_API_URL`.
 
 ## Development
 
@@ -95,6 +103,29 @@ npm run dev
 # Build for production
 npm run build
 ```
+
+## Real POI Backend
+
+The app fetches nearby real POIs from `data/places.json` and stores user workflow data in PostgreSQL through FastAPI.
+
+```bash
+# Start PostgreSQL
+docker compose up -d postgres
+
+# Start FastAPI
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
+```
+
+Optional route AI uses OpenRouter. Add this to `backend/.env` or your shell before running FastAPI:
+
+```
+OPENROUTER_API_KEY=...
+OPENROUTER_MODEL=openai/gpt-4o-mini
+```
+
+Without an OpenRouter key, route generation falls back to deterministic nearby POI selection.
 
 ## Project Structure
 
@@ -118,14 +149,20 @@ src/
 
 ## Data Storage
 
-### Per-User Storage Keys
-- `{userId}_likedPlaces` - User's liked destinations
-- `{userId}_userProfile` - Coins and journey data
+### PostgreSQL Tables
+- `users` - LINE/mock dev users
+- `places` - POI snapshots collected from swipes and routes
+- `user_places` - liked, dismissed, and removed place state
+- `swipes` - swipe history
+- `discovery_sessions` - selected cluster or pinned lat/lng search sessions
+- `route_plans` - generated route payloads
 
-### Global Storage Keys
+### Browser Storage Keys
 - `liff_userId` - Current user's LINE ID
 - `liff_displayName` - Current user's display name
 - `liff_pictureUrl` - Current user's profile picture URL
+- `{userId}_poiDiscoveryLocation` - local UI fallback for the last selected discovery pin
+- `{userId}_userProfile` - legacy coins and journey data
 
 ## Deployment
 

@@ -34,9 +34,9 @@ function toTravelPlace(p: Place): TravelPlace {
 export const appApi = {
   // ============ User ============
 
-  async createOrGetUser(userId: string): Promise<{ id: string; total_coins: number }> {
-    if (!USE_REAL_API) return mockApi.createOrGetUser(userId);
-    const user = await api.createOrGetUser(userId);
+  async createOrGetUser(userId: string, displayName?: string, pictureUrl?: string): Promise<{ id: string; total_coins: number }> {
+    if (!USE_REAL_API) return mockApi.createOrGetUser(userId, displayName, pictureUrl);
+    const user = await api.createOrGetUser(userId, displayName, pictureUrl);
     return { id: user.line_user_id, total_coins: user.total_coins };
   },
 

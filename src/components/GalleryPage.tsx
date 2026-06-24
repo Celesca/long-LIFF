@@ -4,8 +4,8 @@ import type { TravelPlace } from '../types/TravelPlace';
 import PersonalityModal from './PersonalityModal';
 import PlaceDetailModal from './PlaceDetailModal';
 import Layout from './Layout';
-import { getUserStorageKey, getUserId } from '../hooks/useLiff';
-import { appApi } from '../services/apiAdapter';
+import { getUserId } from '../hooks/useLiff';
+import { poiApi } from '../services/poiApi';
 
 const GalleryPage: React.FC = () => {
   const [likedPlaces, setLikedPlaces] = useState<TravelPlace[]>([]);
@@ -14,18 +14,16 @@ const GalleryPage: React.FC = () => {
   const [selectedPlace, setSelectedPlace] = useState<TravelPlace | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const navigate = useNavigate();
-  const userId = getUserId();
+  const userId = getUserId() || 'anonymous';
 
   useEffect(() => {
     const fetchLikedPlaces = async () => {
       try {
-        const response = await appApi.getLikedPlaces(userId || 'anonymous');
+        await poiApi.createOrGetUser({ line_user_id: userId });
+        const response = await poiApi.getLikedPlaces(userId);
         setLikedPlaces(response.places);
       } catch (err) {
         console.error('Failed to fetch liked places:', err);
-        const storageKey = getUserStorageKey('likedPlaces');
-        const saved = localStorage.getItem(storageKey);
-        if (saved) setLikedPlaces(JSON.parse(saved));
       } finally {
         setLoading(false);
       }
@@ -36,7 +34,7 @@ const GalleryPage: React.FC = () => {
   const clearGallery = async () => {
     setLikedPlaces([]);
     try {
-      await appApi.resetAllProgress(userId || 'anonymous');
+      await poiApi.clearLikedPlaces(userId);
     } catch (err) {
       console.error('Failed to clear liked places:', err);
     }
@@ -47,14 +45,14 @@ const GalleryPage: React.FC = () => {
     const updated = likedPlaces.filter(place => place.id !== placeId);
     setLikedPlaces(updated);
     try {
-      await appApi.removeLikedPlace(userId || 'anonymous', placeId);
+      await poiApi.removeLikedPlace(userId, placeId);
     } catch (err) {
       console.error('Failed to remove liked place:', err);
     }
   };
 
-  const handleTravelPlan = (personality: string, duration: string, city: string) => {
-    navigate('/routing', { state: { personality, duration, city } });
+  const handleTravelPlan = (personality: string, duration: string, anchor?: { lat: number; lng: number; radius_km: number; label?: string } | null) => {
+    navigate('/routing', { state: { personality, duration, anchor } });
   };
 
   if (loading) {
@@ -133,7 +131,15 @@ const GalleryPage: React.FC = () => {
                   onClick={() => { setSelectedPlace(place); setShowDetailModal(true); }}
                 >
                   <div className="relative">
-                    <img src={place.image} alt={place.name} className="w-full h-36 object-cover" />
+                    {place.image ? (
+                      <img src={place.image} alt={place.name} className="w-full h-36 object-cover" referrerPolicy="no-referrer" />
+                    ) : (
+                      <div className="flex h-36 w-full items-center justify-center bg-gradient-to-br from-[#2D6A6A] via-[#6B8F71] to-[#C2703E] text-white">
+                        <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317.159.69.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
+                        </svg>
+                      </div>
+                    )}
                     <button
                       onClick={(e) => removePlace(e, place.id)}
                       className="absolute top-2.5 right-2.5 w-8 h-8 bg-black/40 backdrop-blur-sm text-white rounded-full flex items-center justify-center active:bg-black/60 transition-colors"

@@ -1,12 +1,14 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import TinderCard from '../components/TinderCard';
-import CityPreferenceModal from '../components/CityPreferenceModal';
+import LocationPreferenceModal, { type DiscoveryLocation } from '../components/LocationPreferenceModal';
 import PlaceDetailModal from '../components/PlaceDetailModal';
 import Layout from './Layout';
-import { appApi } from '../services/apiAdapter';
-import { getUserId } from '../hooks/useLiff';
+import { poiApi } from '../services/poiApi';
+import { getUserId, getUserStorageKey } from '../hooks/useLiff';
 import type { TravelPlace } from '../types/TravelPlace';
+
+const LOCATION_STORAGE_KEY = 'poiDiscoveryLocation';
 
 const TinderPage: React.FC = () => {
   const [places, setPlaces] = useState<TravelPlace[]>([]);
@@ -14,81 +16,133 @@ const TinderPage: React.FC = () => {
   const [likedPlaces, setLikedPlaces] = useState<TravelPlace[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [showCityModal, setShowCityModal] = useState(false);
-  const [selectedCities, setSelectedCities] = useState<string[]>([]);
+  const [showLocationModal, setShowLocationModal] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<DiscoveryLocation | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
-  const userId = getUserId();
   const navigate = useNavigate();
+  const lineUserId = getUserId() || 'anonymous';
 
-  const fetchPlaces = useCallback(async (cities: string[]) => {
+  const loadLikedPlaces = useCallback(async () => {
+    const liked = await poiApi.getLikedPlaces(lineUserId);
+    setLikedPlaces(liked.places);
+  }, [lineUserId]);
+
+  const loadSwipedIds = useCallback(async () => {
+    const response = await poiApi.getSwipes(lineUserId);
+    return response.swipes.map((swipe) => swipe.place_id);
+  }, [lineUserId]);
+
+  const ensureUser = useCallback(async () => {
+    await poiApi.createOrGetUser({ line_user_id: lineUserId });
+  }, [lineUserId]);
+
+  const persistDiscoveryLocation = useCallback(async (location: DiscoveryLocation) => {
+    await poiApi.createDiscoverySession(lineUserId, {
+      lat: location.lat,
+      lng: location.lng,
+      radius_km: location.radiusKm,
+      label: location.label,
+      source: location.label ? 'cluster-or-pin' : 'pin',
+    });
+  }, [lineUserId]);
+
+  const restoreDiscoveryLocation = useCallback(async (): Promise<DiscoveryLocation | null> => {
+    const latest = await poiApi.getLatestDiscoverySession(lineUserId);
+    if (latest) {
+      return {
+        lat: latest.lat,
+        lng: latest.lng,
+        radiusKm: latest.radius_km,
+        label: latest.label,
+      };
+    }
+
+    const stored = localStorage.getItem(getUserStorageKey(LOCATION_STORAGE_KEY));
+    return stored ? JSON.parse(stored) as DiscoveryLocation : null;
+  }, [lineUserId]);
+
+  const cacheDiscoveryLocation = (location: DiscoveryLocation) => {
+    localStorage.setItem(getUserStorageKey(LOCATION_STORAGE_KEY), JSON.stringify(location));
+  };
+
+  const fetchPlaces = useCallback(async (location: DiscoveryLocation) => {
     try {
       setLoading(true);
       setError(null);
-      await appApi.createOrGetUser(userId || 'anonymous');
-      const response = await appApi.getTinderPlaces(userId || 'anonymous', cities.length > 0 ? cities : undefined);
+      await ensureUser();
+      const swipedIds = await loadSwipedIds();
+      const response = await poiApi.getNearbyPlaces({
+        lat: location.lat,
+        lng: location.lng,
+        radiusKm: location.radiusKm,
+        limit: 80,
+        excludeIds: swipedIds,
+        imagesOnly: true,
+      });
       setPlaces(response.places);
       setCurrentIndex(0);
-      const likedResponse = await appApi.getLikedPlaces(userId || 'anonymous');
-      setLikedPlaces(likedResponse.places);
+      await loadLikedPlaces();
     } catch (err) {
       console.error('Failed to fetch places:', err);
-      setError('Could not load places. Please try again.');
+      setError('เปิด FastAPI backend ที่พอร์ต 8000 แล้วลองโหลด POI ใกล้หมุดอีกครั้ง');
     } finally {
       setLoading(false);
     }
-  }, [userId]);
+  }, [ensureUser, loadLikedPlaces, loadSwipedIds]);
 
   useEffect(() => {
     const checkPreferencesAndLoad = async () => {
       try {
-        const prefs = await appApi.getPreferences(userId || 'anonymous');
-        if (prefs.selected_cities && prefs.selected_cities.length > 0) {
-          setSelectedCities(prefs.selected_cities);
-          fetchPlaces(prefs.selected_cities);
+        await ensureUser();
+        const location = await restoreDiscoveryLocation();
+        if (location) {
+          setSelectedLocation(location);
+          fetchPlaces(location);
         } else {
-          setShowCityModal(true);
+          setShowLocationModal(true);
+          await loadLikedPlaces();
           setLoading(false);
         }
       } catch (err) {
-        console.error('Failed to fetch preferences:', err);
-        setShowCityModal(true);
+        console.error('Failed to load POI discovery location:', err);
+        setShowLocationModal(true);
         setLoading(false);
       }
     };
     checkPreferencesAndLoad();
-  }, [userId, fetchPlaces]);
+  }, [ensureUser, fetchPlaces, loadLikedPlaces, restoreDiscoveryLocation]);
 
-  const handleCitySelection = async (cities: string[]) => {
-    setSelectedCities(cities);
-    setShowCityModal(false);
-    try {
-      await appApi.updatePreferences(userId || 'anonymous', { selected_cities: cities });
-    } catch (err) {
-      console.error('Failed to save preferences:', err);
-    }
-    fetchPlaces(cities);
+  const handleLocationSelection = async (location: DiscoveryLocation) => {
+    setSelectedLocation(location);
+    setShowLocationModal(false);
+    cacheDiscoveryLocation(location);
+    await persistDiscoveryLocation(location);
+    fetchPlaces(location);
   };
 
   const handleSwipe = useCallback(async (direction: 'left' | 'right') => {
     const currentPlace = places[currentIndex];
     if (!currentPlace) return;
-    try {
-      await appApi.createSwipe(userId || 'anonymous', currentPlace.id, direction);
-    } catch (err) {
-      console.error('Failed to record swipe:', err);
-    }
+
+    await poiApi.recordSwipe(lineUserId, currentPlace, direction);
+
     if (direction === 'right') {
-      setLikedPlaces(prev => [...prev, currentPlace]);
+      setLikedPlaces(prev => prev.some(place => place.id === currentPlace.id) ? prev : [...prev, currentPlace]);
     }
     setCurrentIndex(prev => prev + 1);
-  }, [places, currentIndex, userId]);
+  }, [places, currentIndex, lineUserId]);
 
   const handleResetDestinations = async () => {
     try {
       setLoading(true);
-      await appApi.resetAllProgress(userId || 'anonymous');
-      await fetchPlaces(selectedCities);
+      await poiApi.clearSwipes(lineUserId);
+      if (selectedLocation) {
+        await fetchPlaces(selectedLocation);
+      } else {
+        setShowLocationModal(true);
+        setLoading(false);
+      }
     } catch (err) {
       console.error('Failed to reset destinations:', err);
       setError('Could not reset destinations. Please try again.');
@@ -97,7 +151,7 @@ const TinderPage: React.FC = () => {
   };
 
   const remainingPlaces = places.slice(currentIndex, currentIndex + 2);
-  const isFinished = !loading && currentIndex >= places.length;
+  const isFinished = !loading && !!selectedLocation && currentIndex >= places.length;
 
   // Loading state
   if (loading) {
@@ -110,7 +164,7 @@ const TinderPage: React.FC = () => {
               <div className="absolute inset-0 border-3 border-transparent border-t-[#C2703E] rounded-full animate-spin" />
             </div>
             <h2 className="text-lg font-semibold text-[#2D2926]">กำลังโหลด...</h2>
-            <p className="text-[#9C9490] text-sm">กำลังค้นหาสถานที่ท่องเที่ยวสำหรับคุณ</p>
+            <p className="text-[#9C9490] text-sm">กำลังค้นหา POI จริงใกล้หมุดของคุณ</p>
           </div>
         </div>
       </Layout>
@@ -131,13 +185,44 @@ const TinderPage: React.FC = () => {
             <h2 className="text-lg font-bold text-[#2D2926]">มีบางอย่างผิดพลาด</h2>
             <p className="text-[#9C9490] text-sm">{error}</p>
             <button
-              onClick={() => fetchPlaces(selectedCities)}
+              onClick={() => selectedLocation ? fetchPlaces(selectedLocation) : setShowLocationModal(true)}
               className="mt-2 bg-[#C2703E] text-white py-2.5 px-6 rounded-xl font-semibold text-sm active:scale-95 transition-transform"
             >
               ลองใหม่
             </button>
           </div>
         </div>
+      </Layout>
+    );
+  }
+
+  if (!selectedLocation) {
+    return (
+      <Layout showHeader showBackButton headerTitle="สำรวจ POI จริง" backgroundVariant="tinder">
+        <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
+          <div className="text-center space-y-4 max-w-sm">
+            <div className="w-16 h-16 mx-auto bg-[#2D6A6A]/10 rounded-2xl flex items-center justify-center">
+              <svg className="w-8 h-8 text-[#2D6A6A]" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-[#2D2926]">เลือกจุดเริ่มค้นหา</h2>
+            <p className="text-sm text-[#6B635B]">ปักหมุดตำแหน่งที่คุณอยากไป แล้วระบบจะดึง POI จริงจาก places.json รอบตำแหน่งนั้นมาให้ปัด</p>
+            <button
+              onClick={() => setShowLocationModal(true)}
+              className="w-full rounded-xl bg-gradient-to-r from-[#C2703E] to-[#A85C2F] px-6 py-3 text-sm font-semibold text-white shadow-md"
+            >
+              ปักหมุดค้นหา POI
+            </button>
+          </div>
+        </div>
+
+        <LocationPreferenceModal
+          isOpen={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          onConfirm={handleLocationSelection}
+          initialLocation={selectedLocation}
+        />
       </Layout>
     );
   }
@@ -156,9 +241,7 @@ const TinderPage: React.FC = () => {
 
             <h2 className="text-xl font-bold text-[#2D2926]">คุณดูครบหมดแล้ว!</h2>
             <p className="text-[#6B635B] text-sm">
-              {selectedCities.length > 0
-                ? `สำรวจสถานที่ใน${selectedCities.join(' & ')}ครบแล้ว!`
-                : 'สำรวจสถานที่ทั้งหมดครบแล้ว!'}
+              สำรวจ POI ใกล้หมุดนี้ครบแล้ว ลองปักหมุดใหม่หรือเพิ่มระยะค้นหาได้เลย
             </p>
 
             <div className="card-surface p-4">
@@ -173,13 +256,13 @@ const TinderPage: React.FC = () => {
 
             <div className="space-y-2.5 w-full">
               <button
-                onClick={() => setShowCityModal(true)}
+                onClick={() => setShowLocationModal(true)}
                 className="flex items-center justify-center w-full bg-[#2D6A6A] text-white py-3 px-6 rounded-xl font-semibold text-sm active:scale-95 transition-transform"
               >
                 <svg className="w-4.5 h-4.5 mr-2" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
                 </svg>
-                สำรวจเมืองอื่น
+                ปักหมุดตำแหน่งใหม่
               </button>
 
               <button
@@ -205,11 +288,11 @@ const TinderPage: React.FC = () => {
           </div>
         </div>
 
-        <CityPreferenceModal
-          isOpen={showCityModal}
-          onClose={() => setShowCityModal(false)}
-          onConfirm={handleCitySelection}
-          initialCities={selectedCities}
+        <LocationPreferenceModal
+          isOpen={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          onConfirm={handleLocationSelection}
+          initialLocation={selectedLocation}
         />
       </Layout>
     );
@@ -230,16 +313,18 @@ const TinderPage: React.FC = () => {
             </svg>
           </Link>
 
-          {/* City Filter */}
+          {/* Location Filter */}
           <button
-            onClick={() => setShowCityModal(true)}
+            onClick={() => setShowLocationModal(true)}
             className="flex items-center space-x-1.5 bg-[#FDF5EF] hover:bg-[#F9E6D5] px-3.5 py-2 rounded-full transition-colors active:scale-95"
           >
             <svg className="w-3.5 h-3.5 text-[#C2703E]" fill="currentColor" viewBox="0 0 24 24">
               <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
             </svg>
             <span className="font-semibold text-[#C2703E] text-sm">
-              {selectedCities.length === 0 ? 'ทุกเมือง' : selectedCities.length === 1 ? selectedCities[0] : `${selectedCities.length} เมือง`}
+              {selectedLocation
+                ? `${selectedLocation.lat.toFixed(3)}, ${selectedLocation.lng.toFixed(3)}`
+                : 'ปักหมุด'}
             </span>
             <svg className="w-3.5 h-3.5 text-[#C2703E]/60" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -265,6 +350,13 @@ const TinderPage: React.FC = () => {
 
         {/* Progress */}
         <div className="px-4 py-2.5 bg-white/40 backdrop-blur-sm">
+          {selectedLocation && (
+            <div className="mb-2 flex items-center justify-center text-[11px] text-[#6B635B]">
+              <span className="rounded-full bg-white/80 px-3 py-1">
+                POI จริงในรัศมี {selectedLocation.radiusKm} km จากหมุดของคุณ
+              </span>
+            </div>
+          )}
           <div className="flex items-center space-x-3">
             <div className="flex-1 h-1 bg-[#E8E2DB] rounded-full overflow-hidden">
               <div
@@ -334,11 +426,11 @@ const TinderPage: React.FC = () => {
           </div>
         </div>
 
-        <CityPreferenceModal
-          isOpen={showCityModal}
-          onClose={() => setShowCityModal(false)}
-          onConfirm={handleCitySelection}
-          initialCities={selectedCities}
+        <LocationPreferenceModal
+          isOpen={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          onConfirm={handleLocationSelection}
+          initialLocation={selectedLocation}
         />
 
         <PlaceDetailModal

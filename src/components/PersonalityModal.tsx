@@ -1,42 +1,17 @@
 import React from 'react';
+import LocationPreferenceModal, { type DiscoveryLocation } from './LocationPreferenceModal';
 
 interface PersonalityModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (personality: string, duration: string, city: string) => void;
+  onConfirm: (personality: string, duration: string, anchor?: { lat: number; lng: number; radius_km: number; label?: string } | null) => void;
 }
 
 const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, onConfirm }) => {
   const [selectedPersonality, setSelectedPersonality] = React.useState<string>('');
   const [selectedDuration, setSelectedDuration] = React.useState<string>('');
-  const [selectedCity, setSelectedCity] = React.useState<string>('');
-
-  const cities = [
-    {
-      id: 'all',
-      name: 'ทุกเมือง',
-      description: 'ผสมผสานสถานที่จากทุกเมืองที่มี',
-      icon: 'globe'
-    },
-    {
-      id: 'Chiang Mai',
-      name: 'เชียงใหม่',
-      description: 'เสน่ห์เมืองเหนือ วัด ธรรมชาติ & วัฒนธรรม',
-      icon: 'temple'
-    },
-    {
-      id: 'Bangkok',
-      name: 'กรุงเทพ',
-      description: 'เมืองหลวงคึกคัก วัด ตลาด & ไลฟ์ไสต์',
-      icon: 'building'
-    },
-    {
-      id: 'Phuket',
-      name: 'ภูเก็ต',
-      description: 'ชายหาดสวยงาม เกาะ & สวรรค์อาหารทะเล',
-      icon: 'sun'
-    }
-  ];
+  const [selectedAnchor, setSelectedAnchor] = React.useState<DiscoveryLocation | null>(null);
+  const [showLocationModal, setShowLocationModal] = React.useState(false);
 
   const personalities = [
     {
@@ -81,8 +56,19 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
   ];
 
   const handleConfirm = () => {
-    if (selectedPersonality && selectedDuration && selectedCity) {
-      onConfirm(selectedPersonality, selectedDuration, selectedCity);
+    if (selectedPersonality && selectedDuration) {
+      onConfirm(
+        selectedPersonality,
+        selectedDuration,
+        selectedAnchor
+          ? {
+              lat: selectedAnchor.lat,
+              lng: selectedAnchor.lng,
+              radius_km: selectedAnchor.radiusKm,
+              label: selectedAnchor.label,
+            }
+          : null
+      );
       onClose();
     }
   };
@@ -121,39 +107,46 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
               </svg>
             </button>
           </div>
-          <p className="text-[#C2703E] mt-2">เลือกสไตล์การท่องเที่ยวและระยะเวลาเพื่อรับเส้นทางที่เหมาะกับคุณ</p>
+          <p className="text-[#C2703E] mt-2">เลือกสไตล์และระยะเวลา แล้วให้ AI วิเคราะห์ POI ที่บันทึกกับสถานที่จริงใกล้เคียง</p>
         </div>
 
         <div className="p-6">
-          {/* City/Province Selection */}
           <div className="mb-8">
-            <h3 className="text-lg font-bold text-[#2D2926] mb-4">คุณอยากไปที่ไหน?</h3>
-            <div className="grid grid-cols-2 gap-3">
-              {cities.map((city) => (
-                <button
-                  key={city.id}
-                  onClick={() => setSelectedCity(city.id)}
-                  className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:cursor-pointer hover:shadow-md ${selectedCity === city.id
-                      ? 'border-[#C2703E] bg-[#FDF5EF]'
-                      : 'border-gray-200 hover:border-[#D4A853]'
-                    }`}
-                >
-                  <div className="flex flex-col items-center text-center space-y-2">
-                    {renderIcon(city.icon)}
-                    <div>
-                      <h4 className="font-semibold text-[#2D2926]">{city.name}</h4>
-                      <p className="text-xs text-gray-600 mt-1 line-clamp-2">{city.description}</p>
-                    </div>
-                    {selectedCity === city.id && (
-                      <div className="w-6 h-6 bg-[#FDF5EF]0 rounded-full flex items-center justify-center">
-                        <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
-                        </svg>
-                      </div>
-                    )}
+            <h3 className="text-lg font-bold text-[#2D2926] mb-4">จุดเริ่มวิเคราะห์เส้นทาง</h3>
+            <div className="grid grid-cols-1 gap-3">
+              <button
+                onClick={() => setSelectedAnchor(null)}
+                className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:cursor-pointer hover:shadow-md ${
+                  !selectedAnchor ? 'border-[#C2703E] bg-[#FDF5EF]' : 'border-gray-200 hover:border-[#D4A853]'
+                }`}
+              >
+                <div className="flex items-start space-x-4">
+                  {renderIcon('globe')}
+                  <div>
+                    <h4 className="font-semibold text-[#2D2926]">ให้ AI วิเคราะห์จาก POI ที่บันทึก</h4>
+                    <p className="text-sm text-gray-600 mt-1">เหมาะเมื่อคุณกดถูกใจหลายจุดแล้ว ให้ระบบหา centroid และเสริม POI ใกล้เคียงจาก places.json</p>
                   </div>
-                </button>
-              ))}
+                </div>
+              </button>
+
+              <button
+                onClick={() => setShowLocationModal(true)}
+                className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:cursor-pointer hover:shadow-md ${
+                  selectedAnchor ? 'border-[#C2703E] bg-[#FDF5EF]' : 'border-gray-200 hover:border-[#D4A853]'
+                }`}
+              >
+                <div className="flex items-start space-x-4">
+                  {renderIcon('adventure')}
+                  <div>
+                    <h4 className="font-semibold text-[#2D2926]">เลือกคลัสเตอร์ POI หรือปักหมุดเอง</h4>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {selectedAnchor
+                        ? `${selectedAnchor.label || 'Pinned location'} · ${selectedAnchor.lat.toFixed(4)}, ${selectedAnchor.lng.toFixed(4)} · ${selectedAnchor.radiusKm} km`
+                        : 'ใช้พื้นที่แนะนำจากข้อมูลจริง หรือกรอก latitude/longitude ที่อยากไป'}
+                    </p>
+                  </div>
+                </div>
+              </button>
             </div>
           </div>
 
@@ -178,7 +171,7 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
                     </div>
                     {selectedPersonality === personality.id && (
                       <div className="ml-auto">
-                        <div className="w-6 h-6 bg-[#FDF5EF]0 rounded-full flex items-center justify-center">
+                        <div className="w-6 h-6 bg-[#C2703E] rounded-full flex items-center justify-center">
                           <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                           </svg>
@@ -212,7 +205,7 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
                     </div>
                     {selectedDuration === duration.id && (
                       <div className="ml-auto">
-                        <div className="w-6 h-6 bg-[#FDF5EF]0 rounded-full flex items-center justify-center">
+                        <div className="w-6 h-6 bg-[#C2703E] rounded-full flex items-center justify-center">
                           <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
                           </svg>
@@ -235,8 +228,8 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
             </button>
             <button
               onClick={handleConfirm}
-              disabled={!selectedPersonality || !selectedDuration || !selectedCity}
-              className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${selectedPersonality && selectedDuration && selectedCity
+              disabled={!selectedPersonality || !selectedDuration}
+              className={`flex-1 py-3 px-6 rounded-xl font-semibold transition-all duration-200 ${selectedPersonality && selectedDuration
                   ? 'bg-gradient-to-r from-[#C2703E] to-[#A85C2F] text-white hover:from-[#A85C2F] hover:to-[#8F4E28] transform hover:scale-105'
                   : 'bg-gray-200 text-gray-500 cursor-not-allowed'
                 }`}
@@ -246,6 +239,16 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
           </div>
         </div>
       </div>
+
+      <LocationPreferenceModal
+        isOpen={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onConfirm={(location) => {
+          setSelectedAnchor(location);
+          setShowLocationModal(false);
+        }}
+        initialLocation={selectedAnchor}
+      />
     </div>
   );
 };
