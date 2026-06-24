@@ -3,6 +3,7 @@ import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-lea
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { poiApi, type PoiCluster } from '../services/poiApi';
+import { geocodingApi, type GeocodingResult } from '../services/geocodingApi';
 
 export interface DiscoveryLocation {
   lat: number;
@@ -63,14 +64,59 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
   const [clusters, setClusters] = useState<PoiCluster[]>([]);
   const [clustersLoading, setClustersLoading] = useState(false);
   const [clustersError, setClustersError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<GeocodingResult[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
 
   useEffect(() => {
     if (isOpen) {
       setLocation(initialLocation || DEFAULT_LOCATION);
       setGeoError('');
       setClustersError('');
+      setSearchQuery(initialLocation?.label || '');
+      setSearchResults([]);
+      setSearchError('');
     }
   }, [isOpen, initialLocation]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const trimmedQuery = searchQuery.trim();
+    if (trimmedQuery.length < 3 || trimmedQuery === location.label?.trim()) {
+      setSearchResults([]);
+      setSearchError('');
+      setSearchLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    const timer = window.setTimeout(async () => {
+      try {
+        setSearchLoading(true);
+        setSearchError('');
+        const results = await geocodingApi.searchLocations(trimmedQuery, controller.signal);
+        setSearchResults(results);
+        if (results.length === 0) {
+          setSearchError('ไม่พบสถานที่นี้ ลองค้นหาด้วยชื่อเมืองหรือแลนด์มาร์กใกล้เคียง');
+        }
+      } catch (error) {
+        if ((error as DOMException).name === 'AbortError') return;
+        console.error('Failed to geocode location:', error);
+        setSearchError('ค้นหาพิกัดไม่สำเร็จ กรุณาลองใหม่หรือปักหมุดบนแผนที่');
+      } finally {
+        if (!controller.signal.aborted) {
+          setSearchLoading(false);
+        }
+      }
+    }, 450);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timer);
+    };
+  }, [isOpen, location.label, searchQuery]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -112,6 +158,18 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
     }));
   };
 
+  const selectSearchResult = (result: GeocodingResult) => {
+    setLocation((current) => ({
+      ...current,
+      lat: result.lat,
+      lng: result.lng,
+      label: result.displayName,
+    }));
+    setSearchQuery(result.displayName);
+    setSearchResults([]);
+    setSearchError('');
+  };
+
   const useCurrentLocation = () => {
     if (!navigator.geolocation) {
       setGeoError('เบราว์เซอร์นี้ไม่รองรับการระบุตำแหน่ง');
@@ -140,6 +198,9 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
       label: cluster.label,
       radiusKm: cluster.radius_km,
     });
+    setSearchQuery(cluster.label);
+    setSearchResults([]);
+    setSearchError('');
   };
 
   if (!isOpen) return null;
@@ -166,6 +227,50 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
         </div>
 
         <div className="p-5">
+          <div className="mb-5">
+            <label className="block text-sm font-bold text-[#2D2926]" htmlFor="location-search">
+              ค้นหาสถานที่
+            </label>
+            <div className="mt-2 flex items-center gap-2 rounded-2xl border border-[#E8E2DB] bg-white px-3 py-2 focus-within:border-[#C2703E]">
+              <svg className="h-5 w-5 flex-shrink-0 text-[#C2703E]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.197 5.197a7.5 7.5 0 0 0 10.606 10.606Z" />
+              </svg>
+              <input
+                id="location-search"
+                type="search"
+                value={searchQuery}
+                onChange={(event) => setSearchQuery(event.target.value)}
+                placeholder="เช่น Siam Paragon, Chiang Mai, ภูเก็ต"
+                className="min-w-0 flex-1 bg-transparent text-sm text-[#2D2926] outline-none placeholder:text-[#B8AEA7]"
+              />
+              {searchLoading && <span className="text-xs font-medium text-[#C2703E]">ค้นหา...</span>}
+            </div>
+
+            {searchResults.length > 0 && (
+              <div className="mt-2 overflow-hidden rounded-2xl border border-[#E8E2DB] bg-white shadow-sm">
+                {searchResults.map((result) => (
+                  <button
+                    key={result.id}
+                    type="button"
+                    onClick={() => selectSearchResult(result)}
+                    className="block w-full border-b border-[#F5F0EB] px-4 py-3 text-left last:border-b-0 hover:bg-[#FDF5EF]"
+                  >
+                    <p className="line-clamp-2 text-sm font-semibold text-[#2D2926]">{result.displayName}</p>
+                    <p className="mt-1 text-xs text-[#8A958E]">{result.lat.toFixed(6)}, {result.lng.toFixed(6)}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {searchError && (
+              <div className="mt-2 rounded-xl bg-red-50 px-3 py-2 text-xs text-red-700">{searchError}</div>
+            )}
+
+            <p className="mt-2 text-xs text-[#8A958E]">
+              เลือกผลการค้นหาเพื่อย้ายหมุดและกรอก latitude/longitude อัตโนมัติ
+            </p>
+          </div>
+
           <div className="mb-5">
             <div className="mb-3 flex items-center justify-between">
               <div>
