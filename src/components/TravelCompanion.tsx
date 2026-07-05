@@ -5,6 +5,8 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { CoinSystem, type ActiveJourney, type JourneyPlace } from '../utils/coinSystem';
 import CoinCounter from './CoinCounter';
+import Layout from './Layout';
+import { useIsDesktop } from '../hooks/useViewport';
 
 // Fix for default markers in react-leaflet
 delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
@@ -25,6 +27,7 @@ const MapCenterController: React.FC<{ center: [number, number] }> = ({ center })
 
 const TravelCompanion: React.FC = () => {
   const navigate = useNavigate();
+  const isDesktop = useIsDesktop();
   const [journey, setJourney] = useState<ActiveJourney | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [activeTab, setActiveTab] = useState<'places' | 'map'>('places');
@@ -200,6 +203,7 @@ const TravelCompanion: React.FC = () => {
     : [13.7563, 100.5018];
 
   return (
+    <Layout hideNavbar={!isDesktop} backgroundVariant="none">
     <div className="min-h-screen bg-[#FAF7F4] flex flex-col">
       {/* Mobile Header */}
       <div className="bg-white/85 backdrop-blur-xl shadow-sm sticky top-0 z-50 border-b border-[#E8E2DB]">
@@ -713,6 +717,7 @@ const TravelCompanion: React.FC = () => {
         </div>
       )}
     </div>
+    </Layout>
   );
 };
 

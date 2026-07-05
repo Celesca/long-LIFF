@@ -102,7 +102,7 @@ const LaunchPage: React.FC = () => {
 
   return (
     <Layout showHeader showCoinCounter backgroundVariant="thailand">
-      <div className="px-4 py-4 max-w-lg mx-auto">
+      <div className="mx-auto max-w-lg px-4 py-4 lg:max-w-7xl lg:px-8 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-6 animate-fade-in">
           <div className="flex items-center space-x-3.5 mb-3">
@@ -130,12 +130,12 @@ const LaunchPage: React.FC = () => {
         </div>
 
         {/* Event Banner */}
-        <Link to="/event" className="block mb-6 animate-fade-in group">
+        <Link to="/event" className="block mb-6 animate-fade-in group lg:mb-8">
           <div className="relative rounded-2xl overflow-hidden shadow-md group-active:scale-[0.98] transition-transform duration-200">
             <img
               src={eventBanner}
               alt="Event Banner"
-              className="w-full h-44 sm:h-48 object-cover"
+              className="h-44 w-full object-cover sm:h-48 lg:h-72"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-4">
@@ -156,14 +156,14 @@ const LaunchPage: React.FC = () => {
         </Link>
 
         {/* Quick Actions Grid */}
-        <div className="grid grid-cols-4 gap-2.5 mb-6 animate-slide-up">
+        <div className="grid grid-cols-4 gap-2.5 mb-6 animate-slide-up lg:gap-4">
           {quickActions.map((action, index) => {
             const IconComponent = action.icon;
             return (
               <Link
                 key={index}
                 to={action.path}
-                className="group flex flex-col items-center p-3 card-surface card-surface-hover"
+                className="group flex flex-col items-center p-3 card-surface card-surface-hover lg:p-5"
               >
                 <div className={`w-11 h-11 ${action.color} rounded-xl flex items-center justify-center text-white mb-2 group-hover:scale-105 transition-transform duration-200`}>
                   <IconComponent />
@@ -228,7 +228,7 @@ const LaunchPage: React.FC = () => {
         )}
 
         {/* Featured Carousel */}
-        <div className="mb-6 animate-fade-in-delayed">
+        <div className="mb-6 animate-fade-in-delayed lg:mb-8">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-base font-bold text-[#2D2926]">สถานที่แนะนำ</h3>
             <Link to="/tinder" className="text-sm text-[#C2703E] font-medium flex items-center hover:text-[#A85C2F] transition-colors">
@@ -239,7 +239,7 @@ const LaunchPage: React.FC = () => {
             </Link>
           </div>
 
-          <div className="relative h-52 rounded-2xl overflow-hidden shadow-md">
+          <div className="relative h-52 rounded-2xl overflow-hidden shadow-md lg:h-80">
             {featuredPlaces.map((place, index) => (
               <div
                 key={index}
@@ -276,7 +276,7 @@ const LaunchPage: React.FC = () => {
         </div>
 
         {/* Start Exploring CTA */}
-        <div className="bg-[#C2703E] rounded-2xl p-5 mb-6 shadow-md animate-slide-up relative overflow-hidden" style={{ animationDelay: '0.15s' }}>
+        <div className="bg-[#C2703E] rounded-2xl p-5 mb-6 shadow-md animate-slide-up relative overflow-hidden lg:p-7" style={{ animationDelay: '0.15s' }}>
           <div className="absolute top-0 right-0 w-36 h-36 bg-white/8 rounded-full -translate-y-1/2 translate-x-1/2" />
           <div className="relative flex items-center justify-between">
             <div className="flex-1 mr-4">
@@ -303,7 +303,7 @@ const LaunchPage: React.FC = () => {
         {/* How it Works */}
         <div className="mb-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
           <h3 className="text-base font-bold text-[#2D2926] mb-3">วิธีใช้งาน</h3>
-          <div className="space-y-2.5">
+          <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
             {[
               {
                 step: 1,

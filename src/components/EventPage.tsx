@@ -218,14 +218,14 @@ const EventPage: React.FC = () => {
 
   return (
     <Layout showHeader headerTitle="Event Photo" showBackButton backgroundVariant="tinder">
-      <div className="min-h-[calc(100vh-120px)] px-4 py-6 max-w-lg mx-auto">
+      <div className="mx-auto min-h-[calc(100vh-120px)] max-w-lg px-4 py-6 lg:max-w-6xl lg:px-8 lg:py-8">
         
         {/* Event Banner */}
         <div className="relative rounded-3xl overflow-hidden mb-6 shadow-xl">
           <img 
             src={eventBanner}
             alt="Event Banner"
-            className="w-full h-48 object-cover"
+              className="h-48 w-full object-cover lg:h-72"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 p-4">
@@ -274,7 +274,7 @@ const EventPage: React.FC = () => {
 
         {!showGallery ? (
           /* Camera Section */
-          <div className="space-y-4">
+          <div className="space-y-4 lg:mx-auto lg:max-w-2xl">
             {!isCapturing ? (
               /* Start Camera Button */
               <div className="bg-white rounded-3xl p-8 shadow-lg text-center">
@@ -385,7 +385,7 @@ const EventPage: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {photos.map((photo) => (
                   <div 
                     key={photo.id} 

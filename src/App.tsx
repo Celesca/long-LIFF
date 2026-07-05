@@ -65,7 +65,7 @@ function App() {
     const mockUser = {
       userId: storedUserId || "dev_user_local",
       displayName: "Dev User",
-      pictureUrl: "https://via.placeholder.com/150/8B5CF6/FFFFFF?text=DEV",
+      pictureUrl: "https://randomuser.me/api/portraits/men/20.jpg",
     };
 
     setError("");

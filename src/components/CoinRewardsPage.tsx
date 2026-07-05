@@ -60,16 +60,16 @@ const CoinRewardsPage: React.FC = () => {
         </div>
       }
     >
-      <div className="px-4 py-4 max-w-lg mx-auto">
+      <div className="mx-auto max-w-lg px-4 py-4 lg:max-w-7xl lg:px-8 lg:py-8">
         {/* How to Earn */}
-        <div className="card-surface p-4 mb-4">
+        <div className="card-surface mb-4 p-4 lg:p-5">
           <h2 className="text-sm font-bold text-[#2D2926] mb-3 flex items-center gap-2">
             <svg className="w-4 h-4 text-[#D4A853]" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 .75a8.25 8.25 0 00-4.135 15.39c.686.398 1.115 1.008 1.134 1.623a.75.75 0 00.577.706c.352.083.71.148 1.074.195.323.041.6-.218.6-.544v-4.661a6.714 6.714 0 01-.937-.171.75.75 0 11.374-1.453 5.261 5.261 0 002.626 0 .75.75 0 11.374 1.452 6.712 6.712 0 01-.937.172v4.66c0 .327.277.586.6.545.364-.047.722-.112 1.074-.195a.75.75 0 00.577-.706c.02-.615.448-1.225 1.134-1.623A8.25 8.25 0 0012 .75z" />
             </svg>
             วิธีสะสมเหรียญ
           </h2>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-4 gap-2 lg:gap-4">
             {[
               { icon: 'M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z', coins: '+10', label: 'ถ่ายรูป' },
               { icon: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z', coins: '+5', label: 'เยี่ยมชม' },
@@ -107,10 +107,10 @@ const CoinRewardsPage: React.FC = () => {
         </div>
 
         {/* Rewards List */}
-        <div className="space-y-3">
+        <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 xl:grid-cols-3">
           {filteredRewards.map((reward) => (
             <div key={reward.id} className="card-surface overflow-hidden">
-              <div className="relative h-32">
+              <div className="relative h-32 lg:h-44">
                 <img src={reward.image} alt={reward.name} className="w-full h-full object-cover" />
                 <div className={`absolute top-2.5 left-2.5 ${categoryColors[reward.category] || 'bg-[#6B635B]'} text-white px-2 py-0.5 rounded-md text-[11px] font-medium`}>
                   {categoryLabels[reward.category] || reward.category}

@@ -7,7 +7,9 @@ import type { TravelPlace } from '../types/TravelPlace';
 import { CoinSystem } from '../utils/coinSystem';
 import CoinCounter from './CoinCounter';
 import PlaceDetailModal from './PlaceDetailModal';
+import Layout from './Layout';
 import { getUserId } from '../hooks/useLiff';
+import { useIsDesktop } from '../hooks/useViewport';
 import { poiApi } from '../services/poiApi';
 
 // Fix for default markers in react-leaflet
@@ -27,6 +29,7 @@ interface RoutingPageProps {
 const RoutingPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const isDesktop = useIsDesktop();
   const { personality, duration, anchor } = (location.state as RoutingPageProps) || {};
   const lineUserId = getUserId() || 'anonymous';
   const [optimizedRoute, setOptimizedRoute] = useState<TravelPlace[]>([]);
@@ -655,6 +658,7 @@ const RoutingPage: React.FC = () => {
   }
 
   return (
+    <Layout hideNavbar={!isDesktop} backgroundVariant="none">
     <div className="min-h-screen bg-gradient-to-br from-[#FAF7F4] via-[#FAF7F4] to-white">
       {/* Header - Responsive */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-[#E8E2DB] sticky top-0 z-10">
@@ -727,7 +731,7 @@ const RoutingPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="p-6">
+      <div className="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
         {/* Emergency Plan Modal */}
         {showEmergencyModal && emergencyPlace && (
           <div className="fixed inset-0 z-[10000] flex items-center justify-center emergency-modal">
@@ -1235,6 +1239,7 @@ const RoutingPage: React.FC = () => {
         onClose={() => setShowDetailModal(false)}
       />
     </div>
+    </Layout>
   );
 };
 

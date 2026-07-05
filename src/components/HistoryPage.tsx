@@ -39,7 +39,7 @@ const HistoryPage: React.FC = () => {
 
   return (
     <Layout showHeader showCoinCounter backgroundVariant="thailand">
-      <div className="px-4 py-5 max-w-2xl mx-auto">
+      <div className="mx-auto max-w-2xl px-4 py-5 lg:max-w-6xl lg:px-8 lg:py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-5">
           <div>
@@ -74,7 +74,7 @@ const HistoryPage: React.FC = () => {
             </Link>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
             {journeyHistory.map((journey) => {
               const stats = getJourneyStats(journey);
               return (

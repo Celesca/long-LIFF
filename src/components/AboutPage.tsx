@@ -122,7 +122,7 @@ const AboutPage: React.FC = () => {
                     <div className="absolute bottom-0 left-0 w-48 h-48 bg-[#D4A853]/20 rounded-full translate-y-1/2 -translate-x-1/2 blur-2xl" />
                     <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-[#6B8F71]/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />
 
-                    <div className="relative px-4 pt-8 pb-12 max-w-lg mx-auto">
+                    <div className="relative mx-auto max-w-lg px-4 pb-12 pt-8 lg:max-w-5xl lg:px-8">
                         {/* Back Button */}
                         <Link
                             to="/"
@@ -171,7 +171,7 @@ const AboutPage: React.FC = () => {
                 </div>
 
                 {/* Main Content */}
-                <div className="px-4 py-6 max-w-lg mx-auto space-y-6 -mt-4">
+                <div className="-mt-4 mx-auto max-w-lg space-y-6 px-4 py-6 lg:max-w-5xl lg:px-8">
                     {/* About Section */}
                     <div className="bg-white rounded-2xl shadow-lg p-6 animate-fade-in">
                         <h2 className="text-lg font-bold text-gray-900 mb-3 flex items-center">
@@ -199,7 +199,7 @@ const AboutPage: React.FC = () => {
                             </span>
                             ประสบการณ์ทำงาน
                         </h2>
-                        <div className="space-y-3">
+                        <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
                             {experiences.map((exp, index) => (
                                 <div
                                     key={index}

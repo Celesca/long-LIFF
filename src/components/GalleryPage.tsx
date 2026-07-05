@@ -85,7 +85,7 @@ const GalleryPage: React.FC = () => {
       }
       backgroundVariant="tinder"
     >
-      <div className="px-4 py-4 max-w-lg mx-auto">
+      <div className="mx-auto max-w-lg px-4 py-4 lg:max-w-7xl lg:px-8 lg:py-8">
         {likedPlaces.length === 0 ? (
           <div className="text-center py-16">
             <div className="w-20 h-20 mx-auto bg-[#FDF5EF] rounded-2xl flex items-center justify-center mb-5">
@@ -123,7 +123,7 @@ const GalleryPage: React.FC = () => {
             </div>
 
             {/* Gallery list */}
-            <div className="space-y-3">
+            <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0 xl:grid-cols-3">
               {likedPlaces.map((place) => (
                 <div
                   key={place.id}
@@ -132,9 +132,9 @@ const GalleryPage: React.FC = () => {
                 >
                   <div className="relative">
                     {place.image ? (
-                      <img src={place.image} alt={place.name} className="w-full h-36 object-cover" referrerPolicy="no-referrer" />
+                      <img src={place.image} alt={place.name} className="h-36 w-full object-cover lg:h-44" referrerPolicy="no-referrer" />
                     ) : (
-                      <div className="flex h-36 w-full items-center justify-center bg-gradient-to-br from-[#2D6A6A] via-[#6B8F71] to-[#C2703E] text-white">
+                      <div className="flex h-36 w-full items-center justify-center bg-gradient-to-br from-[#2D6A6A] via-[#6B8F71] to-[#C2703E] text-white lg:h-44">
                         <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317.159.69.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                         </svg>

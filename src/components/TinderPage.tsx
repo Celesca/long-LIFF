@@ -6,6 +6,7 @@ import PlaceDetailModal from '../components/PlaceDetailModal';
 import Layout from './Layout';
 import { poiApi } from '../services/poiApi';
 import { getUserId, getUserStorageKey } from '../hooks/useLiff';
+import { useIsDesktop } from '../hooks/useViewport';
 import type { TravelPlace } from '../types/TravelPlace';
 
 const LOCATION_STORAGE_KEY = 'poiDiscoveryLocation';
@@ -19,6 +20,7 @@ const TinderPage: React.FC = () => {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<DiscoveryLocation | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const isDesktop = useIsDesktop();
 
   const navigate = useNavigate();
   const lineUserId = getUserId() || 'anonymous';
@@ -156,7 +158,7 @@ const TinderPage: React.FC = () => {
   // Loading state
   if (loading) {
     return (
-      <Layout hideNavbar backgroundVariant="tinder">
+      <Layout hideNavbar={!isDesktop} backgroundVariant="tinder">
         <div className="min-h-screen flex flex-col items-center justify-center p-6">
           <div className="text-center space-y-4">
             <div className="relative w-16 h-16 mx-auto">
@@ -299,10 +301,10 @@ const TinderPage: React.FC = () => {
   }
 
   return (
-    <Layout hideNavbar backgroundVariant="tinder">
-      <div className="min-h-screen flex flex-col pb-24">
+      <Layout hideNavbar={!isDesktop} backgroundVariant="tinder">
+      <div className="min-h-screen flex flex-col pb-24 lg:pb-32">
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 bg-white/80 backdrop-blur-xl border-b border-[#E8E2DB]/50 sticky top-0 z-30">
+        <div className="sticky top-0 z-30 flex items-center justify-between border-b border-[#E8E2DB]/50 bg-white/80 px-4 py-3 backdrop-blur-xl lg:px-8">
           <Link
             to="/"
             className="flex items-center justify-center w-10 h-10 rounded-full bg-[#F5F0EB] active:scale-95 transition-transform"
@@ -349,7 +351,7 @@ const TinderPage: React.FC = () => {
         </div>
 
         {/* Progress */}
-        <div className="px-4 py-2.5 bg-white/40 backdrop-blur-sm">
+        <div className="bg-white/40 px-4 py-2.5 backdrop-blur-sm lg:px-8">
           {selectedLocation && (
             <div className="mb-2 flex items-center justify-center text-[11px] text-[#6B635B]">
               <span className="rounded-full bg-white/80 px-3 py-1">
@@ -371,8 +373,8 @@ const TinderPage: React.FC = () => {
         </div>
 
         {/* Cards Area */}
-        <div className="flex-1 flex flex-col items-center justify-center px-4 py-2 min-h-0">
-          <div className="relative w-full max-w-xs sm:max-w-sm h-[60vh] max-h-[450px]">
+        <div className="flex min-h-0 flex-1 flex-col items-center justify-center px-4 py-2 lg:px-8 lg:py-6">
+          <div className="relative h-[60vh] max-h-[450px] w-full max-w-xs sm:max-w-sm lg:h-[64vh] lg:max-h-[620px] lg:max-w-md">
             {remainingPlaces.map((place, index) => (
               <TinderCard
                 key={place.id}
@@ -385,7 +387,7 @@ const TinderPage: React.FC = () => {
         </div>
 
         {/* Action Buttons */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-[#E8E2DB]/50 safe-area-bottom">
+        <div className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-xl border-t border-[#E8E2DB]/50 safe-area-bottom lg:left-72">
           <div className="flex items-center justify-center space-x-5 py-4 px-6 max-w-lg mx-auto">
             {/* Skip */}
             <button
