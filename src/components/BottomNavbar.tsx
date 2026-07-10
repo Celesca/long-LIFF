@@ -78,7 +78,7 @@ const BottomNavbar: React.FC = () => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
       {/* Background */}
-      <div className="absolute inset-0 bg-white/90 backdrop-blur-xl border-t border-[#E8E2DB]/60 shadow-[0_-1px_12px_rgba(45,41,38,0.04)]" />
+      <div className="absolute inset-0 bg-white/90 backdrop-blur-xl border-t border-[#DDEAF3]/60 shadow-[0_-1px_12px_rgba(45,41,38,0.04)]" />
 
       <div className="relative flex items-center justify-around h-16 max-w-lg mx-auto px-2">
         {navItems.map((item) => {
@@ -89,13 +89,13 @@ const BottomNavbar: React.FC = () => {
               to={item.path}
               className={`relative flex flex-col items-center justify-center min-w-[64px] min-h-[44px] py-1 transition-all duration-200 ${
                 active
-                  ? 'text-[#C2703E]'
-                  : 'text-[#9C9490] hover:text-[#6B635B]'
+                  ? 'text-[#FF6B4A]'
+                  : 'text-[#8AA0B3] hover:text-[#4F6F87]'
               }`}
             >
               {/* Active indicator */}
               {active && (
-                <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#C2703E] rounded-full" />
+                <div className="absolute -top-0.5 left-1/2 transform -translate-x-1/2 w-8 h-0.5 bg-[#FF6B4A] rounded-full" />
               )}
 
               <div className={`transition-transform duration-200 ${active ? 'scale-105' : ''}`}>
@@ -103,7 +103,7 @@ const BottomNavbar: React.FC = () => {
               </div>
 
               <span className={`text-[10px] mt-0.5 font-medium tracking-wide transition-colors duration-200 ${
-                active ? 'text-[#C2703E]' : 'text-[#9C9490]'
+                active ? 'text-[#FF6B4A]' : 'text-[#8AA0B3]'
               }`}>
                 {item.label}
               </span>

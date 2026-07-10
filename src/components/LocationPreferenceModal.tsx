@@ -208,11 +208,11 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="max-h-[92vh] w-full max-w-lg overflow-y-auto rounded-3xl bg-white shadow-2xl">
-        <div className="border-b border-[#E8E2DB] p-5">
+        <div className="border-b border-[#DDEAF3] p-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h2 className="text-xl font-bold text-[#2D2926]">ปักหมุดจุดที่อยากไป</h2>
-              <p className="mt-1 text-sm text-[#6B635B]">เลือกตำแหน่งบนแผนที่ แล้วเราจะหา POI จริงที่อยู่ใกล้จุดนั้นให้คุณปัด</p>
+              <h2 className="text-xl font-bold text-[#17324D]">ปักหมุดจุดที่อยากไป</h2>
+              <p className="mt-1 text-sm text-[#4F6F87]">เลือกตำแหน่งบนแผนที่ แล้วเราจะหา POI จริงที่อยู่ใกล้จุดนั้นให้คุณปัด</p>
             </div>
             <button
               onClick={onClose}
@@ -228,11 +228,11 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
 
         <div className="p-5">
           <div className="mb-5">
-            <label className="block text-sm font-bold text-[#2D2926]" htmlFor="location-search">
+            <label className="block text-sm font-bold text-[#17324D]" htmlFor="location-search">
               ค้นหาสถานที่
             </label>
-            <div className="mt-2 flex items-center gap-2 rounded-2xl border border-[#E8E2DB] bg-white px-3 py-2 focus-within:border-[#C2703E]">
-              <svg className="h-5 w-5 flex-shrink-0 text-[#C2703E]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <div className="mt-2 flex items-center gap-2 rounded-2xl border border-[#DDEAF3] bg-white px-3 py-2 focus-within:border-[#FF6B4A]">
+              <svg className="h-5 w-5 flex-shrink-0 text-[#FF6B4A]" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.197 5.197a7.5 7.5 0 0 0 10.606 10.606Z" />
               </svg>
               <input
@@ -241,21 +241,21 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
                 value={searchQuery}
                 onChange={(event) => setSearchQuery(event.target.value)}
                 placeholder="เช่น Siam Paragon, Chiang Mai, ภูเก็ต"
-                className="min-w-0 flex-1 bg-transparent text-sm text-[#2D2926] outline-none placeholder:text-[#B8AEA7]"
+                className="min-w-0 flex-1 bg-transparent text-sm text-[#17324D] outline-none placeholder:text-[#B8AEA7]"
               />
-              {searchLoading && <span className="text-xs font-medium text-[#C2703E]">ค้นหา...</span>}
+              {searchLoading && <span className="text-xs font-medium text-[#FF6B4A]">ค้นหา...</span>}
             </div>
 
             {searchResults.length > 0 && (
-              <div className="mt-2 overflow-hidden rounded-2xl border border-[#E8E2DB] bg-white shadow-sm">
+              <div className="mt-2 overflow-hidden rounded-2xl border border-[#DDEAF3] bg-white shadow-sm">
                 {searchResults.map((result) => (
                   <button
                     key={result.id}
                     type="button"
                     onClick={() => selectSearchResult(result)}
-                    className="block w-full border-b border-[#F5F0EB] px-4 py-3 text-left last:border-b-0 hover:bg-[#FDF5EF]"
+                    className="block w-full border-b border-[#EDF6FB] px-4 py-3 text-left last:border-b-0 hover:bg-[#FFF4EC]"
                   >
-                    <p className="line-clamp-2 text-sm font-semibold text-[#2D2926]">{result.displayName}</p>
+                    <p className="line-clamp-2 text-sm font-semibold text-[#17324D]">{result.displayName}</p>
                     <p className="mt-1 text-xs text-[#8A958E]">{result.lat.toFixed(6)}, {result.lng.toFixed(6)}</p>
                   </button>
                 ))}
@@ -274,10 +274,10 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
           <div className="mb-5">
             <div className="mb-3 flex items-center justify-between">
               <div>
-                <h3 className="font-bold text-[#2D2926]">พื้นที่แนะนำจากข้อมูลจริง</h3>
+                <h3 className="font-bold text-[#17324D]">พื้นที่แนะนำจากข้อมูลจริง</h3>
                 <p className="text-xs text-[#8A958E]">จัดกลุ่ม POI จาก places.json แล้วแนะนำจุดที่มีสถานที่หนาแน่น</p>
               </div>
-              {clustersLoading && <span className="text-xs text-[#C2703E]">กำลังโหลด</span>}
+              {clustersLoading && <span className="text-xs text-[#FF6B4A]">กำลังโหลด</span>}
             </div>
 
             {clustersError && (
@@ -292,11 +292,11 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
                     onClick={() => selectCluster(cluster)}
                     className={`w-52 flex-shrink-0 overflow-hidden rounded-2xl border text-left transition ${
                       Math.abs(location.lat - cluster.lat) < 0.0001 && Math.abs(location.lng - cluster.lng) < 0.0001
-                        ? 'border-[#C2703E] ring-2 ring-[#C2703E]/20'
-                        : 'border-[#E8E2DB] hover:border-[#D4A853]'
+                        ? 'border-[#FF6B4A] ring-2 ring-[#FF6B4A]/20'
+                        : 'border-[#DDEAF3] hover:border-[#FFC857]'
                     }`}
                   >
-                    <div className="relative h-24 overflow-hidden bg-gradient-to-br from-[#2D6A6A] via-[#6B8F71] to-[#C2703E]">
+                    <div className="relative h-24 overflow-hidden bg-gradient-to-br from-[#0077B6] via-[#00A896] to-[#FF6B4A]">
                       <div className="absolute inset-0 flex items-center justify-center text-white/80">
                         <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317.159.69.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
@@ -313,7 +313,7 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
                           }}
                         />
                       ) : (
-                        <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#2D6A6A] to-[#C2703E] text-white">
+                        <div className="flex h-full items-center justify-center bg-gradient-to-br from-[#0077B6] to-[#FF6B4A] text-white">
                           <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
                           </svg>
@@ -321,9 +321,9 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
                       )}
                     </div>
                     <div className="p-3">
-                      <p className="truncate text-sm font-bold text-[#2D2926]">{cluster.label}</p>
-                      <p className="text-xs text-[#6B635B]">{cluster.place_count} POI • {cluster.image_count} รูป</p>
-                      {cluster.category && <p className="mt-1 truncate text-xs text-[#C2703E]">{cluster.category}</p>}
+                      <p className="truncate text-sm font-bold text-[#17324D]">{cluster.label}</p>
+                      <p className="text-xs text-[#4F6F87]">{cluster.place_count} POI • {cluster.image_count} รูป</p>
+                      {cluster.category && <p className="mt-1 truncate text-xs text-[#FF6B4A]">{cluster.category}</p>}
                     </div>
                   </button>
                 ))}
@@ -331,7 +331,7 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
             )}
           </div>
 
-          <div className="h-72 overflow-hidden rounded-2xl border border-[#E8E2DB]">
+          <div className="h-72 overflow-hidden rounded-2xl border border-[#DDEAF3]">
             <MapContainer center={markerPosition} zoom={12} style={{ height: '100%', width: '100%' }}>
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -344,29 +344,29 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <label className="text-sm font-medium text-[#6B635B]">
+            <label className="text-sm font-medium text-[#4F6F87]">
               Latitude
               <input
                 type="number"
                 step="0.000001"
                 value={location.lat}
                 onChange={(event) => setLocation((current) => ({ ...current, lat: Number(event.target.value) }))}
-                className="mt-1 w-full rounded-xl border border-[#E8E2DB] px-3 py-2 text-[#2D2926] outline-none focus:border-[#C2703E]"
+                className="mt-1 w-full rounded-xl border border-[#DDEAF3] px-3 py-2 text-[#17324D] outline-none focus:border-[#FF6B4A]"
               />
             </label>
-            <label className="text-sm font-medium text-[#6B635B]">
+            <label className="text-sm font-medium text-[#4F6F87]">
               Longitude
               <input
                 type="number"
                 step="0.000001"
                 value={location.lng}
                 onChange={(event) => setLocation((current) => ({ ...current, lng: Number(event.target.value) }))}
-                className="mt-1 w-full rounded-xl border border-[#E8E2DB] px-3 py-2 text-[#2D2926] outline-none focus:border-[#C2703E]"
+                className="mt-1 w-full rounded-xl border border-[#DDEAF3] px-3 py-2 text-[#17324D] outline-none focus:border-[#FF6B4A]"
               />
             </label>
           </div>
 
-          <label className="mt-3 block text-sm font-medium text-[#6B635B]">
+          <label className="mt-3 block text-sm font-medium text-[#4F6F87]">
             ระยะค้นหา: {location.radiusKm} km
             <input
               type="range"
@@ -375,7 +375,7 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
               step="5"
               value={location.radiusKm}
               onChange={(event) => setLocation((current) => ({ ...current, radiusKm: Number(event.target.value) }))}
-              className="mt-2 w-full accent-[#C2703E]"
+              className="mt-2 w-full accent-[#FF6B4A]"
             />
           </label>
 
@@ -384,13 +384,13 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
           <div className="mt-5 flex flex-col gap-3 sm:flex-row">
             <button
               onClick={useCurrentLocation}
-              className="flex-1 rounded-xl border border-[#2D6A6A] px-4 py-3 text-sm font-semibold text-[#2D6A6A] hover:bg-[#2D6A6A]/5"
+              className="flex-1 rounded-xl border border-[#0077B6] px-4 py-3 text-sm font-semibold text-[#0077B6] hover:bg-[#0077B6]/5"
             >
               ใช้ตำแหน่งปัจจุบัน
             </button>
             <button
               onClick={handleConfirm}
-              className="flex-1 rounded-xl bg-gradient-to-r from-[#C2703E] to-[#A85C2F] px-4 py-3 text-sm font-semibold text-white shadow-md"
+              className="flex-1 rounded-xl bg-gradient-to-r from-[#FF6B4A] to-[#E85336] px-4 py-3 text-sm font-semibold text-white shadow-md"
             >
               ค้นหา POI ใกล้หมุดนี้
             </button>

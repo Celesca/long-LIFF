@@ -108,19 +108,19 @@ const Layout: React.FC<LayoutProps> = ({
       )}
 
       {isDesktop && !hideNavbar && (
-        <aside className="fixed left-0 top-0 bottom-0 z-50 hidden w-72 border-r border-[#E8E2DB]/70 bg-white/88 px-4 py-5 shadow-[8px_0_28px_rgba(45,41,38,0.05)] backdrop-blur-xl lg:flex lg:flex-col">
+        <aside className="fixed left-0 top-0 bottom-0 z-50 hidden w-72 border-r border-[#DDEAF3]/70 bg-white/88 px-4 py-5 shadow-[8px_0_28px_rgba(45,41,38,0.05)] backdrop-blur-xl lg:flex lg:flex-col">
           <Link to="/" className="mb-8 flex items-center gap-3 px-2">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#C2703E] text-white shadow-sm">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#FF6B4A] text-white shadow-sm">
               <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
               </svg>
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xl font-bold tracking-tight text-[#2D2926]">LONG</span>
-                <span className="rounded bg-[#C2703E] px-1.5 py-0.5 text-[10px] font-semibold tracking-wider text-white">TH</span>
+                <span className="text-xl font-bold tracking-tight text-[#17324D]">LONG</span>
+                <span className="rounded bg-[#FF6B4A] px-1.5 py-0.5 text-[10px] font-semibold tracking-wider text-white">TH</span>
               </div>
-              <p className="text-xs font-medium text-[#9C9490]">Travel discovery workspace</p>
+              <p className="text-xs font-medium text-[#8AA0B3]">Travel discovery workspace</p>
             </div>
           </Link>
 
@@ -133,8 +133,8 @@ const Layout: React.FC<LayoutProps> = ({
                   to={item.path}
                   className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold transition-colors ${
                     active
-                      ? 'bg-[#FDF5EF] text-[#C2703E]'
-                      : 'text-[#6B635B] hover:bg-[#F5F0EB] hover:text-[#2D2926]'
+                      ? 'bg-[#FFF4EC] text-[#FF6B4A]'
+                      : 'text-[#4F6F87] hover:bg-[#EDF6FB] hover:text-[#17324D]'
                   }`}
                 >
                   <svg className="h-5 w-5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
@@ -147,20 +147,20 @@ const Layout: React.FC<LayoutProps> = ({
           </nav>
 
           {isLoggedIn && (
-            <div className="mt-5 rounded-2xl border border-[#E8E2DB] bg-[#FDF9F5] p-3">
+            <div className="mt-5 rounded-2xl border border-[#DDEAF3] bg-[#FFFFFF] p-3">
               <div className="flex items-center gap-3">
                 {pictureUrl ? (
                   <img src={pictureUrl} alt={displayName || 'User'} className="h-11 w-11 rounded-xl object-cover" />
                 ) : (
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#C2703E] text-white">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#FF6B4A] text-white">
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.6} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0" />
                     </svg>
                   </div>
                 )}
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-[#2D2926]">{displayName || 'นักเดินทาง'}</p>
-                  <p className="text-xs font-medium text-[#9C9490]">LINE profile connected</p>
+                  <p className="truncate text-sm font-bold text-[#17324D]">{displayName || 'นักเดินทาง'}</p>
+                  <p className="text-xs font-medium text-[#8AA0B3]">LINE profile connected</p>
                 </div>
               </div>
             </div>
@@ -174,7 +174,7 @@ const Layout: React.FC<LayoutProps> = ({
           className={`fixed top-0 left-0 right-0 z-40 transition-all duration-200 lg:left-72 ${
             transparentHeader
               ? 'bg-transparent'
-              : 'bg-white/85 backdrop-blur-xl border-b border-[#E8E2DB]/50 shadow-[0_1px_8px_rgba(45,41,38,0.03)]'
+              : 'bg-white/85 backdrop-blur-xl border-b border-[#DDEAF3]/50 shadow-[0_1px_8px_rgba(45,41,38,0.03)]'
           }`}
         >
           <div className="flex h-14 items-center justify-between px-4 lg:h-16 lg:px-8">
@@ -183,7 +183,7 @@ const Layout: React.FC<LayoutProps> = ({
               {showBackButton ? (
                 <button
                   onClick={handleBack}
-                  className="flex items-center justify-center w-10 h-10 -ml-1 rounded-full text-[#6B635B] hover:text-[#C2703E] hover:bg-[#FDF5EF] transition-colors"
+                  className="flex items-center justify-center w-10 h-10 -ml-1 rounded-full text-[#4F6F87] hover:text-[#FF6B4A] hover:bg-[#FFF4EC] transition-colors"
                   aria-label="Go back"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -194,7 +194,7 @@ const Layout: React.FC<LayoutProps> = ({
                 <img
                   src={pictureUrl}
                   alt={displayName || 'User'}
-                  className="w-9 h-9 rounded-full border-2 border-[#E8E2DB] shadow-sm object-cover"
+                  className="w-9 h-9 rounded-full border-2 border-[#DDEAF3] shadow-sm object-cover"
                 />
               ) : null}
             </div>
@@ -202,16 +202,16 @@ const Layout: React.FC<LayoutProps> = ({
             {/* Center Section - Brand or Title */}
             <div className="flex-1 text-center">
               {headerTitle ? (
-                <h1 className="truncate text-base font-semibold text-[#2D2926] lg:text-left lg:text-lg">{headerTitle}</h1>
+                <h1 className="truncate text-base font-semibold text-[#17324D] lg:text-left lg:text-lg">{headerTitle}</h1>
               ) : (
                 <div className="flex items-center justify-center space-x-1.5">
-                  <svg className="w-5 h-5 text-[#C2703E]" fill="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-5 h-5 text-[#FF6B4A]" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
                   </svg>
-                  <span className="text-lg font-bold text-[#2D2926] tracking-tight">
+                  <span className="text-lg font-bold text-[#17324D] tracking-tight">
                     LONG
                   </span>
-                  <span className="text-[10px] bg-[#C2703E] text-white px-1.5 py-0.5 rounded font-semibold tracking-wider">
+                  <span className="text-[10px] bg-[#FF6B4A] text-white px-1.5 py-0.5 rounded font-semibold tracking-wider">
                     TH
                   </span>
                 </div>
