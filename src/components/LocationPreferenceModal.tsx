@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { MapContainer, Marker, TileLayer, useMap, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { poiApi, type PoiCluster } from '../services/poiApi';
 import { geocodingApi, type GeocodingResult } from '../services/geocodingApi';
+import MapLibreView from './MapLibreView';
 
 export interface DiscoveryLocation {
   lat: number;
@@ -24,33 +22,6 @@ const DEFAULT_LOCATION: DiscoveryLocation = {
   lng: 100.9925,
   label: 'Thailand center',
   radiusKm: 50,
-};
-
-delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-const PinController: React.FC<{ onPick: (lat: number, lng: number) => void }> = ({ onPick }) => {
-  useMapEvents({
-    click(event) {
-      onPick(event.latlng.lat, event.latlng.lng);
-    },
-  });
-
-  return null;
-};
-
-const RecenterMap: React.FC<{ position: [number, number] }> = ({ position }) => {
-  const map = useMap();
-
-  useEffect(() => {
-    map.setView(position, map.getZoom());
-  }, [map, position]);
-
-  return null;
 };
 
 const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
@@ -332,15 +303,21 @@ const LocationPreferenceModal: React.FC<LocationPreferenceModalProps> = ({
           </div>
 
           <div className="h-72 overflow-hidden rounded-2xl border border-[#DDEAF3]">
-            <MapContainer center={markerPosition} zoom={12} style={{ height: '100%', width: '100%' }}>
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <RecenterMap position={markerPosition} />
-              <PinController onPick={updateCoordinates} />
-              <Marker position={markerPosition} />
-            </MapContainer>
+            <MapLibreView
+              center={markerPosition}
+              zoom={12}
+              onMapClick={updateCoordinates}
+              points={[{
+                id: 'selected-location',
+                lat: markerPosition[0],
+                lng: markerPosition[1],
+                label: location.label || 'Selected location',
+                subtitle: `${markerPosition[0].toFixed(6)}, ${markerPosition[1].toFixed(6)}`,
+                markerText: '',
+                variant: 'primary',
+                size: 'lg',
+              }]}
+            />
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3">

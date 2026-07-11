@@ -1,29 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { CoinSystem, type ActiveJourney, type JourneyPlace } from '../utils/coinSystem';
 import CoinCounter from './CoinCounter';
 import Layout from './Layout';
 import { useIsDesktop } from '../hooks/useViewport';
-
-// Fix for default markers in react-leaflet
-delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
-
-// Map center component for dynamic panning
-const MapCenterController: React.FC<{ center: [number, number] }> = ({ center }) => {
-  const map = useMap();
-  useEffect(() => {
-    map.flyTo(center, 15, { duration: 0.8 });
-  }, [center, map]);
-  return null;
-};
+import MapLibreView, { type MapPoint } from './MapLibreView';
 
 const TravelCompanion: React.FC = () => {
   const navigate = useNavigate();
@@ -162,32 +143,6 @@ const TravelCompanion: React.FC = () => {
     };
   };
 
-  const createMarkerIcon = (index: number, visited: boolean, isCurrent: boolean): L.DivIcon => {
-    const bgColor = visited ? '#2FBF71' : isCurrent ? '#FF6B4A' : '#8AA0B3';
-    const size = isCurrent ? 40 : 32;
-
-    return L.divIcon({
-      html: `<div style="
-        background-color: ${bgColor};
-        color: white;
-        border-radius: 50%;
-        width: ${size}px;
-        height: ${size}px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: bold;
-        font-size: ${isCurrent ? '16px' : '12px'};
-        border: 3px solid white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        ${isCurrent ? 'animation: pulse 2s infinite;' : ''}
-      ">${visited ? '✓' : index + 1}</div>`,
-      className: 'custom-marker',
-      iconSize: [size, size],
-      iconAnchor: [size / 2, size / 2],
-    });
-  };
-
   if (!journey) {
     return (
       <div className="min-h-screen bg-[#F6FBFF] flex items-center justify-center">
@@ -201,6 +156,17 @@ const TravelCompanion: React.FC = () => {
   const mapCenter: [number, number] = currentPlace 
     ? [currentPlace.lat, currentPlace.long] 
     : [13.7563, 100.5018];
+  const mapPoints: MapPoint[] = journey.places.map((place, index) => ({
+    id: place.id,
+    lat: place.lat,
+    lng: place.long,
+    label: place.name,
+    subtitle: place.visited ? 'เยี่ยมแล้ว' : `จุดที่ ${index + 1}`,
+    markerText: place.visited ? '✓' : `${index + 1}`,
+    variant: place.visited ? 'success' : index === currentIndex ? 'primary' : 'muted',
+    size: index === currentIndex ? 'lg' : 'md',
+    onClick: () => handlePlaceSelect(index),
+  }));
 
   return (
     <Layout hideNavbar={!isDesktop} backgroundVariant="none">
@@ -406,50 +372,13 @@ const TravelCompanion: React.FC = () => {
         ) : (
           /* Map View */
           <div className="h-full w-full absolute inset-0">
-            <MapContainer
+            <MapLibreView
               center={mapCenter}
               zoom={14}
-              style={{ height: '100%', width: '100%', position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
-              zoomControl={false}
-            >
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-              <MapCenterController center={mapCenter} />
-              
-              {journey.places.map((place, index) => (
-                <Marker
-                  key={place.id}
-                  position={[place.lat, place.long]}
-                  icon={createMarkerIcon(index, place.visited, index === currentIndex)}
-                  eventHandlers={{
-                    click: () => handlePlaceSelect(index)
-                  }}
-                >
-                  <Popup>
-                    <div className="text-center p-2">
-                      <p className="font-bold text-[#17324D]">{place.name}</p>
-                      <p className="text-xs text-[#8AA0B3]">จุดที่ {index + 1}</p>
-                      {place.visited && (
-                        <p className="text-xs text-[#2FBF71] mt-1">✓ เยี่ยมแล้ว</p>
-                      )}
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-
-              {/* Route Polyline */}
-              <Polyline
-                positions={journey.places.map(p => [p.lat, p.long] as [number, number])}
-                pathOptions={{
-                  color: '#FF6B4A',
-                  weight: 4,
-                  opacity: 0.7,
-                  dashArray: '10, 8'
-                }}
-              />
-            </MapContainer>
+              points={mapPoints}
+              route={journey.places.map(p => [p.lat, p.long] as [number, number])}
+              className="absolute inset-0"
+            />
 
             {/* Floating Current Place Card */}
             <div className="absolute bottom-4 left-4 right-4 z-[1000]">

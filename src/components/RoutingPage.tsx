@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import type { TravelPlace } from '../types/TravelPlace';
 import { CoinSystem } from '../utils/coinSystem';
 import CoinCounter from './CoinCounter';
@@ -11,20 +8,21 @@ import Layout from './Layout';
 import { getUserId } from '../hooks/useLiff';
 import { useIsDesktop } from '../hooks/useViewport';
 import { poiApi } from '../services/poiApi';
-
-// Fix for default markers in react-leaflet
-delete (L.Icon.Default.prototype as { _getIconUrl?: () => string })._getIconUrl;
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-});
+import MapLibreView, { type MapPoint } from './MapLibreView';
 
 interface RoutingPageProps {
   personality?: string;
   duration?: string;
   anchor?: { lat: number; lng: number; radius_km: number; label?: string } | null;
 }
+
+const escapeMapHtml = (value: unknown) =>
+  String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 
 const RoutingPage: React.FC = () => {
   const location = useLocation();
@@ -327,8 +325,6 @@ const RoutingPage: React.FC = () => {
   // optimizeRoute & helpers now declared earlier
 
   const MapVisualization = () => {
-    const [mapType, setMapType] = useState<'street' | 'satellite'>('street');
-
     const getCityCenter = (): [number, number] => {
       if (anchor) return [anchor.lat, anchor.lng];
       return [15.87, 100.9925];
@@ -340,46 +336,48 @@ const RoutingPage: React.FC = () => {
 
     // Create path coordinates for the polyline
     const pathCoordinates = optimizedRoute.map(place => [place.lat, place.long] as [number, number]);
-
-    const createNumberedIcon = (number: number): L.DivIcon => {
-      return L.divIcon({
-        html: `<div style="
-          background-color: #FF6B4A;
-          color: white;
-          border-radius: 50%;
-          width: 32px;
-          height: 32px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-weight: bold;
-          font-size: 14px;
-          border: 3px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        ">${number}</div>`,
-        className: 'numbered-marker',
-        iconSize: [32, 32],
-        iconAnchor: [16, 16],
-        popupAnchor: [0, -16]
-      });
-    };
-
-    const createPoiIcon = (): L.DivIcon => {
-      return L.divIcon({
-        html: `<div style="
-          background-color: #0077B6;
-          border-radius: 50%;
-          width: 14px;
-          height: 14px;
-          border: 3px solid white;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.24);
-        "></div>`,
-        className: 'nearby-poi-marker',
-        iconSize: [14, 14],
-        iconAnchor: [7, 7],
-        popupAnchor: [0, -8]
-      });
-    };
+    const routePoints: MapPoint[] = optimizedRoute.map((place, index) => ({
+      id: place.id,
+      lat: place.lat,
+      lng: place.long,
+      label: place.name,
+      subtitle: `จุดที่ ${index + 1}`,
+      markerText: `${index + 1}`,
+      variant: 'primary',
+      size: 'md',
+      popupHtml: `
+        <div class="long-map-popup">
+          <div class="long-map-popup-badge">จุดที่ ${index + 1}</div>
+          <p class="long-map-popup-title">${escapeMapHtml(place.name)}</p>
+          <p class="long-map-popup-copy">${escapeMapHtml(place.description)}</p>
+          <div class="long-map-popup-grid">
+            <span>คะแนน ${escapeMapHtml(place.rating || '-')}</span>
+            <span>${escapeMapHtml(place.distance || 'ระยะทาง')}</span>
+          </div>
+        </div>
+      `,
+    }));
+    const poiPoints: MapPoint[] = nearbyPois.map((place) => ({
+      id: `poi-${place.id}`,
+      lat: place.lat,
+      lng: place.long,
+      label: place.name,
+      subtitle: [place.district, place.province].filter(Boolean).join(', '),
+      variant: 'secondary',
+      size: 'sm',
+      onClick: () => {
+        setSelectedPlace(place);
+        setShowDetailModal(true);
+      },
+      popupHtml: `
+        <div class="long-map-popup">
+          <div class="long-map-popup-badge long-map-popup-badge-blue">POI ใกล้เคียง</div>
+          <p class="long-map-popup-title">${escapeMapHtml(place.name)}</p>
+          <p class="long-map-popup-copy">${escapeMapHtml([place.district, place.province].filter(Boolean).join(', '))}</p>
+          ${place.distance ? `<p class="long-map-popup-distance">${escapeMapHtml(place.distance)} จากจุดเริ่มต้น</p>` : ''}
+        </div>
+      `,
+    }));
 
     return (
       <div className="bg-white rounded-2xl shadow-lg p-6">
@@ -388,132 +386,20 @@ const RoutingPage: React.FC = () => {
             แผนที่เส้นทางแบบอินเตอร์แอกทีฟ - {anchor?.label || 'AI Route'}
           </h3>
 
-          {/* Map Type Toggle */}
-          <div className="flex bg-[#FFF4EC] rounded-lg p-1">
-            <button
-              onClick={() => setMapType('street')}
-              className={`px-3 py-1 rounded text-sm font-medium transition-all ${mapType === 'street'
-                  ? 'bg-[#FF6B4A] text-white shadow-sm'
-                  : 'text-[#FF6B4A] hover:bg-[#FFF4EC]'
-                }`}
-            >
-              ถนน
-            </button>
-            <button
-              onClick={() => setMapType('satellite')}
-              className={`px-3 py-1 rounded text-sm font-medium transition-all ${mapType === 'satellite'
-                  ? 'bg-[#FF6B4A] text-white shadow-sm'
-                  : 'text-[#FF6B4A] hover:bg-[#FFF4EC]'
-                }`}
-            >
-              ดาวเทียม
-            </button>
+          <div className="rounded-lg bg-[#E9FBF7] px-3 py-1 text-sm font-semibold text-[#007F73]">
+            MapLibre + OpenFreeMap
           </div>
         </div>
 
         <div className="h-[500px] rounded-xl overflow-hidden border-2 border-[#DDEAF3]">
-          <MapContainer
+          <MapLibreView
             center={mapCenter}
             zoom={12}
-            style={{ height: '100%', width: '100%' }}
             className="rounded-xl"
-          >
-            {/* Conditional tile layers based on map type */}
-            {mapType === 'street' ? (
-              <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-              />
-            ) : (
-              <TileLayer
-                attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-                url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-              />
-            )}
-
-            {/* Add markers for each place in the route */}
-            {optimizedRoute.map((place, index) => (
-              <Marker
-                key={place.id}
-                position={[place.lat, place.long]}
-                icon={createNumberedIcon(index + 1)}
-              >
-                <Popup className="custom-popup">
-                  <div className="text-center min-w-[200px]">
-                    <div className="bg-[#FF6B4A] text-white px-3 py-1 rounded-full text-xs font-bold mb-3">
-                      จุดที่ {index + 1}
-                    </div>
-                    <h4 className="font-bold text-[#17324D] mb-2 text-lg">
-                      {place.name}
-                    </h4>
-                    <p className="text-sm text-gray-600 mb-3">{place.description}</p>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="bg-[#FFC857]/10 p-2 rounded">
-                        <div className="text-[#FFC857]">⭐ คะแนน</div>
-                        <div className="font-bold">{place.rating}</div>
-                      </div>
-                      <div className="bg-blue-50 p-2 rounded">
-                        <div className="text-[#0077B6]">📍 ระยะทาง</div>
-                        <div className="font-bold">{place.distance}</div>
-                      </div>
-                    </div>
-                    {index < optimizedRoute.length - 1 && (
-                      <div className="mt-2 text-xs text-gray-500 bg-gray-50 p-2 rounded">
-                        ถัดไป: {calculateDistance(place, optimizedRoute[index + 1]).toFixed(2)} km
-                      </div>
-                    )}
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-
-            {/* Draw the route path */}
-            {pathCoordinates.length > 1 && (
-              <Polyline
-                positions={pathCoordinates}
-                pathOptions={{
-                  color: '#FF6B4A',
-                  weight: 5,
-                  opacity: 0.8,
-                  dashArray: '15, 10',
-                  lineCap: 'round',
-                  lineJoin: 'round'
-                }}
-              />
-            )}
-
-            {/* Small nearby POIs loaded from places.json through FastAPI */}
-            {nearbyPois.map((place) => (
-              <Marker
-                key={`poi-${place.id}`}
-                position={[place.lat, place.long]}
-                icon={createPoiIcon()}
-              >
-                <Popup className="custom-popup">
-                  <div className="min-w-[180px]">
-                    <p className="text-xs font-bold text-[#0077B6] mb-1">POI ใกล้เคียง</p>
-                    <h4 className="font-bold text-[#17324D] mb-1">{place.name}</h4>
-                    <p className="text-xs text-gray-500 mb-2">{[place.district, place.province].filter(Boolean).join(', ')}</p>
-                    {place.distance && <p className="text-xs text-[#FF6B4A] font-semibold">{place.distance} จากจุดเริ่มต้น</p>}
-                    <div className="mt-3 flex gap-2">
-                      <button
-                        onClick={() => { setSelectedPlace(place); setShowDetailModal(true); }}
-                        className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-700"
-                      >
-                        รายละเอียด
-                      </button>
-                      <button
-                        onClick={() => addPoiToRoute(place)}
-                        className="text-xs px-2 py-1 rounded bg-[#0077B6] text-white"
-                      >
-                        เพิ่ม
-                      </button>
-                    </div>
-                  </div>
-                </Popup>
-              </Marker>
-            ))}
-          </MapContainer>
+            points={[...routePoints, ...poiPoints]}
+            route={pathCoordinates}
+            fitRoute={pathCoordinates.length > 1}
+          />
         </div>
 
         {/* Enhanced Map Controls and Legend */}

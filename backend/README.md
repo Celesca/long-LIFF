@@ -1,4 +1,4 @@
-# LONG POI API
+# TripNai POI API
 
 FastAPI backend for reading real POIs from `data/places.json`, storing user workflow data in PostgreSQL, and generating routes with OpenRouter when configured.
 

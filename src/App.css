@@ -220,6 +220,125 @@ body {
   -webkit-touch-callout: none;
 }
 
+/* ========== MapLibre Travel Maps ========== */
+.maplibregl-map {
+  font-family: inherit;
+}
+
+.maplibregl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid rgba(221, 234, 243, 0.85) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 10px 28px rgba(23, 50, 77, 0.12) !important;
+}
+
+.maplibregl-ctrl button {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.long-map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background: var(--marker-color);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 8px 20px rgba(23, 50, 77, 0.24);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.long-map-marker:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 12px 28px rgba(23, 50, 77, 0.28);
+}
+
+.long-map-marker-sm {
+  border-width: 3px;
+}
+
+.long-map-marker-sm::after {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #fff;
+  content: '';
+}
+
+.long-map-marker-lg {
+  font-size: 16px;
+}
+
+.maplibregl-popup-content {
+  border-radius: 16px !important;
+  padding: 0 !important;
+  box-shadow: 0 18px 42px rgba(23, 50, 77, 0.2) !important;
+}
+
+.long-map-popup {
+  min-width: 180px;
+  padding: 12px;
+}
+
+.long-map-popup-title {
+  margin: 0;
+  color: #17324D;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.long-map-popup-copy {
+  margin: 5px 0 0;
+  color: #607D93;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.long-map-popup-badge {
+  display: inline-flex;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  background: #FF6B4A;
+  padding: 4px 9px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.long-map-popup-badge-blue {
+  background: #0077B6;
+}
+
+.long-map-popup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 10px;
+  color: #4F6F87;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.long-map-popup-grid span,
+.long-map-popup-distance {
+  border-radius: 10px;
+  background: #EDF6FB;
+  padding: 7px;
+}
+
+.long-map-popup-distance {
+  display: inline-block;
+  margin: 10px 0 0;
+  color: #FF6B4A;
+  font-size: 11px;
+  font-weight: 800;
+}
+
 /* Button press feedback */
 button:active,
 a:active {

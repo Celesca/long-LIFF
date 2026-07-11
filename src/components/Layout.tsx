@@ -19,6 +19,21 @@ interface LayoutProps {
   backgroundVariant?: 'default' | 'travel' | 'minimal' | 'gradient' | 'none' | 'thailand' | 'tinder';
 }
 
+const BrandMark = ({ className = 'h-6 w-6' }: { className?: string }) => (
+  <svg className={className} fill="none" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M12 21.25c3.8-3.55 6.75-7.16 6.75-11.03a6.75 6.75 0 0 0-13.5 0c0 3.87 2.95 7.48 6.75 11.03Z"
+      fill="currentColor"
+      opacity="0.22"
+    />
+    <path
+      d="M15.68 6.62 13.9 12.2a2.5 2.5 0 0 1-1.68 1.68l-5.58 1.78 1.78-5.58a2.5 2.5 0 0 1 1.68-1.68l5.58-1.78Z"
+      fill="currentColor"
+    />
+    <circle cx="12" cy="11.14" r="1.25" fill="white" />
+  </svg>
+);
+
 const Layout: React.FC<LayoutProps> = ({
   children,
   showHeader = false,
@@ -111,16 +126,14 @@ const Layout: React.FC<LayoutProps> = ({
         <aside className="fixed left-0 top-0 bottom-0 z-50 hidden w-72 border-r border-[#DDEAF3]/70 bg-white/88 px-4 py-5 shadow-[8px_0_28px_rgba(45,41,38,0.05)] backdrop-blur-xl lg:flex lg:flex-col">
           <Link to="/" className="mb-8 flex items-center gap-3 px-2">
             <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#FF6B4A] text-white shadow-sm">
-              <svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-              </svg>
+              <BrandMark />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xl font-bold tracking-tight text-[#17324D]">LONG</span>
-                <span className="rounded bg-[#FF6B4A] px-1.5 py-0.5 text-[10px] font-semibold tracking-wider text-white">TH</span>
+                <span className="text-xl font-bold tracking-tight text-[#17324D]">TripNai</span>
+                <span className="rounded bg-[#00A896] px-1.5 py-0.5 text-[10px] font-semibold tracking-wider text-white">GO</span>
               </div>
-              <p className="text-xs font-medium text-[#8AA0B3]">Travel discovery workspace</p>
+              <p className="text-xs font-medium text-[#8AA0B3]">Open travel discovery</p>
             </div>
           </Link>
 
@@ -205,14 +218,12 @@ const Layout: React.FC<LayoutProps> = ({
                 <h1 className="truncate text-base font-semibold text-[#17324D] lg:text-left lg:text-lg">{headerTitle}</h1>
               ) : (
                 <div className="flex items-center justify-center space-x-1.5">
-                  <svg className="w-5 h-5 text-[#FF6B4A]" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                  </svg>
+                  <BrandMark className="h-5 w-5 text-[#FF6B4A]" />
                   <span className="text-lg font-bold text-[#17324D] tracking-tight">
-                    LONG
+                    TripNai
                   </span>
-                  <span className="text-[10px] bg-[#FF6B4A] text-white px-1.5 py-0.5 rounded font-semibold tracking-wider">
-                    TH
+                  <span className="text-[10px] bg-[#00A896] text-white px-1.5 py-0.5 rounded font-semibold tracking-wider">
+                    GO
                   </span>
                 </div>
               )}
