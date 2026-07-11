@@ -13,6 +13,8 @@ from typing import Any, Generator
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+from minio.error import S3Error
 from pydantic import BaseModel, Field
 from sqlalchemy import (
     JSON,
@@ -29,7 +31,7 @@ from sqlalchemy import (
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
-from image_quality import usable_image_urls
+from image_cache import MINIO_BUCKET, cached_urls, manifest_summary, minio_client
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -403,8 +405,7 @@ def _normalize_place(raw: dict[str, Any]) -> Poi | None:
 
 
 def _sanitize_place_images(place: Poi, require_image: bool = False) -> Poi | None:
-    source_images = _string_list(place.images) or _string_list([place.thumbnail_url, place.image])
-    images = usable_image_urls(source_images)
+    images = cached_urls(place.id)
     if require_image and not images:
         return None
 
@@ -696,12 +697,42 @@ def call_openrouter(
 
 
 @app.get("/api/health")
-def health_check() -> dict[str, str | int]:
+def health_check() -> dict[str, Any]:
     try:
         total = len(get_places())
     except Exception:
         total = 0
-    return {"status": "ok", "places": total}
+    return {"status": "ok", "places": total, "image_cache": manifest_summary()}
+
+
+@app.get("/api/image-cache/status")
+def image_cache_status() -> dict[str, Any]:
+    return manifest_summary()
+
+
+@app.get("/api/image-cache/images/{object_name:path}")
+def cached_image(object_name: str) -> StreamingResponse:
+    if not object_name.startswith("places/") or ".." in object_name.split("/"):
+        raise HTTPException(status_code=400, detail="Invalid image object name")
+    try:
+        response = minio_client().get_object(MINIO_BUCKET, object_name)
+    except S3Error as exc:
+        if exc.code in {"NoSuchKey", "NoSuchObject", "NoSuchBucket"}:
+            raise HTTPException(status_code=404, detail="Cached image not found") from exc
+        raise HTTPException(status_code=503, detail="Image cache unavailable") from exc
+
+    def stream() -> Generator[bytes, None, None]:
+        try:
+            yield from response.stream(64 * 1024)
+        finally:
+            response.close()
+            response.release_conn()
+
+    return StreamingResponse(
+        stream(),
+        media_type=response.headers.get("content-type", "image/webp"),
+        headers={"Cache-Control": "public, max-age=86400, immutable"},
+    )
 
 
 @app.post("/api/users", response_model=UserResponse)

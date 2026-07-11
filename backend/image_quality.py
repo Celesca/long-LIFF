@@ -119,27 +119,9 @@ def _open_image_bytes(content: bytes) -> Image.Image:
     return image
 
 
-@lru_cache(maxsize=4096)
-def check_image_url(url: str) -> ImageQualityResult:
+def check_image_bytes(content: bytes) -> ImageQualityResult:
     if not IMAGE_FILTER_ENABLED:
         return ImageQualityResult(usable=True, reason="disabled")
-
-    cleaned_url = url.strip()
-    if not cleaned_url:
-        return ImageQualityResult(usable=False, reason="empty")
-
-    try:
-        with httpx.Client(
-            timeout=IMAGE_FETCH_TIMEOUT_SECONDS,
-            follow_redirects=True,
-            headers={"User-Agent": "TripNai image quality filter/1.0"},
-        ) as client:
-            response = client.get(cleaned_url)
-            response.raise_for_status()
-            content = response.content
-    except httpx.HTTPError:
-        return ImageQualityResult(usable=not REJECT_UNCHECKED_IMAGES, reason="fetch-error")
-
     if len(content) > MAX_IMAGE_BYTES:
         return ImageQualityResult(usable=False, reason="too-large")
 
@@ -181,6 +163,30 @@ def check_image_url(url: str) -> ImageQualityResult:
         width=width,
         height=height,
     )
+
+
+@lru_cache(maxsize=4096)
+def check_image_url(url: str) -> ImageQualityResult:
+    if not IMAGE_FILTER_ENABLED:
+        return ImageQualityResult(usable=True, reason="disabled")
+
+    cleaned_url = url.strip()
+    if not cleaned_url:
+        return ImageQualityResult(usable=False, reason="empty")
+
+    try:
+        with httpx.Client(
+            timeout=IMAGE_FETCH_TIMEOUT_SECONDS,
+            follow_redirects=True,
+            headers={"User-Agent": "TripNai image quality filter/1.0"},
+        ) as client:
+            response = client.get(cleaned_url)
+            response.raise_for_status()
+            content = response.content
+    except httpx.HTTPError:
+        return ImageQualityResult(usable=not REJECT_UNCHECKED_IMAGES, reason="fetch-error")
+
+    return check_image_bytes(content)
 
 
 def usable_image_urls(urls: list[str]) -> list[str]:

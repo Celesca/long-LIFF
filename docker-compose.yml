@@ -28,6 +28,11 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://long_liff:long_liff@postgres:5432/long_liff
       CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      IMAGE_CACHE_MANIFEST_PATH: /cache/image_manifest.json
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-longliff}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-longliff-dev-secret}
+      MINIO_BUCKET: place-images
     command: >
       sh -c "pip install --no-cache-dir -r requirements.txt &&
       uvicorn main:app --reload --host 0.0.0.0 --port 8000"
@@ -35,8 +40,11 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
+      - long_liff_image_cache:/cache:ro
     depends_on:
       postgres:
+        condition: service_healthy
+      minio:
         condition: service_healthy
     healthcheck:
       test:
@@ -47,6 +55,51 @@ services:
       interval: 10s
       timeout: 5s
       retries: 10
+
+  minio:
+    image: minio/minio:RELEASE.2025-04-22T22-12-26Z
+    container_name: long-liff-minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-longliff}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-longliff-dev-secret}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - long_liff_minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  image-cache-worker:
+    image: python:3.12-slim
+    container_name: long-liff-image-cache-worker
+    restart: unless-stopped
+    working_dir: /app/backend
+    environment:
+      PLACES_JSON_PATH: /app/data/places.json
+      IMAGE_CACHE_MANIFEST_PATH: /cache/image_manifest.json
+      IMAGE_CACHE_INTERVAL_SECONDS: ${IMAGE_CACHE_INTERVAL_SECONDS:-21600}
+      IMAGE_CACHE_RETRY_HOURS: ${IMAGE_CACHE_RETRY_HOURS:-12}
+      IMAGE_CACHE_MAX_PER_PLACE: ${IMAGE_CACHE_MAX_PER_PLACE:-3}
+      MINIO_ENDPOINT: minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-longliff}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-longliff-dev-secret}
+      MINIO_BUCKET: place-images
+      REJECT_UNCHECKED_IMAGES: "true"
+    command: >
+      sh -c "pip install --no-cache-dir -r requirements.txt &&
+      python cache_place_images.py --watch"
+    volumes:
+      - .:/app:ro
+      - long_liff_image_cache:/cache
+    depends_on:
+      minio:
+        condition: service_healthy
 
   frontend:
     image: node:22-alpine
@@ -71,5 +124,7 @@ services:
         condition: service_healthy
 
 volumes:
+  long_liff_image_cache:
+  long_liff_minio_data:
   long_liff_node_modules:
   long_liff_postgres_data:

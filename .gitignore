@@ -32,6 +32,9 @@ data/*
 data/
 data/places.json
 
+# Generated image cache state
+backend/cache/
+
 # pycache
 __pycache__/
 *.pyc

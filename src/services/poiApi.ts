@@ -85,20 +85,28 @@ function firstImage(value: unknown): string {
   return '';
 }
 
+function resolveImageUrl(value: string): string {
+  if (!value || !value.startsWith('/')) return value;
+  return `${API_BASE_URL.replace(/\/$/, '')}${value}`;
+}
+
 function normalizePoi(place: RawPoi): TravelPlace {
-  const image =
+  const image = resolveImageUrl(
     place.image ||
     place.thumbnail_url ||
     firstImage(place.thumbnailUrl) ||
     place.detailThumbnail ||
-    firstImage(place.images);
+    firstImage(place.images),
+  );
+
+  const images = (place.images?.length ? place.images : image ? [image] : []).map(resolveImageUrl);
 
   return {
     ...place,
     long: place.long ?? place.longitude ?? place.lng ?? 0,
     image,
-    thumbnail_url: place.thumbnail_url || image,
-    images: place.images?.length ? place.images : image ? [image] : [],
+    thumbnail_url: resolveImageUrl(place.thumbnail_url || image),
+    images,
   };
 }
 
