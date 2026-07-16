@@ -13,6 +13,8 @@ from typing import Any, Generator
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
+from minio.error import S3Error
 from pydantic import BaseModel, Field
 from sqlalchemy import (
     JSON,
@@ -28,6 +30,8 @@ from sqlalchemy import (
 )
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
+
+from image_cache import MINIO_BUCKET, cached_urls, manifest_summary, minio_client
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
@@ -158,7 +162,7 @@ class RoutePlanRecord(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 app = FastAPI(
-    title="LONG POI API",
+    title="TripNai POI API",
     description="FastAPI service for real POI discovery, Postgres workflow storage, and AI route generation.",
     version="0.1.0",
 )
@@ -400,6 +404,30 @@ def _normalize_place(raw: dict[str, Any]) -> Poi | None:
     )
 
 
+def _sanitize_place_images(place: Poi, require_image: bool = False) -> Poi | None:
+    images = cached_urls(place.id)
+    if require_image and not images:
+        return None
+
+    image = images[0] if images else ""
+    return place.model_copy(
+        update={
+            "image": image,
+            "thumbnail_url": image,
+            "images": images,
+        }
+    )
+
+
+def _sanitize_places_images(places: list[Poi], require_image: bool = False) -> list[Poi]:
+    sanitized: list[Poi] = []
+    for place in places:
+        updated_place = _sanitize_place_images(place, require_image=require_image)
+        if updated_place is not None:
+            sanitized.append(updated_place)
+    return sanitized
+
+
 @lru_cache(maxsize=1)
 def get_places() -> list[Poi]:
     if not PLACES_PATH.exists():
@@ -447,6 +475,7 @@ def require_user(db: Session, line_user_id: str) -> UserRecord:
 
 
 def upsert_place(db: Session, poi: Poi) -> PlaceRecord:
+    poi = _sanitize_place_images(poi) or poi
     snapshot = poi.model_dump()
     place = db.query(PlaceRecord).filter(PlaceRecord.place_id == poi.id).first()
 
@@ -491,7 +520,7 @@ def liked_places_for_user(db: Session, user: UserRecord) -> list[Poi]:
         .order_by(UserPlaceRecord.updated_at.desc())
         .all()
     )
-    return [poi_from_snapshot(place.snapshot) for _, place in rows]
+    return _sanitize_places_images([poi_from_snapshot(place.snapshot) for _, place in rows])
 
 
 def desired_route_count(duration: str) -> int:
@@ -523,12 +552,13 @@ def nearby_candidates(
     for place in get_places():
         if place.id in exclude_ids:
             continue
-        if images_only and not place.thumbnail_url:
+        place_with_images = _sanitize_place_images(place, require_image=images_only)
+        if place_with_images is None:
             continue
-        distance_km = _haversine_km(anchor.lat, anchor.lng, place.lat, place.long)
+        distance_km = _haversine_km(anchor.lat, anchor.lng, place_with_images.lat, place_with_images.long)
         if distance_km <= anchor.radius_km:
             candidates.append(
-                place.model_copy(
+                place_with_images.model_copy(
                     update={
                         "distance_km": round(distance_km, 3),
                         "distance": f"{distance_km:.1f} km",
@@ -638,7 +668,7 @@ def call_openrouter(
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
                 "HTTP-Referer": os.getenv("OPENROUTER_SITE_URL", "http://localhost:5173"),
-                "X-Title": os.getenv("OPENROUTER_APP_NAME", "LONG LIFF Travel"),
+                "X-Title": os.getenv("OPENROUTER_APP_NAME", "TripNai Travel"),
             },
             json={
                 "model": OPENROUTER_MODEL,
@@ -667,12 +697,42 @@ def call_openrouter(
 
 
 @app.get("/api/health")
-def health_check() -> dict[str, str | int]:
+def health_check() -> dict[str, Any]:
     try:
         total = len(get_places())
     except Exception:
         total = 0
-    return {"status": "ok", "places": total}
+    return {"status": "ok", "places": total, "image_cache": manifest_summary()}
+
+
+@app.get("/api/image-cache/status")
+def image_cache_status() -> dict[str, Any]:
+    return manifest_summary()
+
+
+@app.get("/api/image-cache/images/{object_name:path}")
+def cached_image(object_name: str) -> StreamingResponse:
+    if not object_name.startswith("places/") or ".." in object_name.split("/"):
+        raise HTTPException(status_code=400, detail="Invalid image object name")
+    try:
+        response = minio_client().get_object(MINIO_BUCKET, object_name)
+    except S3Error as exc:
+        if exc.code in {"NoSuchKey", "NoSuchObject", "NoSuchBucket"}:
+            raise HTTPException(status_code=404, detail="Cached image not found") from exc
+        raise HTTPException(status_code=503, detail="Image cache unavailable") from exc
+
+    def stream() -> Generator[bytes, None, None]:
+        try:
+            yield from response.stream(64 * 1024)
+        finally:
+            response.close()
+            response.release_conn()
+
+    return StreamingResponse(
+        stream(),
+        media_type=response.headers.get("content-type", "image/webp"),
+        headers={"Cache-Control": "public, max-age=86400, immutable"},
+    )
 
 
 @app.post("/api/users", response_model=UserResponse)
@@ -884,7 +944,7 @@ def generate_route(
     provider = "fallback"
     is_ai_generated = False
     reasoning = None
-    trip_name = "LONG Nearby Route"
+    trip_name = "TripNai Nearby Route"
     description = "Generated from your saved places and nearby real POIs."
 
     if ai_payload:
@@ -982,7 +1042,7 @@ def list_pois(
             ).lower()
         ]
 
-    page = filtered[offset : offset + limit]
+    page = _sanitize_places_images(filtered[offset : offset + limit])
     return PoiListResponse(places=page, total=len(filtered), source_total=len(places))
 
 
@@ -1006,12 +1066,13 @@ def nearby_pois(
     for place in places:
         if place.id in excluded:
             continue
-        if images_only and not place.thumbnail_url:
+        place_with_images = _sanitize_place_images(place, require_image=images_only)
+        if place_with_images is None:
             continue
-        distance_km = _haversine_km(lat, lng, place.lat, place.long)
+        distance_km = _haversine_km(lat, lng, place_with_images.lat, place_with_images.long)
         if distance_km <= radius_km:
             nearby.append(
-                place.model_copy(
+                place_with_images.model_copy(
                     update={
                         "distance_km": round(distance_km, 3),
                         "distance": f"{distance_km:.1f} km",
@@ -1064,7 +1125,7 @@ def poi_clusters(
         province = max(province_counts, key=province_counts.get) if province_counts else None
         district = max(district_counts, key=district_counts.get) if district_counts else None
         category = max(category_counts, key=category_counts.get) if category_counts else None
-        with_images = [place for place in bucket if place.thumbnail_url]
+        with_images = _sanitize_places_images(bucket, require_image=True)
         thumbnail = with_images[0].thumbnail_url if with_images else ""
         sample_names = [place.name for place in sorted(bucket, key=lambda item: item.viewer or 0, reverse=True)[:3]]
         center_lat = sum(place.lat for place in bucket) / len(bucket)

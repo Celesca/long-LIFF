@@ -64,10 +64,10 @@ const HistoryIcon = () => (
 );
 
 const quickActions = [
-  { icon: ExploreIcon, label: 'สำรวจ', path: '/tinder', color: 'bg-[#C2703E]', lightBg: 'bg-[#FDF5EF]' },
-  { icon: SavedIcon, label: 'ที่บันทึก', path: '/gallery', color: 'bg-[#A85C2F]', lightBg: 'bg-[#F9E6D5]' },
-  { icon: RewardsIcon, label: 'รางวัล', path: '/rewards', color: 'bg-[#D4A853]', lightBg: 'bg-[#F5E6C4]' },
-  { icon: HistoryIcon, label: 'ประวัติ', path: '/history', color: 'bg-[#6B8F71]', lightBg: 'bg-[#F0F5F1]' },
+  { icon: ExploreIcon, label: 'สำรวจ', path: '/tinder', color: 'bg-[#FF6B4A]', lightBg: 'bg-[#FFF4EC]' },
+  { icon: SavedIcon, label: 'ที่บันทึก', path: '/gallery', color: 'bg-[#E85336]', lightBg: 'bg-[#FFE2D6]' },
+  { icon: RewardsIcon, label: 'รางวัล', path: '/rewards', color: 'bg-[#FFC857]', lightBg: 'bg-[#FFF1C7]' },
+  { icon: HistoryIcon, label: 'ประวัติ', path: '/history', color: 'bg-[#00A896]', lightBg: 'bg-[#E9FBF7]' },
 ];
 
 const LaunchPage: React.FC = () => {
@@ -102,7 +102,7 @@ const LaunchPage: React.FC = () => {
 
   return (
     <Layout showHeader showCoinCounter backgroundVariant="thailand">
-      <div className="px-4 py-4 max-w-lg mx-auto">
+      <div className="mx-auto max-w-lg px-4 py-4 lg:max-w-7xl lg:px-8 lg:py-8">
         {/* Welcome Section */}
         <div className="mb-6 animate-fade-in">
           <div className="flex items-center space-x-3.5 mb-3">
@@ -110,37 +110,37 @@ const LaunchPage: React.FC = () => {
               <img
                 src={pictureUrl}
                 alt={displayName || 'User'}
-                className="w-12 h-12 rounded-2xl border-2 border-[#E8E2DB] shadow-sm object-cover"
+                className="w-12 h-12 rounded-2xl border-2 border-[#DDEAF3] shadow-sm object-cover"
               />
             ) : (
-              <div className="w-12 h-12 rounded-2xl bg-[#C2703E] flex items-center justify-center shadow-sm">
+              <div className="w-12 h-12 rounded-2xl bg-[#FF6B4A] flex items-center justify-center shadow-sm">
                 <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
                 </svg>
               </div>
             )}
             <div>
-              <p className="text-[#9C9490] text-sm font-medium">{greeting}</p>
-              <h2 className="text-lg font-bold text-[#2D2926]">
+              <p className="text-[#8AA0B3] text-sm font-medium">{greeting}</p>
+              <h2 className="text-lg font-bold text-[#17324D]">
                 {isLoggedIn ? displayName || 'นักเดินทาง' : 'ยินดีต้อนรับ'}
               </h2>
             </div>
           </div>
-          <p className="text-[#6B635B] text-sm">ค้นพบประสบการณ์การท่องเที่ยวที่ไม่เหมือนใคร</p>
+          <p className="text-[#4F6F87] text-sm">ค้นพบประสบการณ์การท่องเที่ยวที่ไม่เหมือนใคร</p>
         </div>
 
         {/* Event Banner */}
-        <Link to="/event" className="block mb-6 animate-fade-in group">
+        <Link to="/event" className="block mb-6 animate-fade-in group lg:mb-8">
           <div className="relative rounded-2xl overflow-hidden shadow-md group-active:scale-[0.98] transition-transform duration-200">
             <img
               src={eventBanner}
               alt="Event Banner"
-              className="w-full h-44 sm:h-48 object-cover"
+              className="h-44 w-full object-cover sm:h-48 lg:h-72"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-4">
               <div className="flex items-center gap-2 mb-1.5">
-                <span className="bg-[#C2703E] text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-md uppercase tracking-wider">
+                <span className="bg-[#FF6B4A] text-white text-[11px] font-semibold px-2.5 py-0.5 rounded-md uppercase tracking-wider">
                   New Event
                 </span>
               </div>
@@ -156,19 +156,19 @@ const LaunchPage: React.FC = () => {
         </Link>
 
         {/* Quick Actions Grid */}
-        <div className="grid grid-cols-4 gap-2.5 mb-6 animate-slide-up">
+        <div className="grid grid-cols-4 gap-2.5 mb-6 animate-slide-up lg:gap-4">
           {quickActions.map((action, index) => {
             const IconComponent = action.icon;
             return (
               <Link
                 key={index}
                 to={action.path}
-                className="group flex flex-col items-center p-3 card-surface card-surface-hover"
+                className="group flex flex-col items-center p-3 card-surface card-surface-hover lg:p-5"
               >
                 <div className={`w-11 h-11 ${action.color} rounded-xl flex items-center justify-center text-white mb-2 group-hover:scale-105 transition-transform duration-200`}>
                   <IconComponent />
                 </div>
-                <span className="text-[11px] font-semibold text-[#6B635B] text-center leading-tight">
+                <span className="text-[11px] font-semibold text-[#4F6F87] text-center leading-tight">
                   {action.label}
                 </span>
               </Link>
@@ -179,7 +179,7 @@ const LaunchPage: React.FC = () => {
         {/* Continue Your Travel Banner */}
         {activeJourney && (
           <div className="mb-6 animate-fade-in">
-            <div className="bg-[#2D6A6A] rounded-2xl p-5 shadow-md relative overflow-hidden">
+            <div className="bg-[#0077B6] rounded-2xl p-5 shadow-md relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
               <div className="relative">
                 <div className="flex items-center justify-between mb-3">
@@ -215,7 +215,7 @@ const LaunchPage: React.FC = () => {
 
                 <button
                   onClick={() => navigate('/travel-companion')}
-                  className="w-full bg-white text-[#2D6A6A] py-2.5 px-6 rounded-xl font-semibold text-sm shadow-sm hover:shadow-md transition-shadow active:scale-[0.98] flex items-center justify-center space-x-2"
+                  className="w-full bg-white text-[#0077B6] py-2.5 px-6 rounded-xl font-semibold text-sm shadow-sm hover:shadow-md transition-shadow active:scale-[0.98] flex items-center justify-center space-x-2"
                 >
                   <span>เดินทางต่อ</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -228,10 +228,10 @@ const LaunchPage: React.FC = () => {
         )}
 
         {/* Featured Carousel */}
-        <div className="mb-6 animate-fade-in-delayed">
+        <div className="mb-6 animate-fade-in-delayed lg:mb-8">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-base font-bold text-[#2D2926]">สถานที่แนะนำ</h3>
-            <Link to="/tinder" className="text-sm text-[#C2703E] font-medium flex items-center hover:text-[#A85C2F] transition-colors">
+            <h3 className="text-base font-bold text-[#17324D]">สถานที่แนะนำ</h3>
+            <Link to="/tinder" className="text-sm text-[#FF6B4A] font-medium flex items-center hover:text-[#E85336] transition-colors">
               ดูทั้งหมด
               <svg className="w-4 h-4 ml-0.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
@@ -239,7 +239,7 @@ const LaunchPage: React.FC = () => {
             </Link>
           </div>
 
-          <div className="relative h-52 rounded-2xl overflow-hidden shadow-md">
+          <div className="relative h-52 rounded-2xl overflow-hidden shadow-md lg:h-80">
             {featuredPlaces.map((place, index) => (
               <div
                 key={index}
@@ -276,7 +276,7 @@ const LaunchPage: React.FC = () => {
         </div>
 
         {/* Start Exploring CTA */}
-        <div className="bg-[#C2703E] rounded-2xl p-5 mb-6 shadow-md animate-slide-up relative overflow-hidden" style={{ animationDelay: '0.15s' }}>
+        <div className="bg-[#FF6B4A] rounded-2xl p-5 mb-6 shadow-md animate-slide-up relative overflow-hidden lg:p-7" style={{ animationDelay: '0.15s' }}>
           <div className="absolute top-0 right-0 w-36 h-36 bg-white/8 rounded-full -translate-y-1/2 translate-x-1/2" />
           <div className="relative flex items-center justify-between">
             <div className="flex-1 mr-4">
@@ -284,7 +284,7 @@ const LaunchPage: React.FC = () => {
               <p className="text-white/75 text-sm mb-3">ค้นพบสถานที่ท่องเที่ยวที่เหมาะกับคุณ</p>
               <Link
                 to="/tinder"
-                className="inline-flex items-center px-4 py-2 bg-white text-[#C2703E] rounded-xl font-semibold text-sm shadow-sm hover:shadow-md transition-shadow active:scale-95"
+                className="inline-flex items-center px-4 py-2 bg-white text-[#FF6B4A] rounded-xl font-semibold text-sm shadow-sm hover:shadow-md transition-shadow active:scale-95"
               >
                 เริ่มสำรวจ
                 <svg className="w-4 h-4 ml-1.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
@@ -302,36 +302,36 @@ const LaunchPage: React.FC = () => {
 
         {/* How it Works */}
         <div className="mb-6 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-          <h3 className="text-base font-bold text-[#2D2926] mb-3">วิธีใช้งาน</h3>
-          <div className="space-y-2.5">
+          <h3 className="text-base font-bold text-[#17324D] mb-3">วิธีใช้งาน</h3>
+          <div className="space-y-2.5 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
             {[
               {
                 step: 1,
                 title: 'สำรวจสถานที่',
                 desc: 'ปัดขวาเพื่อบันทึกสถานที่ที่คุณชอบ',
                 iconPath: 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z',
-                color: 'bg-[#C2703E]'
+                color: 'bg-[#FF6B4A]'
               },
               {
                 step: 2,
                 title: 'สร้างคอลเลคชัน',
                 desc: 'รวบรวมสถานที่โปรดของคุณ',
                 iconPath: 'M2.25 12.75V12A2.25 2.25 0 014.5 9.75h15A2.25 2.25 0 0121.75 12v.75m-8.69-6.44l-2.12-2.12a1.5 1.5 0 00-1.061-.44H4.5A2.25 2.25 0 002.25 6v12a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9a2.25 2.25 0 00-2.25-2.25h-5.379a1.5 1.5 0 01-1.06-.44z',
-                color: 'bg-[#A85C2F]'
+                color: 'bg-[#E85336]'
               },
               {
                 step: 3,
                 title: 'สะสมเหรียญ',
                 desc: 'รับเหรียญเมื่อเยี่ยมชมสถานที่',
                 iconPath: 'M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125',
-                color: 'bg-[#D4A853]'
+                color: 'bg-[#FFC857]'
               },
               {
                 step: 4,
                 title: 'แลกรางวัล',
                 desc: 'ใช้เหรียญแลกส่วนลดพิเศษ',
                 iconPath: 'M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21m-8.625-9.75h18c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125h-18c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z',
-                color: 'bg-[#6B8F71]'
+                color: 'bg-[#00A896]'
               },
             ].map((item) => (
               <div key={item.step} className="flex items-center p-3.5 card-surface">
@@ -341,10 +341,10 @@ const LaunchPage: React.FC = () => {
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-[#2D2926] text-sm">{item.title}</p>
-                  <p className="text-xs text-[#9C9490]">{item.desc}</p>
+                  <p className="font-semibold text-[#17324D] text-sm">{item.title}</p>
+                  <p className="text-xs text-[#8AA0B3]">{item.desc}</p>
                 </div>
-                <div className="w-7 h-7 bg-[#F5F0EB] rounded-full flex items-center justify-center text-xs font-bold text-[#9C9490] flex-shrink-0 ml-2">
+                <div className="w-7 h-7 bg-[#EDF6FB] rounded-full flex items-center justify-center text-xs font-bold text-[#8AA0B3] flex-shrink-0 ml-2">
                   {item.step}
                 </div>
               </div>
@@ -355,9 +355,9 @@ const LaunchPage: React.FC = () => {
         {/* Stats Section */}
         <div className="grid grid-cols-3 gap-2.5 mb-6 animate-fade-in" style={{ animationDelay: '0.3s' }}>
           {[
-            { value: '20+', label: 'สถานที่', iconPath: 'M15 10.5a3 3 0 11-6 0 3 3 0 016 0z M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z', color: 'text-[#C2703E]', bgColor: 'bg-[#FDF5EF]' },
-            { value: '8+', label: 'รางวัล', iconPath: 'M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21', color: 'text-[#D4A853]', bgColor: 'bg-[#F5E6C4]/50' },
-            { value: '2', label: 'เมือง', iconPath: 'M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z', color: 'text-[#6B8F71]', bgColor: 'bg-[#F0F5F1]' },
+            { value: '20+', label: 'สถานที่', iconPath: 'M15 10.5a3 3 0 11-6 0 3 3 0 016 0z M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z', color: 'text-[#FF6B4A]', bgColor: 'bg-[#FFF4EC]' },
+            { value: '8+', label: 'รางวัล', iconPath: 'M21 11.25v8.25a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5v-8.25M12 4.875A2.625 2.625 0 109.375 7.5H12m0-2.625V7.5m0-2.625A2.625 2.625 0 1114.625 7.5H12m0 0V21', color: 'text-[#FFC857]', bgColor: 'bg-[#FFF1C7]/50' },
+            { value: '2', label: 'เมือง', iconPath: 'M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z', color: 'text-[#00A896]', bgColor: 'bg-[#E9FBF7]' },
           ].map((stat, index) => (
             <div key={index} className="card-surface p-3.5 text-center">
               <div className={`w-9 h-9 ${stat.bgColor} rounded-lg flex items-center justify-center mx-auto mb-1.5`}>
@@ -366,7 +366,7 @@ const LaunchPage: React.FC = () => {
                 </svg>
               </div>
               <div className={`text-xl font-bold ${stat.color}`}>{stat.value}</div>
-              <div className="text-[11px] text-[#9C9490] font-medium">{stat.label}</div>
+              <div className="text-[11px] text-[#8AA0B3] font-medium">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -378,17 +378,17 @@ const LaunchPage: React.FC = () => {
             className="flex items-center justify-between p-4 card-surface card-surface-hover group"
           >
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-[#2D6A6A] rounded-xl flex items-center justify-center">
+              <div className="w-10 h-10 bg-[#0077B6] rounded-xl flex items-center justify-center">
                 <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
                 </svg>
               </div>
               <div>
-                <h3 className="font-semibold text-[#2D2926] text-sm">เกี่ยวกับเรา</h3>
-                <p className="text-xs text-[#9C9490]">ทำความรู้จักกับทีมและโปรเจค</p>
+                <h3 className="font-semibold text-[#17324D] text-sm">เกี่ยวกับเรา</h3>
+                <p className="text-xs text-[#8AA0B3]">ทำความรู้จักกับทีมและโปรเจค</p>
               </div>
             </div>
-            <svg className="w-4.5 h-4.5 text-[#9C9490] group-hover:text-[#C2703E] group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <svg className="w-4.5 h-4.5 text-[#8AA0B3] group-hover:text-[#FF6B4A] group-hover:translate-x-0.5 transition-all" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
           </Link>

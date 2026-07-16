@@ -53,7 +53,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
       {...bind()}
       style={{ x, y, rotate, scale, touchAction: 'none' }}
       className={`absolute inset-0 bg-white rounded-2xl shadow-lg overflow-hidden select-none ${
-        isTop ? 'z-20 ring-1 ring-[#E8E2DB]' : 'z-10 opacity-50 scale-[0.94]'
+        isTop ? 'z-20 ring-1 ring-[#DDEAF3]' : 'z-10 opacity-50 scale-[0.94]'
       }`}
     >
       <div className="relative h-full">
@@ -63,7 +63,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
         )}
 
         {imageFailed ? (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#2D6A6A] via-[#6B8F71] to-[#C2703E] p-8 text-center text-white">
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#0077B6] via-[#00A896] to-[#FF6B4A] p-8 text-center text-white">
             <div>
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-white/18 backdrop-blur-sm">
                 <svg className="h-8 w-8" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
@@ -96,12 +96,12 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
           }}
           className="absolute top-1/2 right-6 -translate-y-1/2 flex items-center justify-center"
         >
-          <div className="w-20 h-20 bg-[#4D8B5C] rounded-full flex items-center justify-center shadow-xl border-4 border-white/90">
+          <div className="w-20 h-20 bg-[#2FBF71] rounded-full flex items-center justify-center shadow-xl border-4 border-white/90">
             <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
               <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
             </svg>
           </div>
-          <span className="absolute -bottom-2 bg-[#4D8B5C] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-md uppercase tracking-wider">Like</span>
+          <span className="absolute -bottom-2 bg-[#2FBF71] text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-md uppercase tracking-wider">Like</span>
         </animated.div>
 
         {/* Skip indicator */}
@@ -127,7 +127,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
         {/* Category badge */}
         {(place.category || place.tags?.[0]) && (
           <div className="absolute top-4 left-4">
-            <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-[11px] font-semibold text-[#2D2926] shadow-sm">
+            <span className="px-2.5 py-1 bg-white/90 backdrop-blur-sm rounded-lg text-[11px] font-semibold text-[#17324D] shadow-sm">
               {place.category || place.tags[0]}
             </span>
           </div>
@@ -137,7 +137,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
         <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
           {/* Rating */}
           {place.rating && (
-            <div className="flex items-center space-x-1 bg-[#D4A853]/90 backdrop-blur-sm px-2.5 py-1 rounded-lg w-fit mb-2">
+            <div className="flex items-center space-x-1 bg-[#FFC857]/90 backdrop-blur-sm px-2.5 py-1 rounded-lg w-fit mb-2">
               <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.007 5.404.433c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.433 2.082-5.006z" />
               </svg>
@@ -149,7 +149,7 @@ const TinderCard: React.FC<TinderCardProps> = ({ place, onSwipe, isTop }) => {
 
           {(place.province || place.city || place.country) && (
             <div className="flex items-center text-white/80 text-sm mb-2.5">
-              <svg className="w-3.5 h-3.5 mr-1 text-[#D4A853]" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 mr-1 text-[#FFC857]" fill="currentColor" viewBox="0 0 24 24">
                 <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
               </svg>
               <span className="font-medium">{[place.district, place.province || place.city, place.country].filter(Boolean).join(', ')}</span>

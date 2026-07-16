@@ -2,52 +2,52 @@
 
 /* ========== Design Tokens ========== */
 :root {
-  /* Primary - Warm Terracotta */
-  --color-primary: #C2703E;
-  --color-primary-light: #D4915F;
-  --color-primary-dark: #A85C2F;
-  --color-primary-50: #FDF5EF;
-  --color-primary-100: #F9E6D5;
-  --color-primary-200: #F0C9A8;
-  --color-primary-500: #C2703E;
-  --color-primary-600: #A85C2F;
-  --color-primary-700: #8E4A24;
+  /* Primary - Coral CTA */
+  --color-primary: #FF6B4A;
+  --color-primary-light: #FF8A6B;
+  --color-primary-dark: #E85336;
+  --color-primary-50: #FFF4EC;
+  --color-primary-100: #FFE2D6;
+  --color-primary-200: #FFC2AE;
+  --color-primary-500: #FF6B4A;
+  --color-primary-600: #E85336;
+  --color-primary-700: #C9432B;
 
-  /* Secondary - Sage Green */
-  --color-secondary: #6B8F71;
-  --color-secondary-light: #8BAF90;
-  --color-secondary-dark: #4D7252;
-  --color-secondary-50: #F0F5F1;
-  --color-secondary-100: #DCE8DE;
-  --color-secondary-500: #6B8F71;
+  /* Secondary - Tropical Teal */
+  --color-secondary: #00A896;
+  --color-secondary-light: #35C7B3;
+  --color-secondary-dark: #007F73;
+  --color-secondary-50: #E9FBF7;
+  --color-secondary-100: #CFF4EC;
+  --color-secondary-500: #00A896;
 
-  /* Accent - Deep Teal */
-  --color-accent: #2D6A6A;
-  --color-accent-light: #3D8A8A;
-  --color-accent-50: #EFF6F6;
-  --color-accent-500: #2D6A6A;
+  /* Accent - Ocean Blue */
+  --color-accent: #0077B6;
+  --color-accent-light: #00A6D6;
+  --color-accent-50: #EAF7FF;
+  --color-accent-500: #0077B6;
 
-  /* Warm Neutrals */
-  --color-bg: #FAF7F4;
-  --color-bg-warm: #F5F0EB;
+  /* Cool Travel Neutrals */
+  --color-bg: #F6FBFF;
+  --color-bg-warm: #EDF6FB;
   --color-surface: #FFFFFF;
-  --color-surface-warm: #FDF9F5;
-  --color-text-primary: #2D2926;
-  --color-text-secondary: #6B635B;
-  --color-text-tertiary: #9C9490;
-  --color-border: #E8E2DB;
-  --color-border-light: #F0ECE7;
+  --color-surface-warm: #FFFFFF;
+  --color-text-primary: #17324D;
+  --color-text-secondary: #4F6F87;
+  --color-text-tertiary: #8AA0B3;
+  --color-border: #DDEAF3;
+  --color-border-light: #EAF2F8;
 
   /* Coin/Reward Gold */
-  --color-gold: #D4A853;
-  --color-gold-light: #F5E6C4;
-  --color-gold-dark: #B08B3A;
+  --color-gold: #FFC857;
+  --color-gold-light: #FFF1C7;
+  --color-gold-dark: #D89B00;
 
   /* Semantic */
-  --color-success: #4D8B5C;
-  --color-error: #C75050;
-  --color-warning: #D4A853;
-  --color-info: #4A7C9B;
+  --color-success: #2FBF71;
+  --color-error: #EF476F;
+  --color-warning: #FFC857;
+  --color-info: #118AB2;
 }
 
 /* ========== Base Styles ========== */
@@ -64,13 +64,14 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
-  background-color: var(--color-bg);
+  background:
+    linear-gradient(135deg, rgba(234, 247, 255, 0.9) 0%, rgba(246, 251, 255, 0.95) 48%, rgba(255, 244, 236, 0.72) 100%);
   color: var(--color-text-primary);
 }
 
 /* ========== Utility Classes ========== */
 
-/* Warm backgrounds */
+/* Travel backgrounds */
 .bg-warm { background-color: var(--color-bg); }
 .bg-warm-surface { background-color: var(--color-surface-warm); }
 
@@ -174,15 +175,15 @@ body {
 
 /* Skeleton loading */
 .skeleton {
-  background: linear-gradient(90deg, #f0ebe5 25%, #e8e2db 50%, #f0ebe5 75%);
+  background: linear-gradient(90deg, #edf6fb 25%, #ddeaf3 50%, #edf6fb 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s ease-in-out infinite;
 }
 
 /* Pulse glow for coins */
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(212, 168, 83, 0.4); }
-  50% { box-shadow: 0 0 16px rgba(212, 168, 83, 0.6); }
+  0%, 100% { box-shadow: 0 0 5px rgba(255, 200, 87, 0.4); }
+  50% { box-shadow: 0 0 16px rgba(255, 200, 87, 0.6); }
 }
 
 .animate-pulse-glow {
@@ -219,6 +220,125 @@ body {
   -webkit-touch-callout: none;
 }
 
+/* ========== MapLibre Travel Maps ========== */
+.maplibregl-map {
+  font-family: inherit;
+}
+
+.maplibregl-ctrl-group {
+  overflow: hidden;
+  border: 1px solid rgba(221, 234, 243, 0.85) !important;
+  border-radius: 14px !important;
+  box-shadow: 0 10px 28px rgba(23, 50, 77, 0.12) !important;
+}
+
+.maplibregl-ctrl button {
+  width: 34px !important;
+  height: 34px !important;
+}
+
+.long-map-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  background: var(--marker-color);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1;
+  box-shadow: 0 8px 20px rgba(23, 50, 77, 0.24);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.long-map-marker:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 12px 28px rgba(23, 50, 77, 0.28);
+}
+
+.long-map-marker-sm {
+  border-width: 3px;
+}
+
+.long-map-marker-sm::after {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #fff;
+  content: '';
+}
+
+.long-map-marker-lg {
+  font-size: 16px;
+}
+
+.maplibregl-popup-content {
+  border-radius: 16px !important;
+  padding: 0 !important;
+  box-shadow: 0 18px 42px rgba(23, 50, 77, 0.2) !important;
+}
+
+.long-map-popup {
+  min-width: 180px;
+  padding: 12px;
+}
+
+.long-map-popup-title {
+  margin: 0;
+  color: #17324D;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.long-map-popup-copy {
+  margin: 5px 0 0;
+  color: #607D93;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.long-map-popup-badge {
+  display: inline-flex;
+  margin-bottom: 8px;
+  border-radius: 999px;
+  background: #FF6B4A;
+  padding: 4px 9px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.long-map-popup-badge-blue {
+  background: #0077B6;
+}
+
+.long-map-popup-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 10px;
+  color: #4F6F87;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.long-map-popup-grid span,
+.long-map-popup-distance {
+  border-radius: 10px;
+  background: #EDF6FB;
+  padding: 7px;
+}
+
+.long-map-popup-distance {
+  display: inline-block;
+  margin: 10px 0 0;
+  color: #FF6B4A;
+  font-size: 11px;
+  font-weight: 800;
+}
+
 /* Button press feedback */
 button:active,
 a:active {
@@ -238,7 +358,7 @@ input:focus-visible {
   background: var(--color-surface);
   border: 1px solid var(--color-border-light);
   border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(45, 41, 38, 0.04), 0 1px 2px rgba(45, 41, 38, 0.02);
+  box-shadow: 0 1px 3px rgba(0, 119, 182, 0.06), 0 1px 2px rgba(23, 50, 77, 0.04);
 }
 
 .card-surface-hover {
@@ -246,7 +366,7 @@ input:focus-visible {
 }
 
 .card-surface-hover:hover {
-  box-shadow: 0 4px 12px rgba(45, 41, 38, 0.08);
+  box-shadow: 0 8px 24px rgba(0, 119, 182, 0.12);
 }
 
 .card-surface-hover:active {

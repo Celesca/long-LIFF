@@ -18,6 +18,13 @@ const LineLogo = () => (
   </div>
 );
 
+const TripNaiWordmark = () => (
+  <div>
+    <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">TripNai</p>
+    <h1 className="text-lg font-bold">Open Travel Pass</h1>
+  </div>
+);
+
 const LineEntryScreen: React.FC<LineEntryScreenProps> = ({
   mode,
   message,
@@ -56,10 +63,7 @@ const LineEntryScreen: React.FC<LineEntryScreenProps> = ({
           <div className="flex items-center justify-between text-white">
             <div className="flex items-center gap-3">
               <LineLogo />
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/75">LONG LIFF</p>
-                <h1 className="text-lg font-bold">LINE Travel Pass</h1>
-              </div>
+              <TripNaiWordmark />
             </div>
           </div>
 
