@@ -178,7 +178,7 @@ def check_image_url(url: str) -> ImageQualityResult:
         with httpx.Client(
             timeout=IMAGE_FETCH_TIMEOUT_SECONDS,
             follow_redirects=True,
-            headers={"User-Agent": "TripNai image quality filter/1.0"},
+            headers={"User-Agent": "LONG image quality filter/1.0"},
         ) as client:
             response = client.get(cleaned_url)
             response.raise_for_status()

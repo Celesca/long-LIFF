@@ -162,7 +162,7 @@ class RoutePlanRecord(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
 app = FastAPI(
-    title="TripNai POI API",
+    title="LONG POI API",
     description="FastAPI service for real POI discovery, Postgres workflow storage, and AI route generation.",
     version="0.1.0",
 )
@@ -668,7 +668,7 @@ def call_openrouter(
                 "Authorization": f"Bearer {OPENROUTER_API_KEY}",
                 "Content-Type": "application/json",
                 "HTTP-Referer": os.getenv("OPENROUTER_SITE_URL", "http://localhost:5173"),
-                "X-Title": os.getenv("OPENROUTER_APP_NAME", "TripNai Travel"),
+                "X-Title": os.getenv("OPENROUTER_APP_NAME", "LONG Travel"),
             },
             json={
                 "model": OPENROUTER_MODEL,
@@ -944,7 +944,7 @@ def generate_route(
     provider = "fallback"
     is_ai_generated = False
     reasoning = None
-    trip_name = "TripNai Nearby Route"
+    trip_name = "LONG Nearby Route"
     description = "Generated from your saved places and nearby real POIs."
 
     if ai_payload:

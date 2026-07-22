@@ -349,7 +349,7 @@ const AboutPage: React.FC = () => {
                                 </div>
                                 <div>
                                     <p className="text-sm font-semibold text-gray-900">Built with passion by Folk</p>
-                                    <p className="text-xs text-gray-500">TripNai powered by React, TypeScript, MapLibre & LINE LIFF</p>
+                                    <p className="text-xs text-gray-500">LONG powered by React, TypeScript, MapLibre & LINE LIFF</p>
                                 </div>
                             </div>
                         </div>

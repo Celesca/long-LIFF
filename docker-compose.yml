@@ -4,15 +4,15 @@ services:
     container_name: long-liff-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: long_liff
-      POSTGRES_USER: long_liff
-      POSTGRES_PASSWORD: long_liff
+      POSTGRES_DB: ${POSTGRES_DB:-long_liff}
+      POSTGRES_USER: ${POSTGRES_USER:-long_liff}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-long_liff}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     volumes:
       - long_liff_postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U long_liff -d long_liff"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-long_liff} -d ${POSTGRES_DB:-long_liff}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -26,8 +26,8 @@ services:
       - path: backend/.env
         required: false
     environment:
-      DATABASE_URL: postgresql+psycopg://long_liff:long_liff@postgres:5432/long_liff
-      CORS_ORIGINS: http://localhost:5173,http://127.0.0.1:5173
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-long_liff}:${POSTGRES_PASSWORD:-long_liff}@postgres:5432/${POSTGRES_DB:-long_liff}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       IMAGE_CACHE_MANIFEST_PATH: /cache/image_manifest.json
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-longliff}
@@ -35,9 +35,9 @@ services:
       MINIO_BUCKET: place-images
     command: >
       sh -c "pip install --no-cache-dir -r requirements.txt &&
-      uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+      uvicorn main:app --host 0.0.0.0 --port 8000"
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
     volumes:
       - .:/app
       - long_liff_image_cache:/cache:ro
@@ -65,8 +65,8 @@ services:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-longliff}
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:-longliff-dev-secret}
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "127.0.0.1:9000:9000"
+      - "127.0.0.1:9001:9001"
     volumes:
       - long_liff_minio_data:/data
     healthcheck:
@@ -101,30 +101,7 @@ services:
       minio:
         condition: service_healthy
 
-  frontend:
-    image: node:22-alpine
-    container_name: long-liff-frontend
-    restart: unless-stopped
-    working_dir: /app
-    env_file:
-      - path: .env
-        required: false
-    environment:
-      VITE_API_URL: http://localhost:8000
-    command: >
-      sh -c "npm install &&
-      npm run dev -- --host 0.0.0.0"
-    ports:
-      - "5173:5173"
-    volumes:
-      - .:/app
-      - long_liff_node_modules:/app/node_modules
-    depends_on:
-      backend:
-        condition: service_healthy
-
 volumes:
   long_liff_image_cache:
   long_liff_minio_data:
-  long_liff_node_modules:
   long_liff_postgres_data:

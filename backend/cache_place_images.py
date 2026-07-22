@@ -82,7 +82,7 @@ def cache_place(place_id: str, urls: list[str], previous: dict[str, Any]) -> dic
     attempts = int(previous.get("attempts", 0)) + 1
     failures: list[dict[str, str]] = []
 
-    with httpx.Client(timeout=12, follow_redirects=True, headers={"User-Agent": "TripNai image cache/1.0"}) as client:
+    with httpx.Client(timeout=12, follow_redirects=True, headers={"User-Agent": "LONG image cache/1.0"}) as client:
         for url in urls:
             if len(objects) >= MAX_IMAGES_PER_PLACE:
                 break
