@@ -129,10 +129,7 @@ const Layout: React.FC<LayoutProps> = ({
               <BrandMark />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xl font-bold tracking-tight text-[#17324D]">TripNai</span>
-                <span className="rounded bg-[#00A896] px-1.5 py-0.5 text-[10px] font-semibold tracking-wider text-white">GO</span>
-              </div>
+              <span className="text-xl font-bold tracking-tight text-[#17324D]">LONG</span>
               <p className="text-xs font-medium text-[#8AA0B3]">Open travel discovery</p>
             </div>
           </Link>
@@ -220,10 +217,7 @@ const Layout: React.FC<LayoutProps> = ({
                 <div className="flex items-center justify-center space-x-1.5">
                   <BrandMark className="h-5 w-5 text-[#FF6B4A]" />
                   <span className="text-lg font-bold text-[#17324D] tracking-tight">
-                    TripNai
-                  </span>
-                  <span className="text-[10px] bg-[#00A896] text-white px-1.5 py-0.5 rounded font-semibold tracking-wider">
-                    GO
+                    LONG
                   </span>
                 </div>
               )}
