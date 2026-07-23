@@ -14,6 +14,8 @@ import AboutPage from "./components/AboutPage.js";
 import EventPage from "./components/EventPage.js";
 import LineEntryScreen from "./components/LineEntryScreen.js";
 import { poiApi } from "./services/poiApi";
+import { mockApi } from "./services/mockApi";
+import { USE_MOCK_DATA } from "./services/dataMode";
 
 // Development mode - bypass LIFF authentication
 const DEV_MODE = import.meta.env.VITE_DEV_MODE === "true";
@@ -80,11 +82,15 @@ function App() {
     localStorage.setItem("liff_displayName", mockUser.displayName);
     localStorage.setItem("liff_pictureUrl", mockUser.pictureUrl);
 
-    poiApi.createOrGetUser({
-      line_user_id: mockUser.userId,
-      display_name: mockUser.displayName,
-      picture_url: mockUser.pictureUrl,
-    }).catch((err: Error) => {
+    const userRequest = USE_MOCK_DATA
+      ? mockApi.createOrGetUser(mockUser.userId, mockUser.displayName, mockUser.pictureUrl)
+      : poiApi.createOrGetUser({
+          line_user_id: mockUser.userId,
+          display_name: mockUser.displayName,
+          picture_url: mockUser.pictureUrl,
+        });
+
+    userRequest.catch((err: Error) => {
       console.error("DEV MODE: Failed to initialize mock user:", err);
     });
   };
@@ -141,11 +147,15 @@ function App() {
     }
 
     try {
-      await poiApi.createOrGetUser({
-        line_user_id: profile.userId,
-        display_name: profile.displayName,
-        picture_url: profile.pictureUrl,
-      });
+      if (USE_MOCK_DATA) {
+        await mockApi.createOrGetUser(profile.userId, profile.displayName, profile.pictureUrl);
+      } else {
+        await poiApi.createOrGetUser({
+          line_user_id: profile.userId,
+          display_name: profile.displayName,
+          picture_url: profile.pictureUrl,
+        });
+      }
     } catch (err) {
       console.error("Failed to initialize user:", err);
     }

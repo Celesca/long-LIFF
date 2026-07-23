@@ -6,6 +6,8 @@ import PlaceDetailModal from './PlaceDetailModal';
 import Layout from './Layout';
 import { getUserId } from '../hooks/useLiff';
 import { poiApi } from '../services/poiApi';
+import { mockApi } from '../services/mockApi';
+import { USE_MOCK_DATA } from '../services/dataMode';
 
 const GalleryPage: React.FC = () => {
   const [likedPlaces, setLikedPlaces] = useState<TravelPlace[]>([]);
@@ -19,8 +21,12 @@ const GalleryPage: React.FC = () => {
   useEffect(() => {
     const fetchLikedPlaces = async () => {
       try {
-        await poiApi.createOrGetUser({ line_user_id: userId });
-        const response = await poiApi.getLikedPlaces(userId);
+        const response = USE_MOCK_DATA
+          ? await mockApi.getLikedPlaces(userId)
+          : await (async () => {
+              await poiApi.createOrGetUser({ line_user_id: userId });
+              return poiApi.getLikedPlaces(userId);
+            })();
         setLikedPlaces(response.places);
       } catch (err) {
         console.error('Failed to fetch liked places:', err);
@@ -34,7 +40,11 @@ const GalleryPage: React.FC = () => {
   const clearGallery = async () => {
     setLikedPlaces([]);
     try {
-      await poiApi.clearLikedPlaces(userId);
+      if (USE_MOCK_DATA) {
+        await mockApi.clearLikedPlaces(userId);
+      } else {
+        await poiApi.clearLikedPlaces(userId);
+      }
     } catch (err) {
       console.error('Failed to clear liked places:', err);
     }
@@ -45,7 +55,11 @@ const GalleryPage: React.FC = () => {
     const updated = likedPlaces.filter(place => place.id !== placeId);
     setLikedPlaces(updated);
     try {
-      await poiApi.removeLikedPlace(userId, placeId);
+      if (USE_MOCK_DATA) {
+        await mockApi.removeLikedPlace(userId, placeId);
+      } else {
+        await poiApi.removeLikedPlace(userId, placeId);
+      }
     } catch (err) {
       console.error('Failed to remove liked place:', err);
     }

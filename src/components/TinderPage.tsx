@@ -5,11 +5,19 @@ import LocationPreferenceModal, { type DiscoveryLocation } from '../components/L
 import PlaceDetailModal from '../components/PlaceDetailModal';
 import Layout from './Layout';
 import { poiApi } from '../services/poiApi';
+import { mockApi } from '../services/mockApi';
+import { USE_MOCK_DATA } from '../services/dataMode';
 import { getUserId, getUserStorageKey } from '../hooks/useLiff';
 import { useIsDesktop } from '../hooks/useViewport';
 import type { TravelPlace } from '../types/TravelPlace';
 
 const LOCATION_STORAGE_KEY = 'poiDiscoveryLocation';
+const MOCK_LOCATION: DiscoveryLocation = {
+  lat: 15.87,
+  lng: 100.9925,
+  label: 'Mock travel places',
+  radiusKm: 0,
+};
 
 const TinderPage: React.FC = () => {
   const [places, setPlaces] = useState<TravelPlace[]>([]);
@@ -18,7 +26,7 @@ const TinderPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState<DiscoveryLocation | null>(null);
+  const [selectedLocation, setSelectedLocation] = useState<DiscoveryLocation | null>(USE_MOCK_DATA ? MOCK_LOCATION : null);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const isDesktop = useIsDesktop();
 
@@ -26,20 +34,28 @@ const TinderPage: React.FC = () => {
   const lineUserId = getUserId() || 'anonymous';
 
   const loadLikedPlaces = useCallback(async () => {
-    const liked = await poiApi.getLikedPlaces(lineUserId);
+    const liked = USE_MOCK_DATA
+      ? await mockApi.getLikedPlaces(lineUserId)
+      : await poiApi.getLikedPlaces(lineUserId);
     setLikedPlaces(liked.places);
   }, [lineUserId]);
 
   const loadSwipedIds = useCallback(async () => {
+    if (USE_MOCK_DATA) return [];
     const response = await poiApi.getSwipes(lineUserId);
     return response.swipes.map((swipe) => swipe.place_id);
   }, [lineUserId]);
 
   const ensureUser = useCallback(async () => {
+    if (USE_MOCK_DATA) {
+      await mockApi.createOrGetUser(lineUserId);
+      return;
+    }
     await poiApi.createOrGetUser({ line_user_id: lineUserId });
   }, [lineUserId]);
 
   const persistDiscoveryLocation = useCallback(async (location: DiscoveryLocation) => {
+    if (USE_MOCK_DATA) return;
     await poiApi.createDiscoverySession(lineUserId, {
       lat: location.lat,
       lng: location.lng,
@@ -50,6 +66,7 @@ const TinderPage: React.FC = () => {
   }, [lineUserId]);
 
   const restoreDiscoveryLocation = useCallback(async (): Promise<DiscoveryLocation | null> => {
+    if (USE_MOCK_DATA) return MOCK_LOCATION;
     const latest = await poiApi.getLatestDiscoverySession(lineUserId);
     if (latest) {
       return {
@@ -73,25 +90,28 @@ const TinderPage: React.FC = () => {
       setLoading(true);
       setError(null);
       await ensureUser();
-      const swipedIds = await loadSwipedIds();
-      const response = await poiApi.getNearbyPlaces({
-        lat: location.lat,
-        lng: location.lng,
-        radiusKm: location.radiusKm,
-        limit: 80,
-        excludeIds: swipedIds,
-        imagesOnly: true,
-      });
+      const response = USE_MOCK_DATA
+        ? await mockApi.getTinderPlaces(lineUserId)
+        : await poiApi.getNearbyPlaces({
+            lat: location.lat,
+            lng: location.lng,
+            radiusKm: location.radiusKm,
+            limit: 80,
+            excludeIds: await loadSwipedIds(),
+            imagesOnly: true,
+          });
       setPlaces(response.places);
       setCurrentIndex(0);
       await loadLikedPlaces();
     } catch (err) {
       console.error('Failed to fetch places:', err);
-      setError('เปิด FastAPI backend ที่พอร์ต 8000 แล้วลองโหลด POI ใกล้หมุดอีกครั้ง');
+      setError(USE_MOCK_DATA
+        ? 'ไม่สามารถโหลดข้อมูลสถานที่ตัวอย่างได้ กรุณาลองใหม่อีกครั้ง'
+        : 'เปิด FastAPI backend ที่พอร์ต 8000 แล้วลองโหลด POI ใกล้หมุดอีกครั้ง');
     } finally {
       setLoading(false);
     }
-  }, [ensureUser, loadLikedPlaces, loadSwipedIds]);
+  }, [ensureUser, lineUserId, loadLikedPlaces, loadSwipedIds]);
 
   useEffect(() => {
     const checkPreferencesAndLoad = async () => {
@@ -127,7 +147,11 @@ const TinderPage: React.FC = () => {
     const currentPlace = places[currentIndex];
     if (!currentPlace) return;
 
-    await poiApi.recordSwipe(lineUserId, currentPlace, direction);
+    if (USE_MOCK_DATA) {
+      await mockApi.createSwipe(lineUserId, currentPlace.id, direction);
+    } else {
+      await poiApi.recordSwipe(lineUserId, currentPlace, direction);
+    }
 
     if (direction === 'right') {
       setLikedPlaces(prev => prev.some(place => place.id === currentPlace.id) ? prev : [...prev, currentPlace]);
@@ -138,7 +162,11 @@ const TinderPage: React.FC = () => {
   const handleResetDestinations = async () => {
     try {
       setLoading(true);
-      await poiApi.clearSwipes(lineUserId);
+      if (USE_MOCK_DATA) {
+        await mockApi.clearSwipes(lineUserId);
+      } else {
+        await poiApi.clearSwipes(lineUserId);
+      }
       if (selectedLocation) {
         await fetchPlaces(selectedLocation);
       } else {
@@ -166,7 +194,9 @@ const TinderPage: React.FC = () => {
               <div className="absolute inset-0 border-3 border-transparent border-t-[#FF6B4A] rounded-full animate-spin" />
             </div>
             <h2 className="text-lg font-semibold text-[#17324D]">กำลังโหลด...</h2>
-            <p className="text-[#8AA0B3] text-sm">กำลังค้นหา POI จริงใกล้หมุดของคุณ</p>
+            <p className="text-[#8AA0B3] text-sm">
+              {USE_MOCK_DATA ? 'กำลังเตรียมสถานที่ท่องเที่ยวตัวอย่าง' : 'กำลังค้นหา POI จริงใกล้หมุดของคุณ'}
+            </p>
           </div>
         </div>
       </Layout>
@@ -198,7 +228,7 @@ const TinderPage: React.FC = () => {
     );
   }
 
-  if (!selectedLocation) {
+  if (!USE_MOCK_DATA && !selectedLocation) {
     return (
       <Layout showHeader showBackButton headerTitle="สำรวจ POI จริง" backgroundVariant="tinder">
         <div className="min-h-[80vh] flex flex-col items-center justify-center p-6">
@@ -219,12 +249,14 @@ const TinderPage: React.FC = () => {
           </div>
         </div>
 
-        <LocationPreferenceModal
-          isOpen={showLocationModal}
-          onClose={() => setShowLocationModal(false)}
-          onConfirm={handleLocationSelection}
-          initialLocation={selectedLocation}
-        />
+        {!USE_MOCK_DATA && (
+          <LocationPreferenceModal
+            isOpen={showLocationModal}
+            onClose={() => setShowLocationModal(false)}
+            onConfirm={handleLocationSelection}
+            initialLocation={selectedLocation}
+          />
+        )}
       </Layout>
     );
   }
@@ -243,7 +275,9 @@ const TinderPage: React.FC = () => {
 
             <h2 className="text-xl font-bold text-[#17324D]">คุณดูครบหมดแล้ว!</h2>
             <p className="text-[#4F6F87] text-sm">
-              สำรวจ POI ใกล้หมุดนี้ครบแล้ว ลองปักหมุดใหม่หรือเพิ่มระยะค้นหาได้เลย
+              {USE_MOCK_DATA
+                ? 'คุณดูสถานที่ท่องเที่ยวตัวอย่างครบแล้ว สามารถรีเซ็ตเพื่อปัดใหม่ได้เลย'
+                : 'สำรวจ POI ใกล้หมุดนี้ครบแล้ว ลองปักหมุดใหม่หรือเพิ่มระยะค้นหาได้เลย'}
             </p>
 
             <div className="card-surface p-4">
@@ -257,15 +291,17 @@ const TinderPage: React.FC = () => {
             </div>
 
             <div className="space-y-2.5 w-full">
-              <button
-                onClick={() => setShowLocationModal(true)}
-                className="flex items-center justify-center w-full bg-[#0077B6] text-white py-3 px-6 rounded-xl font-semibold text-sm active:scale-95 transition-transform"
-              >
-                <svg className="w-4.5 h-4.5 mr-2" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
-                </svg>
-                ปักหมุดตำแหน่งใหม่
-              </button>
+              {!USE_MOCK_DATA && (
+                <button
+                  onClick={() => setShowLocationModal(true)}
+                  className="flex items-center justify-center w-full bg-[#0077B6] text-white py-3 px-6 rounded-xl font-semibold text-sm active:scale-95 transition-transform"
+                >
+                  <svg className="w-4.5 h-4.5 mr-2" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5a17.92 17.92 0 01-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" />
+                  </svg>
+                  ปักหมุดตำแหน่งใหม่
+                </button>
+              )}
 
               <button
                 onClick={() => navigate('/gallery')}
@@ -290,12 +326,14 @@ const TinderPage: React.FC = () => {
           </div>
         </div>
 
-        <LocationPreferenceModal
-          isOpen={showLocationModal}
-          onClose={() => setShowLocationModal(false)}
-          onConfirm={handleLocationSelection}
-          initialLocation={selectedLocation}
-        />
+        {!USE_MOCK_DATA && (
+          <LocationPreferenceModal
+            isOpen={showLocationModal}
+            onClose={() => setShowLocationModal(false)}
+            onConfirm={handleLocationSelection}
+            initialLocation={selectedLocation}
+          />
+        )}
       </Layout>
     );
   }
@@ -317,20 +355,25 @@ const TinderPage: React.FC = () => {
 
           {/* Location Filter */}
           <button
-            onClick={() => setShowLocationModal(true)}
-            className="flex items-center space-x-1.5 bg-[#FFF4EC] hover:bg-[#FFE2D6] px-3.5 py-2 rounded-full transition-colors active:scale-95"
+            onClick={() => !USE_MOCK_DATA && setShowLocationModal(true)}
+            disabled={USE_MOCK_DATA}
+            className="flex items-center space-x-1.5 bg-[#FFF4EC] hover:bg-[#FFE2D6] px-3.5 py-2 rounded-full transition-colors active:scale-95 disabled:cursor-default"
           >
             <svg className="w-3.5 h-3.5 text-[#FF6B4A]" fill="currentColor" viewBox="0 0 24 24">
               <path fillRule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
             </svg>
             <span className="font-semibold text-[#FF6B4A] text-sm">
-              {selectedLocation
+              {USE_MOCK_DATA
+                ? 'ข้อมูลตัวอย่าง'
+                : selectedLocation
                 ? `${selectedLocation.lat.toFixed(3)}, ${selectedLocation.lng.toFixed(3)}`
                 : 'ปักหมุด'}
             </span>
-            <svg className="w-3.5 h-3.5 text-[#FF6B4A]/60" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
-            </svg>
+            {!USE_MOCK_DATA && (
+              <svg className="w-3.5 h-3.5 text-[#FF6B4A]/60" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+              </svg>
+            )}
           </button>
 
           {/* Gallery Link */}
@@ -355,7 +398,9 @@ const TinderPage: React.FC = () => {
           {selectedLocation && (
             <div className="mb-2 flex items-center justify-center text-[11px] text-[#4F6F87]">
               <span className="rounded-full bg-white/80 px-3 py-1">
-                POI จริงในรัศมี {selectedLocation.radiusKm} km จากหมุดของคุณ
+                {USE_MOCK_DATA
+                  ? 'โหมดตัวอย่าง · บันทึกการปัดไว้ในอุปกรณ์นี้'
+                  : `POI จริงในรัศมี ${selectedLocation.radiusKm} km จากหมุดของคุณ`}
               </span>
             </div>
           )}
@@ -428,12 +473,14 @@ const TinderPage: React.FC = () => {
           </div>
         </div>
 
-        <LocationPreferenceModal
-          isOpen={showLocationModal}
-          onClose={() => setShowLocationModal(false)}
-          onConfirm={handleLocationSelection}
-          initialLocation={selectedLocation}
-        />
+        {!USE_MOCK_DATA && (
+          <LocationPreferenceModal
+            isOpen={showLocationModal}
+            onClose={() => setShowLocationModal(false)}
+            onConfirm={handleLocationSelection}
+            initialLocation={selectedLocation}
+          />
+        )}
 
         <PlaceDetailModal
           place={remainingPlaces[0] || null}
