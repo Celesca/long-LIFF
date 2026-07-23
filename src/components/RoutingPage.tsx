@@ -8,6 +8,9 @@ import Layout from './Layout';
 import { getUserId } from '../hooks/useLiff';
 import { useIsDesktop } from '../hooks/useViewport';
 import { poiApi } from '../services/poiApi';
+import { mockApi } from '../services/mockApi';
+import { USE_MOCK_DATA } from '../services/dataMode';
+import { allPlaces } from '../data/seedData';
 import MapLibreView, { type MapPoint } from './MapLibreView';
 
 interface RoutingPageProps {
@@ -46,7 +49,7 @@ const RoutingPage: React.FC = () => {
   // Place detail modal state
   const [selectedPlace, setSelectedPlace] = useState<TravelPlace | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  // Real POI state from FastAPI places.json backend
+  // Nearby POIs come from the bundled dataset in mock mode or FastAPI in real mode.
   const [nearbyPois, setNearbyPois] = useState<TravelPlace[]>([]);
   const [isLoadingPois, setIsLoadingPois] = useState(false);
   const [poiError, setPoiError] = useState('');
@@ -98,13 +101,17 @@ const RoutingPage: React.FC = () => {
     if (places.length === 0) return [];
     let filteredPlaces = [...places];
     if (personality === 'introvert mode') {
-      const introvertKeywords = ['temple', 'nature', 'park', 'sanctuary'];
+      const introvertKeywords = ['temple', 'nature', 'park', 'sanctuary', 'วัด', 'ธรรมชาติ', 'สวน', 'สงบ'];
       filteredPlaces.sort((a, b) => {
         const aScore = introvertKeywords.some(keyword =>
-          a.name.toLowerCase().includes(keyword) || (a.description?.toLowerCase().includes(keyword) ?? false)
+          a.name.toLowerCase().includes(keyword) ||
+          (a.description?.toLowerCase().includes(keyword) ?? false) ||
+          a.tags.some(tag => tag.toLowerCase().includes(keyword))
         ) ? 1 : 0;
         const bScore = introvertKeywords.some(keyword =>
-          b.name.toLowerCase().includes(keyword) || (b.description?.toLowerCase().includes(keyword) ?? false)
+          b.name.toLowerCase().includes(keyword) ||
+          (b.description?.toLowerCase().includes(keyword) ?? false) ||
+          b.tags.some(tag => tag.toLowerCase().includes(keyword))
         ) ? 1 : 0;
         return bScore - aScore;
       });
@@ -127,6 +134,13 @@ const RoutingPage: React.FC = () => {
     return filteredPlaces;
   }, [optimizeRouteOrder]);
 
+  const getLikedPlaces = React.useCallback(async (): Promise<TravelPlace[]> => {
+    const response = USE_MOCK_DATA
+      ? await mockApi.getLikedPlaces(lineUserId)
+      : await poiApi.getLikedPlaces(lineUserId);
+    return response.places;
+  }, [lineUserId]);
+
   const loadNearbyPois = React.useCallback(async () => {
     const startPoint = optimizedRoute[0];
     if (!startPoint) return;
@@ -135,6 +149,22 @@ const RoutingPage: React.FC = () => {
     setPoiError('');
 
     try {
+      if (USE_MOCK_DATA) {
+        const routeIds = new Set(optimizedRoute.map(place => place.id));
+        const nearby = allPlaces
+          .filter(place => !routeIds.has(place.id))
+          .map(place => ({ place, distance: calculateDistance(startPoint, place) }))
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 12)
+          .map(({ place, distance }) => ({
+            ...place,
+            distance_km: distance,
+            distance: `~${distance.toFixed(1)} กม.`,
+          }));
+        setNearbyPois(nearby);
+        return;
+      }
+
       const response = await poiApi.getNearbyPlaces({
         lat: startPoint.lat,
         lng: startPoint.long,
@@ -145,11 +175,13 @@ const RoutingPage: React.FC = () => {
       setNearbyPois(response.places);
     } catch (error) {
       console.error('Failed to load nearby POIs:', error);
-      setPoiError('เปิด FastAPI backend ที่พอร์ต 8000 ก่อนโหลด POI จาก places.json');
+      setPoiError(USE_MOCK_DATA
+        ? 'ไม่สามารถโหลดสถานที่ตัวอย่างใกล้เคียงได้'
+        : 'เปิด FastAPI backend ที่พอร์ต 8000 ก่อนโหลด POI จาก places.json');
     } finally {
       setIsLoadingPois(false);
     }
-  }, [optimizedRoute]);
+  }, [calculateDistance, optimizedRoute]);
 
   const addPoiToRoute = (poi: TravelPlace) => {
     if (optimizedRoute.some(place => place.id === poi.id)) return;
@@ -163,6 +195,20 @@ const RoutingPage: React.FC = () => {
     setRouteError('');
 
     try {
+      if (USE_MOCK_DATA) {
+        const likedPlaces = await getLikedPlaces();
+        const route = optimizeRoute(likedPlaces, personality, duration);
+        setOptimizedRoute(route);
+        setNearbyPois([]);
+        setRouteMeta({
+          name: 'LONG Mock Journey',
+          description: 'เส้นทางตัวอย่างที่จัดจากสถานที่ที่คุณกดถูกใจและเรียงตามระยะทางบนอุปกรณ์นี้',
+          provider: 'local-mock',
+          isAi: false,
+        });
+        return;
+      }
+
       await poiApi.createOrGetUser({ line_user_id: lineUserId });
       const likedResponse = await poiApi.getLikedPlaces(lineUserId);
       const response = await poiApi.generateRoute(lineUserId, {
@@ -181,11 +227,13 @@ const RoutingPage: React.FC = () => {
       });
     } catch (error) {
       console.error('Failed to generate route:', error);
-      setRouteError('ไม่สามารถสร้างเส้นทางได้ กรุณาเปิด FastAPI/Postgres backend แล้วลองอีกครั้ง');
+      setRouteError(USE_MOCK_DATA
+        ? 'ไม่สามารถสร้างเส้นทางตัวอย่างได้ กรุณาลองใหม่อีกครั้ง'
+        : 'ไม่สามารถสร้างเส้นทางได้ กรุณาเปิด FastAPI/Postgres backend แล้วลองอีกครั้ง');
     } finally {
       setIsGeneratingRoute(false);
     }
-  }, [anchor, duration, lineUserId, personality]);
+  }, [anchor, duration, getLikedPlaces, lineUserId, optimizeRoute, personality]);
 
   // Trigger an emergency scenario (e.g., flood at next unvisited place) and suggest alternatives
   const triggerEmergencyPlan = async () => {
@@ -197,8 +245,7 @@ const RoutingPage: React.FC = () => {
 
     // Gather candidate alternatives from likedPlaces (excluding the emergency place & already in optimizedRoute)
     try {
-      const likedResponse = await poiApi.getLikedPlaces(lineUserId);
-      const liked = likedResponse.places;
+      const liked = await getLikedPlaces();
       const routeIds = new Set(optimizedRoute.map(p => p.id));
       let candidates = liked.filter(p => p.id !== placeToReplace.id && !routeIds.has(p.id));
       // Fallback: allow other places in route (not the emergency place) if no external candidates
@@ -286,8 +333,7 @@ const RoutingPage: React.FC = () => {
     setSwapPlace({ place, index });
 
     try {
-      const likedResponse = await poiApi.getLikedPlaces(lineUserId);
-      const liked = likedResponse.places;
+      const liked = await getLikedPlaces();
 
       // Get current route place IDs
       const routeIds = new Set(optimizedRoute.map(p => p.id));
@@ -383,7 +429,7 @@ const RoutingPage: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-bold text-[#17324D]">
-            แผนที่เส้นทางแบบอินเตอร์แอกทีฟ - {anchor?.label || 'AI Route'}
+            แผนที่เส้นทางแบบอินเตอร์แอกทีฟ - {anchor?.label || (USE_MOCK_DATA ? 'Mock Route' : 'AI Route')}
           </h3>
 
           <div className="rounded-lg bg-[#E9FBF7] px-3 py-1 text-sm font-semibold text-[#007F73]">
@@ -475,7 +521,7 @@ const RoutingPage: React.FC = () => {
     CoinSystem.startActiveJourney(
       personality || 'default',
       duration || 'custom',
-      anchor?.label || 'AI Route',
+      anchor?.label || (USE_MOCK_DATA ? 'Mock Route' : 'AI Route'),
       optimizedRoute
     );
 
@@ -488,7 +534,11 @@ const RoutingPage: React.FC = () => {
         <div className="bg-white rounded-3xl shadow-xl p-8 max-w-md text-center">
           <div className="w-14 h-14 mx-auto border-4 border-[#DDEAF3] border-t-[#FF6B4A] rounded-full animate-spin mb-6" />
           <h2 className="text-2xl font-bold text-[#17324D] mb-3">กำลังสร้างเส้นทาง</h2>
-          <p className="text-gray-600">กำลังวิเคราะห์ POI ที่บันทึกและสถานที่จริงใกล้เคียงจาก places.json</p>
+          <p className="text-gray-600">
+            {USE_MOCK_DATA
+              ? 'กำลังจัดสถานที่ที่บันทึกและเรียงเส้นทางตัวอย่างบนอุปกรณ์นี้'
+              : 'กำลังวิเคราะห์ POI ที่บันทึกและสถานที่จริงใกล้เคียงจาก places.json'}
+          </p>
         </div>
       </div>
     );
@@ -522,7 +572,9 @@ const RoutingPage: React.FC = () => {
             ไม่พบสถานที่สำหรับสร้างเส้นทาง
           </h2>
           <p className="text-gray-600 mb-6">
-            ลองกลับไปสำรวจ กดถูกใจ POI เพิ่ม หรือเลือกจุดปักหมุดใหม่เพื่อดึงสถานที่ใกล้เคียง
+            {USE_MOCK_DATA
+              ? 'ลองกลับไปสำรวจและกดถูกใจสถานที่อย่างน้อยหนึ่งแห่งก่อนสร้างเส้นทาง'
+              : 'ลองกลับไปสำรวจ กดถูกใจ POI เพิ่ม หรือเลือกจุดปักหมุดใหม่เพื่อดึงสถานที่ใกล้เคียง'}
           </p>
           <div className="space-y-3">
             <Link
@@ -793,7 +845,7 @@ const RoutingPage: React.FC = () => {
               <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                 <div>
                   <p className="text-xs font-semibold uppercase text-[#0077B6]">
-                    {routeMeta.isAi ? 'AI route' : 'Fallback route'} · {routeMeta.provider}
+                    {USE_MOCK_DATA ? 'Mock route' : routeMeta.isAi ? 'AI route' : 'Fallback route'} · {routeMeta.provider}
                   </p>
                   <h2 className="text-lg font-bold text-[#17324D]">{routeMeta.name}</h2>
                   <p className="text-sm text-gray-600">{routeMeta.description}</p>
@@ -879,14 +931,20 @@ const RoutingPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Real POIs from places.json */}
+        {/* Nearby POIs from mock data or places.json */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase text-[#0077B6]">places.json POI</p>
-              <h2 className="text-lg font-bold text-[#17324D]">สถานที่จริงใกล้จุดเริ่มต้น</h2>
+              <p className="text-xs font-semibold uppercase text-[#0077B6]">
+                {USE_MOCK_DATA ? 'Mock travel places' : 'places.json POI'}
+              </p>
+              <h2 className="text-lg font-bold text-[#17324D]">
+                {USE_MOCK_DATA ? 'สถานที่ตัวอย่างใกล้จุดเริ่มต้น' : 'สถานที่จริงใกล้จุดเริ่มต้น'}
+              </h2>
               <p className="text-sm text-gray-500">
-                โหลด POI ที่ได้รับอนุมัติจาก FastAPI backend ภายในรัศมี 25 km จาก {optimizedRoute[0]?.name}
+                {USE_MOCK_DATA
+                  ? `ค้นหาจากชุดข้อมูลตัวอย่างและเรียงตามระยะทางจาก ${optimizedRoute[0]?.name}`
+                  : `โหลด POI ที่ได้รับอนุมัติจาก FastAPI backend ภายในรัศมี 25 km จาก ${optimizedRoute[0]?.name}`}
               </p>
             </div>
             <button
@@ -894,7 +952,7 @@ const RoutingPage: React.FC = () => {
               disabled={isLoadingPois}
               className="inline-flex items-center justify-center rounded-xl bg-[#0077B6] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#00649A] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {isLoadingPois ? 'กำลังโหลด...' : 'โหลด POI ใกล้เคียง'}
+              {isLoadingPois ? 'กำลังโหลด...' : USE_MOCK_DATA ? 'ดูสถานที่ตัวอย่างใกล้เคียง' : 'โหลด POI ใกล้เคียง'}
             </button>
           </div>
 

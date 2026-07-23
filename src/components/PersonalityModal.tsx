@@ -1,5 +1,6 @@
 import React from 'react';
 import LocationPreferenceModal, { type DiscoveryLocation } from './LocationPreferenceModal';
+import { USE_MOCK_DATA } from '../services/dataMode';
 
 interface PersonalityModalProps {
   isOpen: boolean;
@@ -107,7 +108,11 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
               </svg>
             </button>
           </div>
-          <p className="text-[#FF6B4A] mt-2">เลือกสไตล์และระยะเวลา แล้วให้ AI วิเคราะห์ POI ที่บันทึกกับสถานที่จริงใกล้เคียง</p>
+          <p className="text-[#FF6B4A] mt-2">
+            {USE_MOCK_DATA
+              ? 'เลือกสไตล์และระยะเวลา แล้วระบบจะจัดเส้นทางจากสถานที่ตัวอย่างที่คุณบันทึก'
+              : 'เลือกสไตล์และระยะเวลา แล้วให้ AI วิเคราะห์ POI ที่บันทึกกับสถานที่จริงใกล้เคียง'}
+          </p>
         </div>
 
         <div className="p-6">
@@ -123,30 +128,38 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
                 <div className="flex items-start space-x-4">
                   {renderIcon('globe')}
                   <div>
-                    <h4 className="font-semibold text-[#17324D]">ให้ AI วิเคราะห์จาก POI ที่บันทึก</h4>
-                    <p className="text-sm text-gray-600 mt-1">เหมาะเมื่อคุณกดถูกใจหลายจุดแล้ว ให้ระบบหา centroid และเสริม POI ใกล้เคียงจาก places.json</p>
-                  </div>
-                </div>
-              </button>
-
-              <button
-                onClick={() => setShowLocationModal(true)}
-                className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:cursor-pointer hover:shadow-md ${
-                  selectedAnchor ? 'border-[#FF6B4A] bg-[#FFF4EC]' : 'border-gray-200 hover:border-[#FFC857]'
-                }`}
-              >
-                <div className="flex items-start space-x-4">
-                  {renderIcon('adventure')}
-                  <div>
-                    <h4 className="font-semibold text-[#17324D]">เลือกคลัสเตอร์ POI หรือปักหมุดเอง</h4>
+                    <h4 className="font-semibold text-[#17324D]">
+                      {USE_MOCK_DATA ? 'จัดเส้นทางจากสถานที่ที่บันทึก' : 'ให้ AI วิเคราะห์จาก POI ที่บันทึก'}
+                    </h4>
                     <p className="text-sm text-gray-600 mt-1">
-                      {selectedAnchor
-                        ? `${selectedAnchor.label || 'Pinned location'} · ${selectedAnchor.lat.toFixed(4)}, ${selectedAnchor.lng.toFixed(4)} · ${selectedAnchor.radiusKm} km`
-                        : 'ใช้พื้นที่แนะนำจากข้อมูลจริง หรือกรอก latitude/longitude ที่อยากไป'}
+                      {USE_MOCK_DATA
+                        ? 'ระบบจะเลือกสถานที่ตามสไตล์ท่องเที่ยวและเรียงจุดที่อยู่ใกล้กันโดยไม่ใช้ backend'
+                        : 'เหมาะเมื่อคุณกดถูกใจหลายจุดแล้ว ให้ระบบหา centroid และเสริม POI ใกล้เคียงจาก places.json'}
                     </p>
                   </div>
                 </div>
               </button>
+
+              {!USE_MOCK_DATA && (
+                <button
+                  onClick={() => setShowLocationModal(true)}
+                  className={`p-4 rounded-xl border-2 text-left transition-all duration-200 hover:cursor-pointer hover:shadow-md ${
+                    selectedAnchor ? 'border-[#FF6B4A] bg-[#FFF4EC]' : 'border-gray-200 hover:border-[#FFC857]'
+                  }`}
+                >
+                  <div className="flex items-start space-x-4">
+                    {renderIcon('adventure')}
+                    <div>
+                      <h4 className="font-semibold text-[#17324D]">เลือกคลัสเตอร์ POI หรือปักหมุดเอง</h4>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {selectedAnchor
+                          ? `${selectedAnchor.label || 'Pinned location'} · ${selectedAnchor.lat.toFixed(4)}, ${selectedAnchor.lng.toFixed(4)} · ${selectedAnchor.radiusKm} km`
+                          : 'ใช้พื้นที่แนะนำจากข้อมูลจริง หรือกรอก latitude/longitude ที่อยากไป'}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              )}
             </div>
           </div>
 
@@ -240,15 +253,17 @@ const PersonalityModal: React.FC<PersonalityModalProps> = ({ isOpen, onClose, on
         </div>
       </div>
 
-      <LocationPreferenceModal
-        isOpen={showLocationModal}
-        onClose={() => setShowLocationModal(false)}
-        onConfirm={(location) => {
-          setSelectedAnchor(location);
-          setShowLocationModal(false);
-        }}
-        initialLocation={selectedAnchor}
-      />
+      {!USE_MOCK_DATA && (
+        <LocationPreferenceModal
+          isOpen={showLocationModal}
+          onClose={() => setShowLocationModal(false)}
+          onConfirm={(location) => {
+            setSelectedAnchor(location);
+            setShowLocationModal(false);
+          }}
+          initialLocation={selectedAnchor}
+        />
+      )}
     </div>
   );
 };
